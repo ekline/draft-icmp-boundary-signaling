@@ -4,16 +4,18 @@
 <meta charset="utf-8">
 <meta content="Common,Latin" name="scripts">
 <meta content="initial-scale=1.0" name="viewport">
-<title>TODO - Your title</title>
+<title>ICMP Enclave Boundary Signaling</title>
 <meta content="Your Name Here" name="author">
 <meta content="
        TODO Abstract 
     " name="description">
 <meta content="xml2rfc 3.34.0" name="generator">
-<meta content="next generation" name="keyword">
-<meta content="unicorn" name="keyword">
-<meta content="AI-native" name="keyword">
-<meta content="draft-todo-yourname-protocol-latest" name="ietf.draft">
+<meta content="IP enclave" name="keyword">
+<meta content="delay/distruption links" name="keyword">
+<meta content="ICMP" name="keyword">
+<meta content="ICMPv4" name="keyword">
+<meta content="ICMPv6" name="keyword">
+<meta content="draft-ek-icmp-boundary-signaling-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.34.0
     Python 3.14.7
@@ -29,7 +31,7 @@
     requests 2.33.1
     wcwidth 0.8.3
 -->
-<link href="draft-todo-yourname-protocol.xml" rel="alternate" type="application/rfc+xml">
+<link href="draft-ek-icmp-boundary-signaling.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
 <style type="text/css">@font-face {
   font-family: 'Lora';
@@ -1042,7 +1044,7 @@ svg {
 <table class="ears">
 <thead><tr>
 <td class="left">Internet-Draft</td>
-<td class="center">TODO - Abbreviation</td>
+<td class="center">ICMP Enclave Boundary Signaling</td>
 <td class="right">September 2026</td>
 </tr></thead>
 <tfoot><tr>
@@ -1055,15 +1057,15 @@ svg {
 <div id="internal-metadata" class="document-information">
 <dl id="identifiers">
 <dt class="label-workgroup">Workgroup:</dt>
-<dd class="workgroup">WG Working Group</dd>
+<dd class="workgroup">WG</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
-<dd class="internet-draft">draft-todo-yourname-protocol-latest</dd>
+<dd class="internet-draft">draft-ek-icmp-boundary-signaling-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
 <time datetime="2026-09-17" class="published">17 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
-<dd class="intended-status">Informational</dd>
+<dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
 <dd class="expires"><time datetime="2027-03-21">21 March 2027</time></dd>
 <dt class="label-authors">Author:</dt>
@@ -1075,7 +1077,7 @@ svg {
 </dd>
 </dl>
 </div>
-<h1 id="title">TODO - Your title</h1>
+<h1 id="title">ICMP Enclave Boundary Signaling</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
 <p id="section-abstract-1">TODO Abstract<a href="#section-abstract-1" class="pilcrow">¶</a></p>
@@ -1087,11 +1089,12 @@ svg {
 <p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
 <p id="section-note.1-2">
         The latest revision of this draft can be found at <span><a href="https://example.com/LATEST">https://example.com/LATEST</a></span>.
-        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-todo-yourname-protocol/">https://datatracker.ietf.org/doc/draft-todo-yourname-protocol/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-ek-icmp-boundary-signaling/">https://datatracker.ietf.org/doc/draft-ek-icmp-boundary-signaling/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
 <p id="section-note.1-3">
         Discussion of this document takes place on the
-        WG Working Group mailing list (<span><a href="mailto:WG@example.com">mailto:WG@example.com</a></span>),
-        which is archived at <span><a href="https://example.com/WG">https://example.com/WG</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+        INTAREA Working Group mailing list (<span><a href="mailto:intarea@ietf.org">mailto:intarea@ietf.org</a></span>),
+        which is archived at <span><a href="https://ietf.org/wg/intarea">https://ietf.org/wg/intarea</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/intarea/">https://www.ietf.org/mailman/listinfo/intarea/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
 <p id="section-note.1-4">Source for this draft and an issue tracker can be found at
         <span><a href="https://github.com/USER/REPO">https://github.com/USER/REPO</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
 </section>

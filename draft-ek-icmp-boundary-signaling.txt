@@ -2,14 +2,14 @@
 
 
 
-WG Working Group                                              Y. N. Here
+WG                                                            Y. N. Here
 Internet-Draft                                    Your Organization Here
-Intended status: Informational                         17 September 2026
+Intended status: Experimental                          17 September 2026
 Expires: 21 March 2027
 
 
-                           TODO - Your title
-                  draft-todo-yourname-protocol-latest
+                    ICMP Enclave Boundary Signaling
+                draft-ek-icmp-boundary-signaling-latest
 
 Abstract
 
@@ -21,12 +21,13 @@ About This Document
 
    The latest revision of this draft can be found at
    https://example.com/LATEST.  Status information for this document may
-   be found at https://datatracker.ietf.org/doc/draft-todo-yourname-
-   protocol/.
+   be found at https://datatracker.ietf.org/doc/draft-ek-icmp-boundary-
+   signaling/.
 
-   Discussion of this document takes place on the WG Working Group
-   mailing list (mailto:WG@example.com), which is archived at
-   https://example.com/WG.
+   Discussion of this document takes place on the INTAREA Working Group
+   mailing list (mailto:intarea@ietf.org), which is archived at
+   https://ietf.org/wg/intarea.  Subscribe at
+   https://www.ietf.org/mailman/listinfo/intarea/.
 
    Source for this draft and an issue tracker can be found at
    https://github.com/USER/REPO.
