@@ -44,14 +44,12 @@ informative:
   RFC4890:
   RFC4950:
   RFC5461:
-  RFC5482:
   RFC5837:
   RFC5927:
   RFC8799:
   RFC8877:
   RFC8883:
   RFC9171:
-  RFC9293:
 
 ...
 
@@ -62,14 +60,16 @@ by the gateway at the boundary between a low-delay IP network and a
 constrained link, such as a scheduled deep-space link, whose usability
 is intermittent and whose use is governed by admission policy. Link
 Temporarily Unavailable reports that an otherwise admissible packet
-was not forwarded because the required link is not presently usable,
-and may carry optional predictive metadata including the expected time
-at which the link will become usable. Denied by Link Policy reports
-that the packet was not forwarded because the link's admission policy
-does not admit it. Both convey information the gateway already holds
-to senders at local timescales, allowing transports and applications
-to defer traffic, fail fast, or select another communication mechanism
-rather than discover the condition through timer expiry.
+was not forwarded because the required link is presently unusable
+under a transient condition known to the domain, and may carry
+optional predictive metadata including the expected time until the
+link becomes usable. Denied by Link Policy reports that the packet was
+not forwarded because the link's admission policy does not admit it.
+This document specifies the conditions under which the codes are
+generated and the information they convey. It does not specify how
+transports, applications, or hosts react to them; making a precise
+signal available is intended to enable experimentation with such
+reactions.
 
 
 --- middle
@@ -80,39 +80,48 @@ In networks that include constrained links -- deep-space links,
 windowed satellite reachback, periodic store-and-forward contacts --
 an IP sender has no visibility into the condition of the path beyond
 its own timers. The router at the boundary between the sender's
-low-delay network and the constrained link knows more: it holds a
-contact plan describing when the link will next carry traffic, and it
-enforces an admission policy describing whose traffic the link will
-carry. Today that knowledge shapes forwarding at the boundary but is
-not communicated to senders, whose transports retransmit into
-unavailable or unauthorized links until timers expire and whose
-applications receive a failure indistinguishable from a routing fault
-or a crashed peer.
+low-delay network and the constrained link knows more: it knows, from
+a contact plan or equivalent domain knowledge, when the link is
+expected to carry traffic, and it enforces an admission policy
+describing whose traffic the link will carry. Today that knowledge
+shapes forwarding at the boundary but is not communicated to senders,
+whose transports retransmit into unavailable or unauthorized links
+until timers expire and whose applications receive a failure
+indistinguishable from a routing fault or a crashed peer.
 
 This document defines two ICMP Destination Unreachable codes, for both
 ICMPv4 and ICMPv6, that move that knowledge to senders. Link
 Temporarily Unavailable reports that a packet which was otherwise
 admissible was not forwarded because the constrained link required to
-reach its destination is not presently usable. The gateway MAY attach
-predictive metadata in ICMP extension objects {{RFC4884}}: the time at
-which it generated the message, the time at which it expects the link
-to become usable, and the approximate one-way delay of the link. Denied
-by Link Policy reports that the packet was not forwarded because the
-link's admission policy does not admit it, and MAY identify the policy
+reach its destination is presently unusable under a transient
+condition the domain knows about. The gateway MAY attach predictive
+metadata in ICMP extension objects {{RFC4884}}: the time at which it
+generated the message, its estimate of the time until the link becomes
+usable, and the approximate one-way delay of the link. Denied by Link
+Policy reports that the packet was not forwarded because the link's
+admission policy does not admit it, and MAY identify the policy
 dimension on which admission failed. Neither code describes what
 traffic would be admitted, and neither reports on a packet that was
 forwarded.
 
+This document specifies the network-layer signals: when a gateway
+generates each code, what each means, and the semantics and encoding
+of the optional metadata. It does not specify how a transport,
+application, host cache, provisioning system, or orchestrator reacts
+to them. Such reactions are not required for interoperability, and
+they are not merely out of scope: a purpose of publishing the signals
+is to enable experimentation with them. A host might defer further
+attempts; a transport might use the information as an input to its
+timeout and failure decisions; an application might expose the
+condition, select another communication mechanism such as a Bundle
+Protocol {{RFC9171}} agent for store-and-forward delivery, or trigger
+provisioning. Experience with such reactions may motivate later
+specifications ({{experiment}}).
+
 The mechanism depends on the boundary being close and the condition
 being long-lived: gateway feedback reaches senders in local round-trip
 times, while the unavailability it reports lasts minutes to hours
-({{applicability}}). Receivers can use it to defer traffic until the
-link is expected to be usable, to fail fast when the expected wait
-exceeds an application's tolerance, or to select a different
-communication mechanism such as a Bundle Protocol {{RFC9171}} agent for
-store-and-forward delivery. This document does not prescribe any of
-these responses; the codes carry information, and endpoint and
-application policy determine its use.
+({{applicability}}).
 
 Where an application can learn in advance which communication
 mechanisms suit a destination -- through configuration, provisioning,
@@ -133,7 +142,10 @@ proposes.
 
 Constrained link:
 : a link whose usability is scheduled, intermittent, or otherwise
-  restricted, and whose use is governed by admission policy.
+  restricted according to knowledge held by the domain, and whose use
+  is governed by admission policy. Ordinary transient interface or
+  carrier failure does not by itself make a link constrained
+  ({{applicability}}).
 
 Contact:
 : an interval during which a constrained link is planned to carry
@@ -141,7 +153,8 @@ Contact:
 
 Contact plan:
 : the schedule of contacts for a link or set of links, distributed to
-  gateways in advance of execution.
+  gateways in advance of execution. A contact plan is one source of
+  the domain knowledge this document relies on, not the only one.
 
 Low-delay domain:
 : an administered IP network whose internal round-trip times are
@@ -155,8 +168,9 @@ Enclave:
 
 Gateway:
 : the router at the boundary between a low-delay domain and a
-  constrained link, holding the contact plan and admission policy for
-  that link and generating the codes defined in this document.
+  constrained link, holding the domain's knowledge of that link's
+  availability and admission policy and generating the codes defined
+  in this document.
 
 Signaling domain:
 : the set of gateways and paths whose aggregate ability to serve
@@ -171,10 +185,10 @@ Admission:
 : a gateway's determination, against local policy, that particular
   traffic may use a constrained link.
 
-Deferral cache:
-: per-destination state a receiver maintains from Link Temporarily
-  Unavailable metadata and consults before transmission
-  ({{deferral-cache}}).
+Expected Time Until Link Usability (ETU):
+: the gateway's estimate, at generation of a notification, of the
+  interval from generation until the constrained link is expected to
+  become usable for forwarding ({{etu}}).
 
 
 # Applicability {#applicability}
@@ -207,24 +221,33 @@ is measured in minutes, and a vehicle-area network is one relative to a
 SATCOM link whose availability is measured in scheduled windows of tens
 of minutes.
 
+The mechanism applies only to links whose availability the domain
+deliberately models as a constrained resource: the gateway asserts a
+transient service condition on the basis of domain or service
+knowledge about the link, not on the basis of observed local carrier
+or interface state. A router that merely notices its outgoing
+interface is down has no basis to generate Link Temporarily
+Unavailable, and ordinary transient link failures are not the
+condition this document addresses. How the domain acquires its
+knowledge -- a contact plan, orchestration, link-management
+signaling, or other domain-specific means -- is not specified; the
+codes encode what the gateway is entitled to assert, not how it
+learned it.
+
 The mechanism is further applicable only where the signaling domain
 can determine that no path within it can serve the invoking traffic
 toward its destination. The codes describe the domain's aggregate
 ability to serve the traffic, not the local state of the gateway that
 happened to receive the packet; a signal is meaningful only when
 receiving it tells the sender something true about every path the
-domain could offer. How the domain obtains this knowledge -- from its
-routing architecture, orchestration, the contact plan, or other
-domain-specific mechanisms -- is not specified here. The mechanism is
-not applicable to arbitrary routing architectures in which a gateway
-cannot make this determination ({{generation}}).
+domain could offer. The mechanism is not applicable to arbitrary
+routing architectures in which a gateway cannot make this
+determination ({{generation}}).
 
-The same criteria identify deployments beyond the interplanetary case:
-tactical edge networks behind scheduled reachback links, maritime and
-airborne platforms with windowed satellite connectivity, sensor
-networks served by periodic data-mule contacts, and remote ground
-stations with pass-limited access. Conversely, the mechanism offers
-nothing on paths that are merely lossy or congested; existing
+The same criteria identify deployments beyond the interplanetary case,
+wherever a domain manages a scheduled or intermittently available
+link on the basis of advance knowledge. Conversely, the mechanism
+offers nothing on paths that are merely lossy or congested; existing
 congestion signaling and routing convergence address those conditions.
 
 These codes are specified for use within limited domains {{RFC8799}}
@@ -241,7 +264,9 @@ and egress to uncontrolled networks.
 
 This section is informative. It describes a representative deployment:
 an IP-based enclave in Mars orbit and on the Martian surface, connected
-to terrestrial networks through scheduled deep-space contacts.
+to terrestrial networks through scheduled deep-space contacts. Host
+and application behaviors described here are illustrations of what the
+signals make possible, not requirements ({{consumers}}).
 
 ## Reference Scenario {#scenario}
 
@@ -277,12 +302,9 @@ DTN-aware, running a BP agent or a stack extension that can hand
 traffic to one; others are unmodified IP hosts, including legacy
 instruments and commercial payloads whose stacks predate this
 specification. Where a performance-enhancing proxy (PEP) terminates
-transport sessions on behalf of such hosts, the PEP consumes these
-codes for them, applying the behaviors of {{use-cases}} on their behalf
-while the hosts see locally acknowledged sessions with enclave-scale
-round-trip times. This is the expected deployment pattern for hosts
-that cannot be modified, and it means the mechanism's benefit does not
-depend on universal host adoption.
+transport sessions on behalf of such hosts, the PEP can consume these
+codes for them, so that the mechanism's benefit need not depend on
+universal host adoption.
 
 Gateways hold the contact plan for their deep-space links, enforce
 admission and precedence policy on contact capacity, and generate the
@@ -292,9 +314,9 @@ and Denied by Link Policy when traffic arrives that policy does not
 admit. In this deployment, enclave routing is driven by the same
 contact plan the gateways hold, so traffic reaches a gateway that
 cannot serve it only when no gateway can; this is what makes the
-aggregate-domain invariant of {{applicability}} hold. The appropriate
-response to either code is deferral, selection of another
-communication mechanism, or provisioning, never a routing retry.
+aggregate-domain invariant of {{applicability}} hold. Because the
+signal already accounts for every path the domain could offer,
+immediately retrying the same traffic is likely to be futile.
 
 An orchestration function, which may be Earth-based, distributes
 contact plans and admission policy to gateways in advance. Since
@@ -308,26 +330,26 @@ originate such traffic need not implement them.
 
 ## Use Cases {#use-cases}
 
-### Deferral Until the Link Is Usable {#uc-deferral}
+### Traffic Sent While the Link Is Unusable {#uc-deferral}
 
 A surface host begins a bulk transfer toward Earth between contacts.
 The first packet reaches the gateway, which drops it and returns Link
-Temporarily Unavailable carrying its generation time and the time at
-which it expects the link to become usable. The host records the
-notification against the destination, suppresses transmission until
-the indicated time, and informs the application that the path is
-deferred rather than failed. The entry expires at the expected
-usability time, so one notification per destination per gap suffices,
-which matters because the gateway rate-limits ICMP generation like any
-router.
+Temporarily Unavailable carrying its Expected Time Until Link
+Usability. The host now knows that the domain regards the path as
+transiently unavailable and roughly how long that is expected to last.
+It might use this to avoid repeated attempts that would elicit the
+same error, and to tell the application that the path is deferred
+rather than failed. Whether and how a host does so is an experiment
+question; ICMP is unreliable, and the gateway cannot assume that any
+particular notification was received.
 
 ### Selection of Another Communication Mechanism {#uc-handoff}
 
-A DTN-aware host receiving Link Temporarily Unavailable may, as a
+A DTN-aware host receiving Link Temporarily Unavailable might, as a
 matter of local policy, hand the affected traffic to its local BP
 agent, which originates bundles toward the destination; these queue at
 the gateway and are forwarded during the next contact. An application
-with its own delay tolerance may instead compare the expected wait
+with its own delay tolerance might instead compare the expected wait
 against that tolerance and fail fast. The code does not prescribe
 either response; it supplies the information on which the endpoint
 decides.
@@ -364,18 +386,6 @@ policy distribution failure, or traffic outside the provisioning
 workflow. Gateways count and report generation of these codes so that
 operators can use them as a diagnostic feed ({{operational}}).
 
-## Receiver Processing Model {#receiver-model}
-
-A receiving host processes these codes at three levels. The stack may
-cache the expected usability time per destination and consult it
-before transmitting. The transport may compare the expected wait
-against the connection's own tolerance and treat the notification as a
-soft or hard error accordingly; Denied by Link Policy indicates a
-condition that retrying unchanged will not resolve. The API may expose
-both conditions to applications with their metadata, so that
-applications can defer or select another mechanism themselves.
-Requirements and open questions are given in {{receiver}}.
-
 ## Interaction of the Two Codes {#interaction}
 
 The two codes answer different questions and may both apply to one
@@ -388,6 +398,14 @@ usable receives Link Temporarily Unavailable. A sender whose denial is
 resolved through provisioning may then receive Link Temporarily
 Unavailable for the same flow: first become admissible, then wait for
 the link.
+
+Both codes are distinct from the existing Destination Unreachable
+codes reporting no route or service absence. Those codes retain their
+meaning: the domain has no way to reach the destination. Link
+Temporarily Unavailable means that service exists and the traffic is
+admitted, but the required link is presently unusable under a
+transient condition; Denied by Link Policy means that the link may
+exist and be usable, but this traffic is not admitted to it.
 
 
 # Message Formats and Extension Objects {#formats}
@@ -443,18 +461,36 @@ each C-Type per message, taking the first if several are present.
 ## Link Temporarily Unavailable {#ltu}
 
 Link Temporarily Unavailable is code TBD1 under ICMPv6 Destination
-Unreachable and code TBD2 under ICMPv4 Destination Unreachable. It
-reports that the invoking packet was admissible for the constrained
-link required to reach its destination, that no path in the signaling
-domain could serve it, and that the packet was not forwarded because
-that link is not presently usable. The condition concerns the link,
-not ordinary routing failure or congestion.
+Unreachable and code TBD2 under ICMPv4 Destination Unreachable. A
+gateway generating it asserts all of the following:
 
-The message MAY carry any of the Generation Time, Expected Link
-Usability Time, and Expected Link Delay objects ({{objects}}). The
-message is meaningful without any of them: it reports the condition,
-and the objects add prediction where the gateway has it. If Expected
-Link Usability Time is present, Generation Time MUST also be present.
+- the signaling domain determined that the invoking packet would
+  otherwise be served using a constrained link;
+
+- no alternative path in the signaling domain can provide service
+  inconsistent with the signal;
+
+- the traffic is otherwise admitted to that link;
+
+- the required constrained link is presently unusable;
+
+- the domain represents that unusability as a transient service
+  condition, on the basis of its knowledge of the link, rather than as
+  absence of a route or of service; and
+
+- the invoking packet was not forwarded.
+
+The code does not mean merely that a local outgoing interface is
+down, and it does not report ordinary routing failure or congestion.
+"Temporarily" describes the domain's model of the condition; it does
+not guarantee recovery, and the gateway need not know when the
+condition will clear.
+
+The message MAY carry any combination of the Generation Time, Expected
+Time Until Link Usability, and Expected Link Delay objects
+({{objects}}). Each is independently optional. A message carrying none
+of them is valid and meaningful: it reports the condition, and the
+objects add prediction where the gateway has it.
 
 ## Denied by Link Policy {#dlp}
 
@@ -466,11 +502,12 @@ destination does not admit it, independent of the link's current
 usability.
 
 The outcome resembles that of the existing administratively prohibited
-codes, and those codes are capable of representing the condition. This
-code differs in identifying refusal by the admission policy of a
-specific constrained link, and in carrying a structured reason.
-Whether that distinction warrants a dedicated code is left for review
-and experimentation ({{experiment}}).
+codes, and those codes are capable of representing the broad outcome.
+This experimental code differs in identifying refusal by the admission
+policy of a specific constrained link, and in carrying a structured
+reason. Whether that distinction warrants a permanent distinct code is
+not established by this document; it is left for experimentation and
+IETF review ({{experiment}}).
 
 The message SHOULD include exactly one Admission Denial Object
 ({{ado}}). A message without one reports the denial with no reason,
@@ -485,6 +522,12 @@ object header is as defined in {{Section 8 of RFC4884}}. Each object
 is independently optional; presence conveys availability, and absence
 means the gateway did not supply that information. No sentinel values
 are defined for absent data.
+
+The two duration objects, Expected Time Until Link Usability and
+Expected Link Delay, are defined and encoded independently of the
+Generation Time object. Their interpretation does not depend on the
+absolute timestamp representation, so that representation could later
+be revised or superseded without changing them.
 
 ### Generation Time {#gen-time}
 
@@ -503,41 +546,67 @@ are defined for absent data.
 {: #fig-gen-time title="Generation Time Object"}
 
 Generation Time is the gateway's clock reading at the time it
-generated the message, in the timestamp format of {{timestamps}}. It
-dates any other metadata in the message and, together with Expected
-Link Usability Time, allows a receiver to derive a predicted interval
-without sharing the gateway's time reference.
+generated the message, as a 64-bit NTP timestamp per
+{{Section 6 of RFC5905}}: 32 bits of seconds since the NTP epoch of 1
+January 1900 UTC and 32 bits of fraction, with resolution 2^-32
+seconds, wrapping every 2^32 seconds. Following the template of
+{{RFC8877}}, no era number is carried; a receiver interpreting the
+value absolutely resolves the era as the one placing it nearest its
+own current time.
 
-### Expected Link Usability Time {#elut}
+Generation Time identifies when the notification and any estimates in
+it were generated. A receiver that can relate it to its local time
+reference can compensate for the age of the notification on receipt
+({{etu}}). A receiver that cannot relate it to its local time
+reference ignores it; nothing else in the message depends on it.
+
+### Expected Time Until Link Usability {#etu}
 
 ~~~
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|         Length = 12           |  Class-Num =  |  C-Type = 2   |
+|          Length = 8           |  Class-Num =  |  C-Type = 2   |
 |                               |     TBD5      |               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-+                 Expected Link Usability Time                  +
-|                                                               |
+|              Expected Time Until Link Usability               |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ~~~
-{: #fig-elut title="Expected Link Usability Time Object"}
+{: #fig-etu title="Expected Time Until Link Usability Object"}
 
-Expected Link Usability Time is the earliest time, according to
-information available to the signaling gateway, at or after which the
-constrained link is expected to be usable for forwarding traffic, in
-the timestamp format of {{timestamps}}. The value refers to data-plane
-usability, not to the start of a scheduled contact or of preparation
-for one: antenna pointing, modem configuration, acquisition,
-synchronization, and analogous link-establishment operations occur
-before the reported time and are not represented separately. The value
-is predictive, not a guarantee that the link will be usable at that
-instant.
+Expected Time Until Link Usability (ETU) is the gateway's estimate, at
+the moment it generated the notification, of the interval from
+generation until the constrained link is expected to become usable for
+forwarding traffic. It is an unsigned 32-bit integer count of
+milliseconds, giving a range of approximately 49.7 days. The value
+refers to data-plane usability, not to the start of a scheduled
+contact or of preparation for one: antenna pointing, modem
+configuration, acquisition, synchronization, and analogous
+link-establishment operations complete within the interval and are
+not represented separately.
 
-This object MUST NOT be sent without a Generation Time object in the
-same message. Both MUST be derived from the same clock. A receiver
-that receives this object without Generation Time MUST ignore it.
+ETU is measured from notification generation, not from receipt. It is
+an estimate, not a guarantee. It is not a retry interval and not an
+instruction to transmit at any particular time. It does not include
+Expected Link Delay, which describes traversal of the link once
+usable.
+
+ETU is meaningful on its own. A receiver that can relate a supplied
+Generation Time to its local time reference may compute the expected
+absolute usability time as Generation Time + ETU, and may thereby
+account for the time the notification spent in delivery; any NTP era
+or wraparound considerations apply only to that absolute
+interpretation. A receiver without Generation Time, or unable to
+relate it to local time, may apply ETU from the moment of receipt.
+Doing so is conservative when delivery of the notification was
+delayed, since the true remaining interval can only be shorter. This
+document does not assume that ICMP delivery is prompt.
+
+Editor's note (to be removed before publication): the 32-bit
+millisecond encoding is chosen for consistency with Expected Link
+Delay and comfortably covers planned gaps such as solar conjunction.
+Whether a coarser unit or wider field is preferable is for author
+review.
 
 ### Expected Link Delay {#eld}
 
@@ -555,13 +624,12 @@ that receives this object without Generation Time MUST ignore it.
 
 Expected Link Delay is the approximate one-way delay associated with
 traversal of the constrained link whose unavailability prevented
-forwarding, in milliseconds, as an unsigned 32-bit integer. It is an
-estimate, not a bound; a quantity of the link, not an end-to-end path
-delay; and independent of the waiting time until the link becomes
-usable. This document does not require receivers to combine it with
-Expected Link Usability Time or otherwise compute an end-to-end
-delivery time; how the estimate is used is a matter of endpoint and
-application policy.
+forwarding, as an unsigned 32-bit integer count of milliseconds. It is
+an estimate, not a bound; a quantity of the link, not an end-to-end
+path delay; and independent of ETU and of Generation Time. This
+document does not require receivers to combine it with other metadata
+or otherwise compute an end-to-end delivery time; how the estimate is
+used is a matter of endpoint and application policy.
 
 ### Admission Denial {#ado}
 
@@ -604,28 +672,6 @@ gateway to deliver a definite denial while disclosing nothing, as an
 alternative to silent discard. Registration policy for new values is
 Specification Required.
 
-## Timestamp Format {#timestamps}
-
-Generation Time and Expected Link Usability Time are 64-bit values in
-the format of the NTP timestamp of {{Section 6 of RFC5905}}: 32 bits
-of seconds followed by 32 bits of fraction, with resolution 2^-32
-seconds and wrapping every 2^32 seconds. Per the timestamp
-specification template of {{RFC8877}}: the epoch is the NTP epoch, 1
-January 1900 UTC, where the gateway's clock is expressed in the NTP
-timescale; no era number is carried.
-
-This document does not require that the gateway's clock be
-synchronized to any reference shared with receivers. Both timestamps
-in one message MUST be derived from the same clock, so that their
-difference is meaningful. A receiver that can relate the transmitted
-values to its own time reference MAY interpret Expected Link
-Usability Time directly. A receiver that cannot MAY instead derive the
-predicted interval (Expected Link Usability Time - Generation Time),
-computed with unsigned modular arithmetic, and apply it from the time
-of receipt. Applying the interval from receipt is conservative when
-delivery of the notification was delayed; this document does not
-assume that ICMP delivery is prompt.
-
 
 # Generation Rules {#generation}
 
@@ -646,8 +692,9 @@ On receiving trans-boundary traffic, a gateway proceeds as follows:
 3. If the traffic is not admitted, drop it and, where configured,
    send Denied by Link Policy.
 
-4. If the traffic is admitted but the required link is not presently
-   usable, drop it and send Link Temporarily Unavailable.
+4. If the traffic is admitted but the required link is presently
+   unusable under a transient condition known to the domain, drop it
+   and send Link Temporarily Unavailable.
 
 5. If the traffic is admitted and the link is usable, forward it
    normally. A forwarded packet MUST NOT elicit either code.
@@ -659,10 +706,15 @@ toward the destination ({{applicability}}). A gateway that cannot
 determine this property for a destination MUST NOT generate these
 codes for it.
 
-A gateway MUST NOT populate Expected Link Usability Time with a value
-not derived from its current contact plan or equivalent information.
-A gateway sending Expected Link Usability Time MUST also send
-Generation Time set from the same clock.
+A gateway MUST NOT generate Link Temporarily Unavailable on the basis
+of observed local interface or carrier state alone. The transient
+condition it reports MUST derive from the domain's knowledge of the
+constrained link's availability ({{applicability}}).
+
+A gateway MUST NOT send an ETU value not derived from its current
+knowledge of the link. A gateway that does not know when the link is
+expected to become usable omits the ETU object. A gateway MAY send ETU
+without Generation Time, and MAY send Generation Time without ETU.
 
 Generation of both codes MUST be configurable per policy. An operator
 MUST be able to configure, per source, prefix, or policy class,
@@ -676,17 +728,14 @@ A gateway MUST NOT generate these codes toward the constrained link
 and MUST NOT generate them in response to traffic arriving from it
 ({{applicability}}).
 
-The absence of these codes promises nothing. A gateway without current
-contact plan information does not send Expected Link Usability Time.
+The absence of these codes promises nothing. ICMP delivery is
+unreliable and rate limited, and a gateway MUST NOT assume that a
+sender received any particular notification; it generates a fresh
+notification, subject to rate limiting, for each invoking packet that
+meets the conditions above.
 
 
-# Receiver Requirements {#receiver}
-
-The receiver behaviors in this section have not been fully reviewed
-against the current message architecture. The requirements retained
-here are those needed for coherent processing; transport reaction
-semantics, cache scope, and application interface are left as open
-questions for review and experimentation ({{exp-questions}}).
+# Receiver Processing {#receiver}
 
 ## Validation {#validation}
 
@@ -697,63 +746,46 @@ message matching nothing the receiver sent is discarded. A receiver
 SHOULD discard these messages when received on an interface facing
 outside its administered domain.
 
-## Deferral Cache {#deferral-cache}
+## Consumer Behavior {#consumers}
 
-A host processing Link Temporarily Unavailable MAY maintain a deferral
-cache keyed by the exact destination address of the invoking packet. A
-newer notification replaces an older entry for the same key. An entry
-records the metadata received and an expiry.
+This section is informative. This document does not specify how a
+host, transport, application, or management system reacts to the
+codes, and no such reaction is required for interoperability. Receipt
+of Link Temporarily Unavailable informs the receiver that the domain
+models the path as transiently unavailable and, where ETU is present,
+roughly when usability is expected; receipt of Denied by Link Policy
+informs it that the traffic is not admitted and, where a reason is
+present, on what dimension. What follows are possibilities that the
+signals enable and that the experiment of {{experiment}} is intended
+to explore.
 
-An entry created from a message carrying Expected Link Usability Time
-expires at that time, interpreted per {{timestamps}}; an entry created
-from a message without it expires after an implementation-chosen
-conservative interval. Entry lifetime MUST be bounded by a
-configurable maximum; a default of 24 hours is RECOMMENDED, and
-deployments whose planned gaps exceed it configure it accordingly. The
-bound limits the effect of a forged notification ({{security}}).
+A host might record the information to avoid immediately repeating
+attempts known to have failed. Because the signal already reflects
+every path the domain could offer, immediate repetition is likely to
+elicit the same error. How such state would be keyed, how widely it
+would apply, how long it would live, how it would be invalidated when
+the domain's knowledge changes, and how it would interact with routing
+are all open questions. Because ETU is an estimate and the gateway
+cannot revoke a notification, any such state is a hint about the
+domain's knowledge at generation time and not an assurance of service
+at any later time.
 
-Entries are advisory: a gateway cannot revoke a notification whose
-plan has since changed. A host MAY probe before expiry, SHOULD NOT
-sustain transmission against an unexpired entry, and MUST NOT treat
-expiry as an assurance of service; traffic sent at expiry that finds
-the link still unusable elicits a fresh notification.
+A transport might use the information as an input to its timeout and
+failure decisions: for example, comparing the expected wait against a
+connection's tolerance, or treating Denied by Link Policy as a
+condition that retrying unchanged will not resolve. The remote
+endpoint receives no corresponding notification and continues to run
+its own timers, which bounds the usefulness of waiting. No TCP or QUIC
+behavior is defined here.
 
-Whether entries may safely cover a prefix rather than a single
-destination is not resolved by this document.
-
-## Transport Processing {#transport}
-
-The information in these messages is available to transports
-according to local policy; this document does not mandate a
-particular transport reaction. The following describes an expected
-approach whose suitability is an experiment question
-({{exp-questions}}).
-
-A transport may compare the expected wait, derived from a deferral
-cache entry, against the connection's tolerance. For TCP {{RFC9293}},
-the tolerance might be the user timeout, as adjusted by {{RFC5482}}
-where negotiated, or an application-supplied value. If the expected
-wait falls within the tolerance, the notification can be treated as a
-soft error, with retransmission suspended until the expected usability
-time rather than counted toward connection failure; if it exceeds the
-tolerance, or none can be computed, the connection can be aborted and
-the reason surfaced to the application. The remote endpoint receives
-no corresponding notification and continues to run its own timers; a
-receiver that suspends a connection beyond what it knows of the peer's
-tolerance preserves nothing.
-
-Denied by Link Policy reports a condition that retrying unchanged will
-not resolve. A transport SHOULD treat it as a hard error for matching
-connections and flows, and a receiver SHOULD NOT automatically retry
-the traffic unchanged ({{uc-denied}}).
-
-## Application Interface {#api}
-
-Hosts SHOULD make both codes available to applications as conditions
-distinguishable from each other and from other unreachable errors,
-including any metadata received, so that applications can implement
-their own deferral or mechanism-selection logic. Whether such an
+An application might be given the condition and its metadata so that
+it can defer, fail fast, select another communication mechanism such
+as a bundle service, or trigger provisioning. Whether such an
 interface should be standardized is not addressed here.
+
+Stronger reactions to unauthenticated ICMP information carry greater
+risk ({{security}}); which reactions are worth their risk is itself an
+experiment question.
 
 
 # Legacy Host and Middlebox Behavior {#legacy}
@@ -773,7 +805,7 @@ present in target environments is an experiment question
 ({{exp-questions}}).
 
 For Denied by Link Policy, each of these behaviors is acceptable: an
-abort is the intended outcome for unauthorized traffic, soft-error
+abort is a reasonable outcome for unauthorized traffic, soft-error
 handling reaches the same outcome through timer expiry, and discard
 leaves the sender where a silently discarding gateway leaves it today.
 
@@ -805,133 +837,155 @@ ICMP rate limiters deserve attention at contact boundaries. When a
 link becomes unusable, every active trans-boundary flow can elicit
 Link Temporarily Unavailable within a short interval, and a
 token-bucket limiter tuned for steady-state error rates may suppress
-most of the burst, leaving hosts without deferral entries for the
-entire gap. Operators SHOULD size gateway ICMP rate limits for the
-expected flow fan-out at gap onset; the deferral cache keeps the burst
-brief.
+most of the burst. Because ICMP is unreliable and a gateway cannot
+know which notifications were received, operators SHOULD size gateway
+ICMP rate limits for the expected flow fan-out at gap onset. Hosts
+that act on the signal to avoid repeated attempts reduce the offered
+load that would otherwise sustain the burst.
 
-Expected Link Usability Time is only as meaningful as the gateway's
-knowledge of the link and, for absolute interpretation, the domain's
-time synchronization. Receivers without a shared time reference fall
-back to the interval interpretation of {{timestamps}}.
+ETU is only as meaningful as the gateway's knowledge of the link.
+Absolute interpretation of Generation Time additionally depends on the
+receiver being able to relate it to its local time reference;
+receivers that cannot may apply ETU from receipt ({{etu}}).
 
-Hosts SHOULD expose their deferral caches to local diagnostics, since
-a populated entry changes transmission behavior in ways otherwise
-invisible to troubleshooting.
+Hosts that maintain state derived from these codes SHOULD expose it to
+local diagnostics, since such state changes transmission behavior in
+ways otherwise invisible to troubleshooting.
 
 
 # Experimental Status and Goals {#experiment}
 
-This document is published as Experimental. The message formats and
-generation rules are specified with normative precision, but the value
-of the mechanism rests on operational questions that only deployment
-can answer, and the receiver reaction rules have not been validated.
+This document is published as Experimental. The codes and metadata
+are specified with normative precision so that independent
+implementations interoperate at the ICMP layer. The value of the
+mechanism, however, rests on two kinds of questions that only
+deployment can answer: whether gateways can generate the signals
+correctly and usefully, and whether consumers of the signals can do
+anything worthwhile with them. Consumer behaviors are deliberately not
+standardized here and are not prerequisites for interoperability; the
+experiment is intended to produce the experience on which later
+specification of such behaviors might be based.
 
 ## Scope of the Experiment {#exp-scope}
 
 The experiment runs within administered limited domains meeting the
 criteria of {{applicability}}: space networking testbeds and missions,
-tactical and maritime networks with windowed reachback, and laboratory
-emulations of the same topologies. The codes are not exchanged across
-uncontrolled networks, and no behavior in this document affects hosts
-whose traffic never requires a trans-boundary link.
+other networks with scheduled or intermittently available managed
+links, and laboratory emulations of the same topologies. The codes are
+not exchanged across uncontrolled networks, and no behavior in this
+document affects hosts whose traffic never requires a trans-boundary
+link.
 
 Prior to IANA assignment, implementations use the experimental ICMP
 values reserved by {{RFC4727}} and coordinate their interpretation
 bilaterally, per that document's rules. Interoperability reports from
 this phase are in scope for the experiment.
 
-## Questions the Experiment Is Intended to Answer {#exp-questions}
+## Network Signal Evaluation {#exp-signal}
 
-The experiment is intended to produce evidence on the following
-questions:
+The first layer of the experiment concerns the signals themselves:
 
-- Whether actionable Destination Unreachable signaling reduces futile
-  retransmission and offered load during link-unavailable periods,
-  measured as retransmission volume on trans-boundary paths, time from
-  first send to application-visible disposition, and offered load at
-  the gateway during gaps, with and without processing of the new
-  codes.
+- Generation correctness: whether gateways generate each code only
+  under the conditions of {{generation}}, and in particular whether
+  the aggregate-domain determination can be made reliably in deployed
+  routing architectures.
 
-- Whether Expected Link Usability Time is accurate and useful: how
-  often a host that deferred to the advertised time found the link
-  usable at that time, and the operational consequences when it did
-  not.
+- Distinction: whether the three-way distinction among no-route,
+  transient constrained-link unavailability, and policy denial
+  ({{interaction}}) is maintained in practice and is useful to
+  operators and senders.
 
-- Whether the optional extension metadata carries the right
-  information, whether defined objects go unused, and whether
-  additional objects are needed. Unused objects should be removed on
-  advancement rather than carried forward.
+- Prediction accuracy and usefulness: how closely ETU tracks actual
+  link usability, how often it is available at all, and whether
+  Generation Time and Expected Link Delay are populated and used.
 
-- How unmodified hosts respond to the new Destination Unreachable
-  codes across the stacks present in target environments, including
-  embedded and flight-heritage implementations, and in particular
-  whether any stack's hard-error handling of Link Temporarily
-  Unavailable is harmful ({{legacy}}).
+- Generation rate: gateway ICMP generation rates at gap onset under
+  realistic fan-out, and the effect of rate limiting on which senders
+  receive a notification.
 
-- What transport reaction rules are appropriate, including whether
-  the tolerance comparison described in {{transport}} is the right
-  approach and whether suspended connections survive the peer's own
-  timers in practice.
+- Legacy and middlebox behavior: how unmodified hosts respond to the
+  new codes across the stacks present in target environments,
+  including embedded and flight-heritage implementations, and whether
+  any hard-error handling of Link Temporarily Unavailable is harmful
+  ({{legacy}}); and what filtering changes deployments required.
 
-- Whether exact-destination deferral caching is sufficient, or whether
-  prefix-scoped caching is needed and can be made safe.
+- Security and disclosure: whether the information disclosed by
+  Denied by Link Policy reasons and by predictive metadata is
+  operationally acceptable, whether the disclosure controls of
+  {{generation}} are sufficient, and whether forged or stale
+  notifications caused harm.
 
-- Whether gateway ICMP rate limiting, as deployed, allows one
-  notification per destination per gap to reach senders under
-  realistic fan-out.
+- Whether Denied by Link Policy warrants a permanent distinct code, or
+  whether an existing administratively prohibited code with the
+  Admission Denial Object would serve.
 
-- Whether divergence telemetry ({{uc-divergence}}) exposed real faults
-  ahead of existing monitoring.
+## Consumer Behavior Exploration {#exp-questions}
 
-- Whether the information disclosed by Denied by Link Policy reasons
-  and by predictive metadata is operationally acceptable, and whether
-  the configurable disclosure controls of {{generation}} are
-  sufficient.
+The second layer concerns what receivers do with the signals. None of
+these behaviors is specified here; the experiment is intended to
+discover which are worthwhile:
 
-- Whether Denied by Link Policy warrants a dedicated code, or whether
-  an existing administratively prohibited code with the Admission
-  Denial Object would serve.
+- Whether hosts that record the information to avoid repeated
+  attempts reduce futile retransmission and offered load during
+  link-unavailable periods, and what keying, scope, lifetime, and
+  invalidation rules work.
 
-## Criteria for Advancement {#exp-criteria}
+- What transport reactions are appropriate, including whether
+  comparing expected wait against connection tolerance is useful and
+  whether connections that wait survive the peer's own timers.
 
-Advancement to the standards track would be supported by at least two
-independent interoperable implementations of both codes, including
-extension object processing; deployment experience from at least one
-operational, non-laboratory domain meeting the applicability
-criteria; measurement showing that processing the codes reduces
-retransmission load or time-to-disposition on trans-boundary paths
-relative to timer-based behavior in the same environment; and no
-evidence of harmful interaction with unmodified hosts or middleboxes
-in the target environments. Findings on transport reaction rules,
-cache scope, and extension object contents are expected to produce
-revisions rather than block advancement. Reports of failed or
+- What application decisions the information enables, including
+  selection among communication mechanisms such as IP transports and
+  bundle services, and whether an application interface should be
+  standardized.
+
+- Whether provisioning and orchestration systems can use the signals,
+  and whether divergence telemetry ({{uc-divergence}}) exposed real
+  faults ahead of existing monitoring.
+
+## Evidence for Advancement {#exp-criteria}
+
+Later consideration of the mechanism for the standards track could be
+informed by evidence of: at least two independent interoperable
+implementations of both codes, including extension object processing;
+generation accuracy in at least one operational, non-laboratory
+domain; usefulness of the metadata objects, with unused objects
+removed rather than carried forward; manageable legacy and middlebox
+behavior; acceptable security and disclosure properties; consumer
+behaviors independently demonstrated to benefit from the signals,
+without presupposing any one receiver strategy; and evidence that the
+semantics apply across more than one class of constrained network
+without special-case changes to the wire format. Reports of failed or
 inconclusive experiments are requested to the same degree as
 successful ones.
 
 
 # Security Considerations {#security}
 
-ICMP carries no authentication, and both codes are actionable, so the
-principal threats are forgery by off-path attackers and information
-disclosure to the senders these messages answer. The containment for
-both is the limited-domain scoping of {{applicability}}: validation
-against sender state ({{validation}}), boundary filtering
-({{generation}}), rate limiting, and a single administrative
-authority. None of these defenses is dependable across the open
-internet.
+ICMP carries no authentication, and both codes are actionable by
+implementations that choose to act on them, so the principal threats
+are forgery by off-path attackers and information disclosure to the
+senders these messages answer. The containment for both is the
+limited-domain scoping of {{applicability}}: validation against sender
+state ({{validation}}), boundary filtering ({{generation}}), rate
+limiting, and a single administrative authority. None of these
+defenses is dependable across the open internet.
 
-A forged Link Temporarily Unavailable message is a traffic-suppression
-attack: a sender that accepts one may pause trans-boundary traffic for
-the advertised interval. The invoking-packet validation of {{RFC5927}}
-forces the attacker to guess connection state, boundary filtering
-confines injection to on-path or in-domain attackers, and the
-deferral-cache lifetime bound of {{deferral-cache}} caps the damage of
-a forged far-future usability time.
+A forged Link Temporarily Unavailable message could induce an
+implementation that acts on it to withhold trans-boundary traffic for
+the advertised interval. This document does not require receivers to
+withhold traffic, and stronger reactions to unauthenticated ICMP
+information carry correspondingly greater risk; an implementation that
+does act on the signal should bound the effect of any single
+notification, treat ETU as an estimate that may be stale or wrong, and
+consider that the gateway cannot revoke a notification whose basis has
+changed. The invoking-packet validation of {{RFC5927}} forces an
+attacker to guess connection state, and boundary filtering confines
+injection to on-path or in-domain attackers.
 
-A forged Denied by Link Policy message is a connection-reset attack in
-the class {{RFC5927}} analyzes for existing hard-error codes; it adds
-no capability beyond forging the existing administratively prohibited
+A forged Denied by Link Policy message is in the class of attacks
+{{RFC5927}} analyzes for existing hard-error codes; it adds no
+capability beyond forging the existing administratively prohibited
 codes, and the same mitigations apply.
 
 Denied by Link Policy discloses policy to the sender it refuses, and a
@@ -947,8 +1001,8 @@ The predictive metadata of Link Temporarily Unavailable discloses link
 schedule information, which in some deployments is sensitive
 operational information. {{generation}} permits omitting it per
 policy; operators of such deployments should protect the metadata as
-they protect the contact plan. Evaluating admission before link state
-({{generation}}) prevents disclosure of schedule information to
+they protect the underlying schedule. Evaluating admission before link
+state ({{generation}}) prevents disclosure of schedule information to
 traffic that would not be admitted regardless.
 
 Neither code creates an amplification vector: each is generated only
@@ -975,9 +1029,9 @@ requests IESG Approval.
 
 From the "ICMP Extension Object Classes and Class Sub-types" registry
 {{RFC4884}}: a new class TBD5, Link Condition Object, with C-Type 1,
-Generation Time; C-Type 2, Expected Link Usability Time; C-Type 3,
-Expected Link Delay; and C-Type 4, Admission Denial, assigned by this
-document. Further C-Types are Specification Required.
+Generation Time; C-Type 2, Expected Time Until Link Usability; C-Type
+3, Expected Link Delay; and C-Type 4, Admission Denial, assigned by
+this document. Further C-Types are Specification Required.
 
 A new registry, "Admission Denial Reason Codes," initialized per
 {{ado}}, registration policy Specification Required.
@@ -992,38 +1046,42 @@ the allocation strategy is a matter for further review.
 
 # Worked Example {#example}
 
-A gateway with no usable deep-space link receives a packet for a
-trans-boundary destination at 18:00:00 UTC on 16 September 2026. No
-other path in the signaling domain can serve the traffic. The packet
-is admissible under the link's policy, but the link is not presently
-usable; the gateway's contact plan indicates that the link is expected
-to be usable 42 minutes later, at 18:42:00 UTC, and its one-way delay
-estimate for the link is 20 minutes. The gateway drops the packet and
-returns Destination Unreachable, code Link Temporarily Unavailable,
-with three extension objects. The Class-Num octet of each is TBD5 and
-is omitted from the listing.
+A gateway whose deep-space link is presently unusable receives a
+packet for a trans-boundary destination at 18:00:00 UTC on 16
+September 2026. No other path in the signaling domain can serve the
+traffic. The packet is admissible under the link's policy, but the
+domain's contact plan shows the link becoming usable 42 minutes later,
+and the gateway's one-way delay estimate for the link is 20 minutes.
+The gateway drops the packet and returns Destination Unreachable, code
+Link Temporarily Unavailable, with three extension objects. The
+Class-Num octet of each is TBD5 and is omitted from the listing.
 
 | Object | C-Type | Wire value | Decoded |
 |:-------|-------:|:-----------|:--------|
 | Generation Time | 1 | 0xEE5557A0 0x00000000 | 2026-09-16 18:00:00Z |
-| Expected Link Usability Time | 2 | 0xEE556178 0x00000000 | 2026-09-16 18:42:00Z |
+| Expected Time Until Link Usability | 2 | 0x002673C0 | 2520000 ms (42 min) |
 | Expected Link Delay | 3 | 0x00124F80 | 1200000 ms (20 min) |
 {: #tab-example title="Worked Example Extension Objects"}
 
-The timestamps are NTP-format 64-bit values: the seconds words are the
-Unix times of the two instants plus 2208988800, and both fraction
-words are zero.
+The Generation Time seconds word is the Unix time of the instant plus
+2208988800; the fraction word is zero.
 
-A receiver whose clock is synchronized to the gateway's reference
-caches a deferral entry for the destination expiring at 18:42:00Z. A
-receiver that cannot relate the timestamps to its own clock computes
-Expected Link Usability Time minus Generation Time, 0x9D8 = 2520
-seconds, and defers for that interval from the time it received the
-message; if the message was delayed in delivery, this errs toward
-waiting slightly longer than necessary. Either receiver may, as a
-matter of local policy, use the 20-minute link delay estimate in
-deciding whether the destination is suitable for its traffic once the
-link is usable.
+A receiver that cannot relate Generation Time to its own clock, or
+that did not receive it, needs no timestamp arithmetic: it knows that,
+as of generation, the link was expected to become usable in 42
+minutes, and it may apply that interval from the moment of receipt. If
+the notification spent time in delivery, the receiver waits slightly
+longer than necessary, which errs on the safe side.
+
+A receiver that can relate Generation Time to its local clock may
+compute Generation Time + ETU = 18:42:00Z and, on receiving the
+message at, say, 18:00:03Z, understand that about 41 minutes 57
+seconds remain.
+
+Either receiver might, as a matter of local policy, use the 20-minute
+link delay estimate in deciding whether the destination suits its
+traffic once the link is usable. Whether either receiver does anything
+at all with the information is not specified by this document.
 
 
 # Acknowledgments
