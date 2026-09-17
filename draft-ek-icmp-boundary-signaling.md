@@ -19,27 +19,29 @@
 # Change the file extension to match the format (.xml for XML, etc...)
 #
 ###
-title: "TODO - Your title"
-abbrev: "TODO - Abbreviation"
-category: info
+title: "ICMP Enclave Boundary Signaling"
+abbrev: "ICMP Enclave Boundary Signaling"
+category: exp
 
-docname: draft-todo-yourname-protocol-latest
+docname: draft-ek-icmp-boundary-signaling-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
 consensus: true
 v: 3
-area: AREA
-workgroup: WG Working Group
+area: INT
+workgroup: WG
 keyword:
- - next generation
- - unicorn
- - AI-native
+ - IP enclave
+ - delay/distruption links
+ - ICMP
+ - ICMPv4
+ - ICMPv6
 venue:
-  group: WG
+  group: INTAREA
   type: Working Group
-  mail: WG@example.com
-  arch: https://example.com/WG
+  mail: intarea@ietf.org
+  arch: https://ietf.org/wg/intarea
   github: USER/REPO
   latest: https://example.com/LATEST
 
