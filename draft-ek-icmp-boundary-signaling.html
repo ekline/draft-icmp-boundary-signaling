@@ -5,9 +5,23 @@
 <meta content="Common,Latin" name="scripts">
 <meta content="initial-scale=1.0" name="viewport">
 <title>ICMP Enclave Boundary Signaling</title>
-<meta content="Your Name Here" name="author">
+<meta content="Erik Kline" name="author">
 <meta content="
-       TODO Abstract 
+       This document defines two ICMP messages generated at the boundary
+between a low-delay IP network and a scheduled, high-delay or
+disruption-prone segment such as a deep-space link. The Path Delay
+Notification reports that the path to a destination is awaiting a
+scheduled contact, subject to a stated delay, or preempted, and
+carries the expected delay and next contact time. The Denied by Link
+Policy code, under Destination Unreachable, reports that the sender's
+traffic is denied admission to the link the path requires. The
+messages move information that already exists at the boundary, the
+contact plan and the admission policy, to senders at local
+timescales, allowing transports and applications to defer traffic,
+fail fast, or hand traffic to a bundle service rather than discover
+path conditions through timer expiry. The messages are specified for
+use within administered limited domains, and this document is
+published as Experimental. 
     " name="description">
 <meta content="xml2rfc 3.34.0" name="generator">
 <meta content="IP enclave" name="keyword">
@@ -1048,7 +1062,7 @@ svg {
 <td class="right">September 2026</td>
 </tr></thead>
 <tfoot><tr>
-<td class="left">Here</td>
+<td class="left">Kline</td>
 <td class="center">Expires 21 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
@@ -1057,7 +1071,7 @@ svg {
 <div id="internal-metadata" class="document-information">
 <dl id="identifiers">
 <dt class="label-workgroup">Workgroup:</dt>
-<dd class="workgroup">WG</dd>
+<dd class="workgroup">Network Working Group</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
 <dd class="internet-draft">draft-ek-icmp-boundary-signaling-latest</dd>
 <dt class="label-published">Published:</dt>
@@ -1071,8 +1085,8 @@ svg {
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
-      <div class="author-name">Y. N. Here</div>
-<div class="org">Your Organization Here</div>
+      <div class="author-name">E. Kline</div>
+<div class="org">Aalyria Technologies, Inc.</div>
 </div>
 </dd>
 </dl>
@@ -1080,7 +1094,21 @@ svg {
 <h1 id="title">ICMP Enclave Boundary Signaling</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">TODO Abstract<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This document defines two ICMP messages generated at the boundary
+between a low-delay IP network and a scheduled, high-delay or
+disruption-prone segment such as a deep-space link. The Path Delay
+Notification reports that the path to a destination is awaiting a
+scheduled contact, subject to a stated delay, or preempted, and
+carries the expected delay and next contact time. The Denied by Link
+Policy code, under Destination Unreachable, reports that the sender's
+traffic is denied admission to the link the path requires. The
+messages move information that already exists at the boundary, the
+contact plan and the admission policy, to senders at local
+timescales, allowing transports and applications to defer traffic,
+fail fast, or hand traffic to a bundle service rather than discover
+path conditions through timer expiry. The messages are specified for
+use within administered limited domains, and this document is
+published as Experimental.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1088,15 +1116,10 @@ svg {
       </h2>
 <p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
 <p id="section-note.1-2">
-        The latest revision of this draft can be found at <span><a href="https://example.com/LATEST">https://example.com/LATEST</a></span>.
+        The latest revision of this draft can be found at <span><a href="https://ekline.github.io/draft-icmp-boundary-signaling/draft-ek-icmp-boundary-signaling.html">https://ekline.github.io/draft-icmp-boundary-signaling/draft-ek-icmp-boundary-signaling.html</a></span>.
         Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-ek-icmp-boundary-signaling/">https://datatracker.ietf.org/doc/draft-ek-icmp-boundary-signaling/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
-<p id="section-note.1-3">
-        Discussion of this document takes place on the
-        INTAREA Working Group mailing list (<span><a href="mailto:intarea@ietf.org">mailto:intarea@ietf.org</a></span>),
-        which is archived at <span><a href="https://ietf.org/wg/intarea">https://ietf.org/wg/intarea</a></span>.
-        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/intarea/">https://www.ietf.org/mailman/listinfo/intarea/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
-<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
-        <span><a href="https://github.com/USER/REPO">https://github.com/USER/REPO</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/ekline/draft-icmp-boundary-signaling">https://github.com/ekline/draft-icmp-boundary-signaling</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
 </section>
 <div id="status-of-memo">
 <section id="section-boilerplate.1">
@@ -1153,19 +1176,152 @@ svg {
             <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
-            <p id="section-toc.1-1.3.1" class="keepWithNext"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+            <p id="section-toc.1-1.3.1" class="keepWithNext"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-applicability" class="internal xref">Applicability</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
-            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-concept-of-operations" class="internal xref">Concept of Operations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-reference-scenario" class="internal xref">Reference Scenario</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-roles" class="internal xref">Roles</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-use-cases" class="internal xref">Use Cases</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.1">
+                    <p id="section-toc.1-1.4.2.3.2.1.1"><a href="#section-4.3.1" class="auto internal xref">4.3.1</a>.  <a href="#name-deferral-until-the-next-con" class="internal xref">Deferral Until the Next Contact</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.2">
+                    <p id="section-toc.1-1.4.2.3.2.2.1"><a href="#section-4.3.2" class="auto internal xref">4.3.2</a>.  <a href="#name-delay-tolerance-decisions-b" class="internal xref">Delay Tolerance Decisions by Transports and Applications</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.3">
+                    <p id="section-toc.1-1.4.2.3.2.3.1"><a href="#section-4.3.3" class="auto internal xref">4.3.3</a>.  <a href="#name-handoff-to-the-bundle-servi" class="internal xref">Handoff to the Bundle Service</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.4">
+                    <p id="section-toc.1-1.4.2.3.2.4.1"><a href="#section-4.3.4" class="auto internal xref">4.3.4</a>.  <a href="#name-traffic-denied-by-link-poli" class="internal xref">Traffic Denied by Link Policy</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.5">
+                    <p id="section-toc.1-1.4.2.3.2.5.1"><a href="#section-4.3.5" class="auto internal xref">4.3.5</a>.  <a href="#name-preemption-during-a-contact" class="internal xref">Preemption During a Contact</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.6">
+                    <p id="section-toc.1-1.4.2.3.2.6.1"><a href="#section-4.3.6" class="auto internal xref">4.3.6</a>.  <a href="#name-proxy-operation-for-legacy-" class="internal xref">Proxy Operation for Legacy Hosts</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3.2.7">
+                    <p id="section-toc.1-1.4.2.3.2.7.1"><a href="#section-4.3.7" class="auto internal xref">4.3.7</a>.  <a href="#name-plan-reality-divergence-as-" class="internal xref">Plan/Reality Divergence as an Operational Signal</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-receiver-processing-model" class="internal xref">Receiver Processing Model</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.5">
+                <p id="section-toc.1-1.4.2.5.1"><a href="#section-4.5" class="auto internal xref">4.5</a>.  <a href="#name-interaction-of-the-two-mess" class="internal xref">Interaction of the Two Messages</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
-            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-message-formats-and-extensi" class="internal xref">Message Formats and Extension Objects</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-path-delay-notification" class="internal xref">Path Delay Notification</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1.2.1">
+                    <p id="section-toc.1-1.5.2.1.2.1.1"><a href="#section-5.1.1" class="auto internal xref">5.1.1</a>.  <a href="#name-icmpv4-differences" class="internal xref">ICMPv4 Differences</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-denied-by-link-policy" class="internal xref">Denied by Link Policy</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-path-schedule-object" class="internal xref">Path Schedule Object</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-admission-denial-object" class="internal xref">Admission Denial Object</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
-            <p id="section-toc.1-1.6.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-generation-rules" class="internal xref">Generation Rules</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
-            <p id="section-toc.1-1.7.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-receiver-requirements" class="internal xref">Receiver Requirements</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-validation" class="internal xref">Validation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-deferral-cache" class="internal xref">Deferral Cache</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-transport-processing" class="internal xref">Transport Processing</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-application-interface" class="internal xref">Application Interface</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-legacy-host-and-middlebox-b" class="internal xref">Legacy Host and Middlebox Behavior</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-path-delay-notification-2" class="internal xref">Path Delay Notification</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
+                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-denied-by-link-policy-2" class="internal xref">Denied by Link Policy</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-middleboxes" class="internal xref">Middleboxes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4">
+                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="auto internal xref">8.4</a>.  <a href="#name-legacy-senders" class="internal xref">Legacy Senders</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-operational-considerations" class="internal xref">Operational Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-experimental-status-and-goa" class="internal xref">Experimental Status and Goals</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-scope-of-the-experiment" class="internal xref">Scope of the Experiment</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-questions-the-experiment-is" class="internal xref">Questions the Experiment Is Intended to Answer</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.3">
+                <p id="section-toc.1-1.10.2.3.1"><a href="#section-10.3" class="auto internal xref">10.3</a>.  <a href="#name-criteria-for-advancement" class="internal xref">Criteria for Advancement</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#section-13" class="auto internal xref">13</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
+                <p id="section-toc.1-1.13.2.1.1"><a href="#section-13.1" class="auto internal xref">13.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
+                <p id="section-toc.1-1.13.2.2.1"><a href="#section-13.2" class="auto internal xref">13.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-worked-example" class="internal xref">Worked Example</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16">
+            <p id="section-toc.1-1.16.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
 </li>
         </ul>
 </nav>
@@ -1176,7 +1332,48 @@ svg {
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">TODO Introduction<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-1">In networks that include scheduled, high-delay segments -- deep-space
+links, windowed satellite reachback, periodic store-and-forward
+contacts -- an IP sender has no visibility into the condition of the
+path beyond its own timers. The router at the boundary between the
+sender's low-delay network and the high-delay segment knows a great
+deal more: it holds a contact plan describing when the segment will
+next carry traffic, and it enforces an admission policy describing
+whose traffic the segment will carry. Today that knowledge shapes
+forwarding at the boundary but is not communicated to senders, whose
+transports retransmit into dead or unauthorized links until timers
+expire, and whose applications receive an undifferentiated failure
+indistinguishable from a routing fault or a crashed peer.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">This document defines two ICMP messages that move boundary knowledge
+to senders. The Path Delay Notification (PDN), a new ICMPv4 and
+ICMPv6 type, reports that the path to a destination is awaiting a
+scheduled contact, subject to a stated delay, or preempted, and
+carries the expected delay and next contact time in an ICMP extension
+object <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>. Disruption is expressed as the limiting case: a
+path with no active contact is reported with a next-contact time and
+no finite delay bound. The Denied by Link Policy code, a new code
+under Destination Unreachable in both IP versions, reports that the
+sender's traffic is denied admission to the link the path requires
+under local policy. It is diagnostic, identifying the policy
+dimension on which admission failed, and never prescriptive; it does
+not describe what traffic would be admitted.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">The mechanism rests on an asymmetry stated precisely in
+<a href="#applicability" class="auto internal xref">Section 3</a>: the boundary is close and the path is far.
+Feedback from the gateway reaches senders in local round-trip times,
+milliseconds to seconds, while the conditions reported last minutes to
+hours. Receivers use the messages to defer traffic until the next
+contact, to fail fast when a path cannot meet an application's delay
+tolerance, and to hand traffic to a Bundle Protocol <span>[<a href="#RFC9171" class="cite xref">RFC9171</a>]</span> agent
+for store-and-forward delivery. The messages complement rather than
+compete with the Bundle Protocol; in many deployments the intended
+effect of a PDN is precisely to trigger handoff to a bundle service at
+flow establishment rather than after a timeout budget has been spent.
+Neither message reports congestion, and neither substitutes for
+congestion signaling or routing convergence (<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">These messages are specified for use within administered limited
+domains <span>[<a href="#RFC8799" class="cite xref">RFC8799</a>]</span>. This document is published as Experimental;
+<a href="#experiment" class="auto internal xref">Section 10</a> defines the experiment, the questions it is intended to
+answer, and the evidence that would support advancement.<a href="#section-1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1188,60 +1385,1367 @@ svg {
 "<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-2-2">
+        <dt id="section-2-2.1">Contact:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.2">
+          <p id="section-2-2.2.1">an interval during which a high-delay link is planned to carry
+traffic between a gateway and its remote counterpart.<a href="#section-2-2.2.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.3">Contact plan:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.4">
+          <p id="section-2-2.4.1">the schedule of contacts for a link or set of links, distributed to
+gateways in advance of execution.<a href="#section-2-2.4.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.5">High-delay segment:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.6">
+          <p id="section-2-2.6.1">a network segment whose delay or scheduled unavailability is large
+relative to the round-trip times of the domains it connects.<a href="#section-2-2.6.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.7">Low-delay domain:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.8">
+          <p id="section-2-2.8.1">an administered IP network whose internal round-trip times are
+negligible relative to the delays and gap durations of an adjacent
+high-delay segment. The definition is relative, not absolute
+(<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-2-2.8.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.9">Enclave:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.10">
+          <p id="section-2-2.10.1">a low-delay domain reachable from other domains only across a
+high-delay segment.<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.11">Gateway:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.12">
+          <p id="section-2-2.12.1">the router at the boundary between a low-delay domain and a
+high-delay segment, holding the contact plan and admission policy
+for that segment and generating the messages defined in this
+document.<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.13">Trans-boundary traffic:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.14">
+          <p id="section-2-2.14.1">traffic whose path crosses a gateway onto a high-delay segment.<a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.15">Admission:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.16">
+          <p id="section-2-2.16.1">a gateway's determination, against local policy, that particular
+traffic may use a high-delay link.<a href="#section-2-2.16.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.17">Deferral cache:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.18">
+          <p id="section-2-2.18.1">per-destination state a receiver maintains from PDN contents and
+consults before transmission (<a href="#deferral-cache" class="auto internal xref">Section 7.2</a>).<a href="#section-2-2.18.1" class="pilcrow">¶</a></p>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="applicability">
+<section id="section-3">
+      <h2 id="name-applicability">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-applicability" class="section-name selfRef">Applicability</a>
+      </h2>
+<p id="section-3-1">The mechanisms in this document are applicable at a boundary between
+two network segments whose characteristic delays differ by enough that
+feedback generated at the boundary reaches senders in time to change
+their behavior. This section states that condition precisely, since it
+both motivates the mechanism and bounds where deployment makes sense.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">Let R be the round-trip time between a sender and the gateway
+generating these messages, D be the duration of the condition being
+reported (a contact gap, a deferral interval, or the path delay
+itself), and T be the timescale on which the sender's transport would
+otherwise detect failure on its own through retransmission timer growth
+and eventual user timeout. The messages defined here are useful when
+R is small relative to T, so the notification arrives while the sender
+still has options, and R is small relative to D, so the reported
+condition is still in effect when the notification arrives and the cost
+of reacting to it is justified. In the Mars enclave of <a href="#conops" class="auto internal xref">Section 4</a>, R is
+milliseconds to seconds, T is seconds to minutes, and D is minutes to
+hours; both conditions hold by several orders of magnitude.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-3">When R approaches D, the mechanism degrades: a notification that takes
+as long to deliver as the condition it reports lasts describes a path
+state that may no longer exist on arrival. This is why gateways
+generate these messages only into their local low-delay domain and
+never across the high-delay segment. Each boundary serves its own
+side. An Earth-side gateway signals terrestrial senders; a Mars-side
+gateway signals enclave hosts; neither attempts to signal across the
+segment between them. The definition of "local" that follows from this
+is relative, not absolute: the entire terrestrial internet, at
+sub-second internal round-trip times, constitutes a single local
+low-delay domain relative to a segment whose delays are measured in
+minutes, and a vehicle-area network constitutes one relative to a
+SATCOM link whose availability is measured in scheduled windows of tens
+of minutes. No fixed delay threshold defines the boundary; the ratios
+do.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-4">The same criterion identifies deployments beyond the interplanetary
+case. Tactical edge networks behind scheduled or intermittently
+available reachback links, maritime and airborne platforms with
+windowed satellite connectivity, sensor networks served by periodic
+data-mule or store-and-forward contacts, and polar or remote ground
+stations with pass-limited access all present a low-delay local domain
+against a scheduled high-delay segment, and all have a boundary node
+positioned to know the schedule and the admission policy. Conversely,
+the mechanism offers nothing on paths that are merely lossy or
+congested at uniform delay; existing congestion signaling and routing
+convergence address those conditions, and these messages are not a
+substitute for either.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<p id="section-3-5">These messages are specified for use within limited domains <span>[<a href="#RFC8799" class="cite xref">RFC8799</a>]</span>
+under a single administrative authority, for two reasons beyond the
+delay criterion. First, ICMP carries no authentication, and the only
+practical containment of forged notifications is validation against
+sender state combined with filtering at domain boundaries; both are
+enforceable within an administered domain and neither is dependable
+across the open internet. Second, the Denied by Link Policy message
+discloses admission policy to the sender it refuses. Within a
+cooperative domain this is diagnostic information; toward an untrusted
+sender it is reconnaissance, and gateways default to silent discard
+rather than generating this message for traffic from outside the
+domain. Boundary routers discard these ICMP types on ingress from and
+egress to uncontrolled networks.<a href="#section-3-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="conops">
+<section id="section-4">
+      <h2 id="name-concept-of-operations">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-concept-of-operations" class="section-name selfRef">Concept of Operations</a>
+      </h2>
+<p id="section-4-1">This section is informative. It describes the operational context in
+which the messages defined in this document are generated and consumed,
+using a representative deployment: an IP-based enclave network in Mars
+orbit and on the Martian surface, connected to terrestrial networks
+through scheduled deep-space contacts.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<div id="scenario">
+<section id="section-4.1">
+        <h3 id="name-reference-scenario">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-reference-scenario" class="section-name selfRef">Reference Scenario</a>
+        </h3>
+<p id="section-4.1-1">The enclave consists of surface assets and orbiters interconnected by
+conventional IP links: surface LANs, proximity RF links between landers
+and relay orbiters, and inter-orbiter crosslinks. Within the enclave,
+propagation delays are milliseconds to low seconds and connectivity is
+continuous or near-continuous. Standard IP routing and transport
+protocols operate normally.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">The enclave connects to Earth through one or more gateway nodes on
+relay orbiters equipped with deep-space links. These links have three
+properties that motivate this document. First, they are scheduled:
+contacts with Earth ground stations occur in windows determined by
+orbital geometry and antenna allocation, known in advance through a
+contact plan. Second, they are high-delay: one-way light time to Earth
+ranges from roughly 3 to 22 minutes, so no interactive end-to-end IP
+exchange is practical across them regardless of contact state. Third,
+they are expensive and policy-managed: capacity during a contact may
+be constrained and allocated to specific senders or traffic classes
+according to local policy, and traffic outside those allocations is
+not authorized to use the link.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.1-3">The gateway nodes run a Bundle Protocol version 7 <span>[<a href="#RFC9171" class="cite xref">RFC9171</a>]</span> agent and
+act as the boundary between the enclave's IP domain and the
+store-and-forward interplanetary segment. Trans-enclave data normally
+crosses this boundary as bundles, either because the originating host
+is BP-capable or because the gateway encapsulates IP traffic on the
+host's behalf.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.1-4">The essential asymmetry in this scenario is that the boundary is close
+and the path is far. A host attempting to send toward Earth receives
+feedback from the gateway within enclave round-trip times, on the order
+of milliseconds to seconds, even though the path being reported on has
+delays of minutes to hours. The messages defined here exploit that
+asymmetry: they move knowledge that already exists at the boundary (the
+contact plan, the authorization policy) to the hosts whose traffic is
+affected by it, at local timescales.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1-5">The asymmetry is not specific to the Mars side. A terrestrial sender
+directing traffic toward the enclave crosses an Earth-side gateway that
+holds the same contact plan and enforces its own admission policy; that
+gateway generates the same messages toward terrestrial senders at
+terrestrial timescales. The mechanisms in this document apply
+symmetrically at any boundary between a low-delay IP domain and a
+scheduled, high-delay segment; this section describes the Mars-side
+enclave for concreteness.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="roles">
+<section id="section-4.2">
+        <h3 id="name-roles">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-roles" class="section-name selfRef">Roles</a>
+        </h3>
+<p id="section-4.2-1">Enclave hosts originate and receive application traffic. Some are
+DTN-aware, running a BP agent or a stack extension that can hand
+traffic to one. Others are unmodified IP hosts, including legacy
+instruments and COTS payloads whose stacks predate this specification.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2">Gateway nodes hold the contact plan for their deep-space links,
+enforce per-class authorization and precedence policy on contact
+capacity, and generate the messages defined in this document. A
+gateway generates a PDN when it receives IP traffic for a trans-enclave
+destination while no contact is active, or while the active contact
+cannot meet the delay characteristics implied by the traffic. It
+generates a Denied by Link Policy message when traffic arrives that
+is not admitted under the link's policy, independent of contact
+state.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.2-3">Implicit in this architecture, and load-bearing for the semantics of
+both messages, is that generation occurs only when no alternative
+trans-enclave path could serve the traffic. Enclave routing, driven by
+the same contact plan, already steers trans-enclave traffic to
+whichever gateway and Direct-With-Earth link can serve it; if an
+alternate DWE contact were available, the traffic would have been
+routed there and no message generated. A PDN or a Denied by Link
+Policy message therefore asserts a condition of the enclave's
+aggregate connectivity toward the destination, not of one interface,
+and the correct receiver response is deferral, handoff, or escalation
+to provisioning as described in <a href="#use-cases" class="auto internal xref">Section 4.3</a>, never a routing retry.
+A message generated while another gateway did have service for the
+traffic indicates that routing and the contact plan have diverged,
+which is the fault condition of <a href="#uc-divergence" class="auto internal xref">Section 4.3.7</a>, not a situation the
+sender can resolve.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.2-4">An orchestration or network management function, which may be
+Earth-based, distributes contact plans and authorization policy to
+gateways in advance. Because plan distribution itself crosses the
+deep-space link, gateways are provisioned to operate autonomously
+between management contacts; the messages they generate reflect their
+current local plan and policy, which is authoritative for their links.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.2-5">Intra-enclave communication is unaffected by any of this. Hosts
+exchanging traffic entirely within the enclave use standard IP,
+routing, and transports unmodified; the messages defined here are
+generated only for traffic that requires a trans-enclave link, and
+hosts that never originate such traffic need not implement or be aware
+of them.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.2-6">Optionally, a performance-enhancing proxy (PEP) or enclave-side
+application gateway terminates transport sessions on behalf of legacy
+hosts. Where present, the PEP is the consumer of these messages for
+the hosts behind it.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="use-cases">
+<section id="section-4.3">
+        <h3 id="name-use-cases">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-use-cases" class="section-name selfRef">Use Cases</a>
+        </h3>
+<div id="uc-deferral">
+<section id="section-4.3.1">
+          <h4 id="name-deferral-until-the-next-con">
+<a href="#section-4.3.1" class="section-number selfRef">4.3.1. </a><a href="#name-deferral-until-the-next-con" class="section-name selfRef">Deferral Until the Next Contact</a>
+          </h4>
+<p id="section-4.3.1-1">A surface host begins a bulk transfer toward an Earth destination
+between contacts. The first packets reach the gateway, which has no
+active contact and generates a PDN carrying the start time and duration
+of the next contact from its plan. The host's stack records the
+notification against the destination prefix, analogous to a path MTU
+cache entry, and suppresses further transmission until the indicated
+time. The application is informed through the transport API that the
+path is deferred rather than failed. Without the notification, the
+host would retransmit into a dead link until its transport gave up, and
+the application would see an undifferentiated timeout indistinguishable
+from a routing failure or a crashed peer.<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.1-2">The cache entry has a natural lifetime: the next-contact time itself.
+Negative caching driven by the contact plan means one notification per
+destination prefix per gap is sufficient, which matters because the
+gateway rate-limits ICMP generation like any router.<a href="#section-4.3.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="uc-tolerance">
+<section id="section-4.3.2">
+          <h4 id="name-delay-tolerance-decisions-b">
+<a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-delay-tolerance-decisions-b" class="section-name selfRef">Delay Tolerance Decisions by Transports and Applications</a>
+          </h4>
+<p id="section-4.3.2-1">A PDN carries the expected path delay whether or not a contact is
+active; during a contact the deep-space path is up but still has
+minutes of one-way delay. A transport or application compares the
+advertised delay against its own tolerance. A telemetry archiver with
+a delivery deadline of hours proceeds. A request/response exchange
+with a ten-second application timeout learns immediately that the
+exchange cannot succeed over this path and fails fast, or switches to a
+messaging pattern suited to the delay. The quantitative field, rather
+than a bare unreachable indication, is what allows this decision to be
+made by the endpoint instead of being guessed at through timer
+expiration.<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="uc-handoff">
+<section id="section-4.3.3">
+          <h4 id="name-handoff-to-the-bundle-servi">
+<a href="#section-4.3.3" class="section-number selfRef">4.3.3. </a><a href="#name-handoff-to-the-bundle-servi" class="section-name selfRef">Handoff to the Bundle Service</a>
+          </h4>
+<p id="section-4.3.3-1">A DTN-aware host receiving a PDN for a destination hands the affected
+traffic to its local BP agent, which originates bundles toward the
+destination's EID; the bundles are queued at the gateway and forwarded
+during the next contact. Where the PDN's extension object identifies a
+BP gateway, a host without a local agent can instead direct traffic to
+that gateway for encapsulation. In either case the application's data
+survives the disruption rather than being retransmitted against it.
+This handoff is the intended terminal state for most trans-enclave
+traffic; the PDN's role is to trigger it at flow establishment rather
+than after a timeout budget has been spent.<a href="#section-4.3.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="uc-denied">
+<section id="section-4.3.4">
+          <h4 id="name-traffic-denied-by-link-poli">
+<a href="#section-4.3.4" class="section-number selfRef">4.3.4. </a><a href="#name-traffic-denied-by-link-poli" class="section-name selfRef">Traffic Denied by Link Policy</a>
+          </h4>
+<p id="section-4.3.4-1">A payload host, misconfigured or newly integrated, sends
+best-effort-marked traffic toward Earth during an active contact whose
+capacity is allocated to command and telemetry classes. The gateway
+classifies the traffic against its local policy, which may consider
+DSCP, source and destination address, transport protocol and port, or
+any other classification criteria the policy defines, and determines
+that the traffic is not admitted. It generates a Denied by Link
+Policy message with a reason identifying the policy dimension that
+failed. The message is diagnostic, not prescriptive: it carries no
+description of what traffic would be admitted. Admission policy is
+multidimensional and local, no compact wire encoding of it exists, and
+a message that coached senders on markings the gateway would accept
+would invert the admission model, in which access is granted through
+the control plane rather than obtained by senders adapting traffic to
+gateway responses. The host, or the operator debugging it, learns why
+the traffic was refused rather than merely that it was; obtaining
+admission is a provisioning action. A legacy host that does not
+implement this specification processes the message as a generic
+Destination Unreachable and aborts, which is the correct outcome for
+unauthorized traffic.<a href="#section-4.3.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="uc-preemption">
+<section id="section-4.3.5">
+          <h4 id="name-preemption-during-a-contact">
+<a href="#section-4.3.5" class="section-number selfRef">4.3.5. </a><a href="#name-preemption-during-a-contact" class="section-name selfRef">Preemption During a Contact</a>
+          </h4>
+<p id="section-4.3.5-1">A flow authorized at routine precedence is admitted at contact start
+and later displaced by higher-precedence traffic. This condition is
+temporal, not an authorization failure: the sender's class remains
+permitted and service can resume within the same contact. The gateway
+therefore reports it with a PDN carrying an expected resumption time
+where one can be estimated, not with a Denied by Link Policy message.
+Reporting preemption as prohibition would drive senders to abandon
+paths they should merely pause on.<a href="#section-4.3.5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="uc-proxy">
+<section id="section-4.3.6">
+          <h4 id="name-proxy-operation-for-legacy-">
+<a href="#section-4.3.6" class="section-number selfRef">4.3.6. </a><a href="#name-proxy-operation-for-legacy-" class="section-name selfRef">Proxy Operation for Legacy Hosts</a>
+          </h4>
+<p id="section-4.3.6-1">Where a PEP fronts legacy instruments, the PEP terminates their
+transport sessions locally, consumes PDN and Denied by Link Policy
+messages itself, and applies the deferral and handoff behaviors above
+on the instruments' behalf. The instruments see locally-acknowledged
+transport sessions with intra-enclave-scale RTTs and no visibility into
+contact structure. This is the expected deployment pattern for hosts
+that cannot be modified, and it means the specification's benefit does
+not depend on universal host adoption within the enclave.<a href="#section-4.3.6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="uc-divergence">
+<section id="section-4.3.7">
+          <h4 id="name-plan-reality-divergence-as-">
+<a href="#section-4.3.7" class="section-number selfRef">4.3.7. </a><a href="#name-plan-reality-divergence-as-" class="section-name selfRef">Plan/Reality Divergence as an Operational Signal</a>
+          </h4>
+<p id="section-4.3.7-1">The orchestration function provisions flows against the contact plan;
+in nominal operation, authorized traffic should not encounter these
+messages at all. A PDN generated during a planned contact, or a
+Denied by Link Policy message generated for a flow the orchestrator
+believes it admitted, indicates divergence between the control plane's
+model and the data plane's state: an unplanned outage, a policy
+distribution failure, or traffic originating outside the provisioning
+workflow. Gateways count and report generation of these messages
+through network management, and enclave telemetry consumers treat them
+as a diagnostic feed independent of their effect on senders.<a href="#section-4.3.7-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="receiver-model">
+<section id="section-4.4">
+        <h3 id="name-receiver-processing-model">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-receiver-processing-model" class="section-name selfRef">Receiver Processing Model</a>
+        </h3>
+<p id="section-4.4-1">A conforming host processes these messages at three levels. The stack
+maintains a per-destination (or per-prefix) deferral cache populated
+from PDN extension data, consulted before transmission, and expired at
+the indicated contact time. The transport maps a PDN to a soft or
+hard error depending on the deferral duration. If the indicated
+resumption time falls within the connection's user timeout (<span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span>,
+<span>[<a href="#RFC5482" class="cite xref">RFC5482</a>]</span> where negotiated) or an application-configured tolerance,
+TCP treats the PDN as a soft error, suspending retransmission for the
+deferral interval rather than counting it toward connection failure.
+If the resumption time exceeds that tolerance, or the PDN carries no
+resumption time, TCP aborts the connection immediately: the connection
+was going to fail at timer expiry regardless, and delivering the
+failure now, with the reason attached, is the point of the mechanism.
+A PDN received in SYN-SENT is treated as a hard error unless the
+application has indicated delay tolerance for the connection, since no
+transfer state is preserved by waiting and the application can elect a
+bundle-service path instead. Note that the peer receives no
+corresponding notification and runs its own timers; suspending a
+connection locally for longer than the peer will tolerate preserves
+nothing. QUIC surfaces the PDN as a path event and applies the same
+tolerance comparison per connection. The API surfaces both messages
+to applications as distinguishable conditions, so an application can
+implement its own deferral or handoff logic where the stack defaults
+are insufficient. A Denied by Link Policy message is surfaced as a
+hard error carrying the structured reason; the connection is not
+retried unchanged.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4-2">Validation follows <span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> and <span>[<a href="#RFC5927" class="cite xref">RFC5927</a>]</span>: the receiver matches
+the embedded packet against existing state and discards notifications
+that do not correspond to traffic it sent. Within the enclave this
+check, combined with boundary filtering that discards these ICMP types
+arriving from outside the domain, bounds exposure to off-path
+injection. These messages are specified for use within a limited
+domain <span>[<a href="#RFC8799" class="cite xref">RFC8799</a>]</span>; gateways do not generate them toward the
+deep-space link, and enclave boundaries do not admit them from it.<a href="#section-4.4-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="interaction">
+<section id="section-4.5">
+        <h3 id="name-interaction-of-the-two-mess">
+<a href="#section-4.5" class="section-number selfRef">4.5. </a><a href="#name-interaction-of-the-two-mess" class="section-name selfRef">Interaction of the Two Messages</a>
+        </h3>
+<p id="section-4.5-1">The two messages answer different questions and may both apply to one
+flow: a link can be simultaneously expensive and down. Authorization
+is evaluated first. Traffic that would be refused regardless of
+contact state receives a Denied by Link Policy message; deferring
+such traffic to the next contact would only result in it being
+refused again. Traffic that is authorized but cannot currently be
+served receives a PDN. A sender whose denial is resolved through
+provisioning may subsequently receive a PDN for the same flow, which
+is the expected sequence: first become admissible, then wait for
+service.<a href="#section-4.5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="formats">
+<section id="section-5">
+      <h2 id="name-message-formats-and-extensi">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-message-formats-and-extensi" class="section-name selfRef">Message Formats and Extension Objects</a>
+      </h2>
+<p id="section-5-1">This section is normative. Type, code, and object class values are
+shown as TBD pending IANA assignment (<a href="#iana" class="auto internal xref">Section 12</a>); prior to assignment,
+implementations use the experimental values of <span>[<a href="#RFC4727" class="cite xref">RFC4727</a>]</span> as
+described in <a href="#exp-scope" class="auto internal xref">Section 10.1</a>.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="pdn">
+<section id="section-5.1">
+        <h3 id="name-path-delay-notification">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-path-delay-notification" class="section-name selfRef">Path Delay Notification</a>
+        </h3>
+<p id="section-5.1-1">The PDN is a new ICMPv6 error message, Type TBD1. The ICMPv4
+equivalent is a new type, TBD2, with the same layout except as noted
+in <a href="#pdn-v4" class="auto internal xref">Section 5.1.1</a>. The message reuses the extended-message structure of
+<span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> so that existing extension-aware parsers process it
+without modification.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<span id="name-path-delay-notification-mes"></span><div id="fig-pdn">
+<figure id="figure-1">
+          <div class="alignLeft art-text artwork" id="section-5.1-2.1">
+<pre>
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |     Code      |            Checksum           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|    Length     |                   Reserved                    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+~   As much of the invoking packet as possible, zero-padded    ~
+|   to a multiple of 8 octets, per Section 4 of RFC 4884       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+~              ICMP Extension Structure (RFC 4884)              ~
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-path-delay-notification-mes" class="selfRef">Path Delay Notification Message Format</a>
+          </figcaption></figure>
+</div>
+<p id="section-5.1-3">The Length field gives the size of the invoking packet portion in
+8-octet units, per <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>. The Reserved field <span class="bcp14">MUST</span> be set to zero
+on transmission and ignored on receipt.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+<p id="section-5.1-4">The Code field distinguishes the condition being reported:<a href="#section-5.1-4" class="pilcrow">¶</a></p>
+<span id="name-path-delay-notification-cod"></span><div id="tab-pdn-codes">
+<table class="center" id="table-1">
+          <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-path-delay-notification-cod" class="selfRef">Path Delay Notification Codes</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-right" rowspan="1" colspan="1">Code</th>
+              <th class="text-left" rowspan="1" colspan="1">Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">0</td>
+              <td class="text-left" rowspan="1" colspan="1">No contact active; path awaiting next contact</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">Contact active; path subject to the indicated delay</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">2</td>
+              <td class="text-left" rowspan="1" colspan="1">Contact active; sender's traffic preempted</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-5.1-6">Code 2 reports the preemption condition of <a href="#uc-preemption" class="auto internal xref">Section 4.3.5</a>: the
+sender's traffic remains admitted but is displaced within the current
+contact. It is distinguished from code 0 because the reported times
+refer to expected resumption within a contact rather than to the
+contact plan, and receivers <span class="bcp14">MAY</span> apply a shorter deferral-cache
+lifetime to it.<a href="#section-5.1-6" class="pilcrow">¶</a></p>
+<p id="section-5.1-7">A PDN <span class="bcp14">MUST</span> include exactly one Path Schedule Object (<a href="#pso" class="auto internal xref">Section 5.3</a>) in its
+extension structure. A receiver processing a PDN without one <span class="bcp14">MUST</span>
+treat all schedule fields as unknown. Generation of PDNs is
+rate-limited per <span><a href="https://rfc-editor.org/rfc/rfc4443#section-2.4" class="relref">Section 2.4</a> of [<a href="#RFC4443" class="cite xref">RFC4443</a>]</span>; the deferral cache of
+<a href="#receiver-model" class="auto internal xref">Section 4.4</a> is what makes one notification per destination
+prefix per gap sufficient.<a href="#section-5.1-7" class="pilcrow">¶</a></p>
+<div id="pdn-v4">
+<section id="section-5.1.1">
+          <h4 id="name-icmpv4-differences">
+<a href="#section-5.1.1" class="section-number selfRef">5.1.1. </a><a href="#name-icmpv4-differences" class="section-name selfRef">ICMPv4 Differences</a>
+          </h4>
+<p id="section-5.1.1-1">The ICMPv4 PDN (Type TBD2) carries the Length field in 32-bit words
+and follows the invoking-packet inclusion and padding rules of
+<span><a href="https://rfc-editor.org/rfc/rfc4884#section-5.1" class="relref">Section 5.1</a> of [<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>. All other fields and all extension objects
+are identical.<a href="#section-5.1.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="dlp">
+<section id="section-5.2">
+        <h3 id="name-denied-by-link-policy">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-denied-by-link-policy" class="section-name selfRef">Denied by Link Policy</a>
+        </h3>
+<p id="section-5.2-1">Denied by Link Policy is code TBD3 under ICMPv6 Destination
+Unreachable (Type 1) and code TBD4 under ICMPv4 Destination
+Unreachable (Type 3). The message layout is that of the extended
+Destination Unreachable message defined by <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>; this document
+adds no fields to it.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2"><span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> updates <span>[<a href="#RFC0792" class="cite xref">RFC0792</a>]</span> and <span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> to permit an ICMP
+Extension Structure on Destination Unreachable messages of both
+versions, and its requirements apply here by inheritance: the message
+carries the Length field of <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> bounding the original-datagram
+portion, that portion is truncated and zero-padded per Sections 4.4
+and 5.1 of <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> (including the 128-octet original-datagram
+length for ICMPv4), and the extension structure follows it. New
+object classes under this mechanism are an established pattern;
+<span>[<a href="#RFC8883" class="cite xref">RFC8883</a>]</span> defines a Destination Unreachable code carrying ancillary
+information in an extension object in the same way, and <span>[<a href="#RFC5837" class="cite xref">RFC5837</a>]</span>
+and <span>[<a href="#RFC4950" class="cite xref">RFC4950</a>]</span> attach objects to Destination Unreachable in wide
+deployment.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+<p id="section-5.2-3">A receiver that predates this specification treats the message as a
+generic Destination Unreachable: it does not recognize the code, and
+the extension structure is invisible to it, appearing only as
+trailing octets beyond the portion of the original datagram such
+receivers examine. The classic-versus-compliant message ambiguity
+discussed in <span><a href="https://rfc-editor.org/rfc/rfc4884#section-5.3" class="relref">Section 5.3</a> of [<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> cannot arise for this code,
+because any receiver that recognizes the code postdates this
+specification and parses the extension structure unconditionally.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
+<p id="section-5.2-4">A Denied by Link Policy message <span class="bcp14">SHOULD</span> include exactly one Admission
+Denial Object (<a href="#ado" class="auto internal xref">Section 5.4</a>); a message without one reports the denial with
+no reason, which a gateway <span class="bcp14">MAY</span> choose deliberately where policy
+forbids disclosure (<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-5.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="pso">
+<section id="section-5.3">
+        <h3 id="name-path-schedule-object">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-path-schedule-object" class="section-name selfRef">Path Schedule Object</a>
+        </h3>
+<span id="name-path-schedule-object-2"></span><div id="fig-pso">
+<figure id="figure-2">
+          <div class="alignLeft art-text artwork" id="section-5.3-1.1">
+<pre>
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Length = 28           |  Class-Num =  |  C-Type = 1   |
+|                               |     TBD5      |               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                      Generation Time                          +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                     Next Contact Time                         +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Expected Delay                         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Contact Duration                        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre>
+</div>
+<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<a href="#name-path-schedule-object-2" class="selfRef">Path Schedule Object</a>
+          </figcaption></figure>
+</div>
+<p id="section-5.3-2">The object header is as defined in <span><a href="https://rfc-editor.org/rfc/rfc4884#section-8" class="relref">Section 8</a> of [<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>; the class
+is the Path Signaling Object class (Class-Num TBD5), C-Type 1.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.3-3">Generation Time and Next Contact Time are 64-bit NTP timestamps as
+defined in <span><a href="https://rfc-editor.org/rfc/rfc5905#section-6" class="relref">Section 6</a> of [<a href="#RFC5905" class="cite xref">RFC5905</a>]</span> and recommended by <span>[<a href="#RFC8877" class="cite xref">RFC8877</a>]</span>: 32
+bits of seconds and 32 bits of fraction, in the UTC timescale of the
+NTP era containing the time of generation, seconds excluding leap
+second adjustments. A gateway whose contact plan is expressed in
+another timescale (TAI, GPS) <span class="bcp14">MUST</span> convert at generation; no timescale
+indicator is carried. The value 0 indicates an unknown or unset
+timestamp, consistent with NTP convention.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.3-4">Generation Time <span class="bcp14">MUST</span> be set to the gateway's current time when the
+message is generated. Next Contact Time carries the start of the
+next contact serving the destination (code 0), the present time
+(code 1), or the expected resumption time (code 2); it is 0 where the
+gateway has no prediction.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
+<p id="section-5.3-5">Per the timestamp specification template of <span>[<a href="#RFC8877" class="cite xref">RFC8877</a>]</span>: the epoch is
+the NTP epoch, 1 January 1900 UTC; resolution is 2^-32 seconds;
+the format wraps every 2^32 seconds (one NTP era, approximately 136
+years). No era number is carried. Both timestamps in one object <span class="bcp14">MUST</span>
+be generated from the same clock, and receivers resolve the era of
+each absolute timestamp as the era placing it nearest the receiver's
+current time. A receiver that does not trust its own synchronization
+<span class="bcp14">MAY</span> instead use the two timestamps differentially, treating (Next
+Contact Time - Generation Time), computed with unsigned modular
+arithmetic, as an offset from message receipt; the error of this
+interpretation is bounded by the in-domain transit time of the
+message, which the applicability criterion of <a href="#applicability" class="auto internal xref">Section 3</a> makes
+negligible against the durations reported.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
+<p id="section-5.3-6">Expected Delay is the anticipated one-way path delay to the
+destination, in milliseconds, as an unsigned 32-bit integer. The
+value 0xFFFFFFFF indicates no finite bound, which is how the
+disrupted case is expressed; the value 0 indicates unknown.<a href="#section-5.3-6" class="pilcrow">¶</a></p>
+<p id="section-5.3-7">Contact Duration is the expected remaining duration of the contact
+identified by Next Contact Time, in milliseconds. The value 0
+indicates unknown.<a href="#section-5.3-7" class="pilcrow">¶</a></p>
+<p id="section-5.3-8">A receiver <span class="bcp14">MUST</span> ignore Path Signaling objects with an unrecognized
+C-Type and <span class="bcp14">MUST</span> process at most one Path Schedule Object per message,
+taking the first if several are present.<a href="#section-5.3-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="ado">
+<section id="section-5.4">
+        <h3 id="name-admission-denial-object">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-admission-denial-object" class="section-name selfRef">Admission Denial Object</a>
+        </h3>
+<span id="name-admission-denial-object-2"></span><div id="fig-ado">
+<figure id="figure-3">
+          <div class="alignLeft art-text artwork" id="section-5.4-1.1">
+<pre>
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          Length = 8           |  Class-Num =  |  C-Type = 2   |
+|                               |     TBD5      |               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|            Reason             |            Reserved           |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre>
+</div>
+<figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
+<a href="#name-admission-denial-object-2" class="selfRef">Admission Denial Object</a>
+          </figcaption></figure>
+</div>
+<p id="section-5.4-2">The object uses the Path Signaling Object class (Class-Num TBD5),
+C-Type 2. Reserved <span class="bcp14">MUST</span> be zero on transmission and ignored on
+receipt.<a href="#section-5.4-2" class="pilcrow">¶</a></p>
+<p id="section-5.4-3">Reason identifies the policy dimension on which admission failed,
+from a new IANA registry with the following initial values:<a href="#section-5.4-3" class="pilcrow">¶</a></p>
+<span id="name-admission-denial-reason-cod"></span><div id="tab-ado-reasons">
+<table class="center" id="table-2">
+          <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-admission-denial-reason-cod" class="selfRef">Admission Denial Reason Codes</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-right" rowspan="1" colspan="1">Value</th>
+              <th class="text-left" rowspan="1" colspan="1">Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">0</td>
+              <td class="text-left" rowspan="1" colspan="1">Reserved</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">Denied; dimension not disclosed</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">2</td>
+              <td class="text-left" rowspan="1" colspan="1">Traffic classification not admitted</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">3</td>
+              <td class="text-left" rowspan="1" colspan="1">Source not admitted</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">4</td>
+              <td class="text-left" rowspan="1" colspan="1">Destination not admitted</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">5</td>
+              <td class="text-left" rowspan="1" colspan="1">Allocation exhausted for admitted classification</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">6</td>
+              <td class="text-left" rowspan="1" colspan="1">Precedence below admission threshold</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">7-65279</td>
+              <td class="text-left" rowspan="1" colspan="1">Unassigned</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">65280-65534</td>
+              <td class="text-left" rowspan="1" colspan="1">Experimental use</td>
+            </tr>
+            <tr>
+              <td class="text-right" rowspan="1" colspan="1">65535</td>
+              <td class="text-left" rowspan="1" colspan="1">Reserved</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-5.4-5">Consistent with <a href="#uc-denied" class="auto internal xref">Section 4.3.4</a>, reasons identify the failed dimension
+and never describe what would be admitted. Value 1 exists so that a
+gateway can generate the message while disclosing nothing, as an
+alternative to the silent discard of <a href="#applicability" class="auto internal xref">Section 3</a> where the
+operator wants the sender to receive a definite denial. Registration
+policy for new values is Specification Required.<a href="#section-5.4-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="generation">
+<section id="section-6">
+      <h2 id="name-generation-rules">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-generation-rules" class="section-name selfRef">Generation Rules</a>
+      </h2>
+<p id="section-6-1">The rules in this section govern gateways. General ICMP generation
+rules apply in addition: <span><a href="https://rfc-editor.org/rfc/rfc4443#section-2.4" class="relref">Section 2.4</a> of [<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> for ICMPv6,
+including its rate-limiting requirements, and <span>[<a href="#RFC1812" class="cite xref">RFC1812</a>]</span> for ICMPv4.
+Nothing in this document permits generating an error in response to
+an ICMP error, to a packet addressed to a multicast destination, or
+in the other cases those documents prohibit.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">A gateway <span class="bcp14">MUST NOT</span> generate a PDN or a Denied by Link Policy message
+for traffic that another path in the domain could serve. Domain
+routing, driven by the same contact plan, is assumed to have steered
+the traffic to the generating gateway because no alternative exists;
+these messages assert a condition of the domain's aggregate
+connectivity toward the destination (<a href="#roles" class="auto internal xref">Section 4.2</a>). A gateway that
+cannot make this determination for a destination <span class="bcp14">MUST NOT</span> generate
+these messages for it.<a href="#section-6-2" class="pilcrow">¶</a></p>
+<p id="section-6-3">For trans-boundary traffic a gateway cannot currently serve,
+admission is evaluated first (<a href="#interaction" class="auto internal xref">Section 4.5</a>). Traffic that is denied
+admission regardless of contact state is answered with a Denied by
+Link Policy message. Traffic that is admitted but cannot currently
+be served is answered with a PDN: code 0 when no contact is active,
+code 1 when a contact is active and the stated path delay applies,
+and code 2 when the sender's traffic is preempted within an active
+contact.<a href="#section-6-3" class="pilcrow">¶</a></p>
+<p id="section-6-4">A gateway generating a PDN <span class="bcp14">MUST</span> set Generation Time to its current
+time and <span class="bcp14">MUST</span> populate the remaining Path Schedule Object fields from
+its contact plan where predictions exist, using the unknown values of
+<a href="#pso" class="auto internal xref">Section 5.3</a> where they do not. A gateway <span class="bcp14">MUST NOT</span> populate Next Contact
+Time with a value not derived from its current plan.<a href="#section-6-4" class="pilcrow">¶</a></p>
+<p id="section-6-5">Generation of both messages <span class="bcp14">MUST</span> be configurable per policy. In
+particular, an operator <span class="bcp14">MUST</span> be able to configure, per source,
+prefix, or policy class: whether a Denied by Link Policy message is
+generated at all, the alternative being silent discard, and whether
+its Admission Denial Object carries a specific reason or the value 1,
+dimension not disclosed. An operator <span class="bcp14">SHOULD</span> be able to configure
+omission of Next Contact Time and Contact Duration, transmitted as
+unknown, where the contact schedule itself is sensitive (<a href="#security" class="auto internal xref">Section 11</a>).<a href="#section-6-5" class="pilcrow">¶</a></p>
+<p id="section-6-6">A gateway <span class="bcp14">MUST NOT</span> generate these messages toward the high-delay
+segment and <span class="bcp14">MUST NOT</span> generate them in response to traffic arriving
+from it. Each gateway signals only into its local low-delay domain
+(<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-6-6" class="pilcrow">¶</a></p>
+<p id="section-6-7">These messages report conditions known at the boundary; their absence
+promises nothing. A gateway restarting without a current contact
+plan does not generate PDNs until it holds one.<a href="#section-6-7" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="receiver">
+<section id="section-7">
+      <h2 id="name-receiver-requirements">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-receiver-requirements" class="section-name selfRef">Receiver Requirements</a>
+      </h2>
+<div id="validation">
+<section id="section-7.1">
+        <h3 id="name-validation">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-validation" class="section-name selfRef">Validation</a>
+        </h3>
+<p id="section-7.1-1">A receiver <span class="bcp14">MUST</span> validate these messages as ICMP errors per
+<span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> and the mitigations of <span>[<a href="#RFC5927" class="cite xref">RFC5927</a>]</span>: the invoking packet
+excerpt is matched against existing connection or flow state, and a
+message matching nothing the receiver sent is discarded. A receiver
+<span class="bcp14">SHOULD</span> discard these messages when received on an interface facing
+outside its administered domain.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="deferral-cache">
+<section id="section-7.2">
+        <h3 id="name-deferral-cache">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-deferral-cache" class="section-name selfRef">Deferral Cache</a>
+        </h3>
+<p id="section-7.2-1">A host implementing PDN processing <span class="bcp14">SHOULD</span> maintain a deferral cache
+keyed by destination address or covering prefix. A PDN inserts or
+replaces the entry for the invoking packet's destination; a newer PDN
+always replaces an older entry for the same key. An entry records
+the code, the schedule fields, and an expiry.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-2">An entry created from a code 0 PDN expires at Next Contact Time; from
+code 2, at the expected resumption time; from code 1, after an
+implementation-chosen interval, since an active high-delay contact
+offers no gap to key expiry to. An entry whose PDN carried no usable
+time expires after an implementation-chosen conservative interval.
+In all cases entry lifetime <span class="bcp14">MUST</span> be bounded by a configurable
+maximum; a default of 24 hours is <span class="bcp14">RECOMMENDED</span>, and deployments whose
+planned gaps exceed it, such as solar conjunction, configure it
+accordingly. The bound limits the effect of a forged PDN carrying a
+far-future contact time (<a href="#security" class="auto internal xref">Section 11</a>).<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+<p id="section-7.2-3">Entries are advisory. A gateway cannot revoke a PDN whose plan has
+since changed, so an entry is a hint about the plan as of generation,
+not a guarantee in either direction. A host <span class="bcp14">MAY</span> probe before expiry,
+<span class="bcp14">SHOULD NOT</span> sustain transmission against an unexpired entry, and <span class="bcp14">MUST NOT</span> treat expiry as an assurance of service; traffic sent at expiry
+that finds the path still unserved elicits a fresh PDN.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="transport">
+<section id="section-7.3">
+        <h3 id="name-transport-processing">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-transport-processing" class="section-name selfRef">Transport Processing</a>
+        </h3>
+<p id="section-7.3-1">A transport maps a PDN to a soft or hard error by comparing the
+entry's expiry against the connection's tolerance. For TCP
+<span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span>, the tolerance is the user timeout, as adjusted by
+<span>[<a href="#RFC5482" class="cite xref">RFC5482</a>]</span> where negotiated, or an application-supplied value. If the
+expiry falls within the tolerance, the PDN is a soft error: TCP
+<span class="bcp14">SHOULD</span> suspend retransmission until the expiry rather than counting
+the interval toward connection failure. If the expiry exceeds the
+tolerance, or none could be computed, TCP <span class="bcp14">SHOULD</span> abort the connection
+and surface the reason to the application. A PDN received in
+SYN-SENT <span class="bcp14">SHOULD</span> be treated as a hard error unless the application has
+indicated delay tolerance for the connection. The remote endpoint
+receives no corresponding notification and continues to run its own
+timers; a receiver <span class="bcp14">MUST NOT</span> suspend a connection beyond what it knows
+or has negotiated of the peer's tolerance.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3-2">Other transports apply the same comparison; QUIC surfaces the PDN as
+a path event on the connection.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
+<p id="section-7.3-3">A Denied by Link Policy message <span class="bcp14">MUST</span> be surfaced as a hard error for
+matching connections and flows. A receiver <span class="bcp14">SHOULD NOT</span> automatically
+retry the traffic unchanged; obtaining admission is a provisioning
+action (<a href="#uc-denied" class="auto internal xref">Section 4.3.4</a>).<a href="#section-7.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="api">
+<section id="section-7.4">
+        <h3 id="name-application-interface">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-application-interface" class="section-name selfRef">Application Interface</a>
+        </h3>
+<p id="section-7.4-1">Hosts <span class="bcp14">SHOULD</span> surface both messages to applications as conditions
+distinguishable from each other and from other unreachable errors,
+including the schedule fields of a PDN and the reason of a Denied by
+Link Policy message, so that applications can implement their own
+deferral or handoff logic where transport defaults are insufficient.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="legacy">
+<section id="section-8">
+      <h2 id="name-legacy-host-and-middlebox-b">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-legacy-host-and-middlebox-b" class="section-name selfRef">Legacy Host and Middlebox Behavior</a>
+      </h2>
+<p id="section-8-1">This section analyzes hosts and middleboxes that predate this
+specification. The two messages were deliberately given opposite
+legacy failure modes, and the design claim of this section is that
+every plausible legacy behavior is acceptable and none is worse than
+the status quo, in which senders learn nothing and time out.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<div id="legacy-pdn">
+<section id="section-8.1">
+        <h3 id="name-path-delay-notification-2">
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-path-delay-notification-2" class="section-name selfRef">Path Delay Notification</a>
+        </h3>
+<p id="section-8.1-1">The PDN is a new type, so legacy behavior is whatever a stack does
+with an unknown ICMP type, and the two IP versions specify this
+differently. For ICMPv4, <span><a href="https://rfc-editor.org/rfc/rfc1122#section-3.2.2" class="relref">Section 3.2.2</a> of [<a href="#RFC1122" class="cite xref">RFC1122</a>]</span> requires that a
+message of unknown type be silently discarded; the PDN is a specified
+no-op. For ICMPv6, <span><a href="https://rfc-editor.org/rfc/rfc4443#section-2.4" class="relref">Section 2.4</a> of [<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> requires that an
+unknown message with the error bit set be passed to the upper-layer
+process that originated the invoking packet. The PDN is therefore not
+discarded at the ICMPv6 layer but delivered to a transport with no
+defined handling for it. Deployed transports ignore ICMPv6 error
+types they do not classify, so the practical outcome is a no-op as
+well, but that is an empirical claim about implementations rather
+than a specified behavior, and <a href="#exp-questions" class="auto internal xref">Section 10.2</a> lists confirming it
+across the stacks present in target environments, including embedded
+and flight-heritage stacks, as an experiment question.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.1-2">In either version, a legacy host experiences exactly today's
+behavior: it retransmits into the gap and times out.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="legacy-dlp">
+<section id="section-8.2">
+        <h3 id="name-denied-by-link-policy-2">
+<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-denied-by-link-policy-2" class="section-name selfRef">Denied by Link Policy</a>
+        </h3>
+<p id="section-8.2-1">Legacy handling of a new code under an existing type is the least
+specified corner of ICMP processing. <span><a href="https://rfc-editor.org/rfc/rfc1122#section-3.2.2.1" class="relref">Section 3.2.2.1</a> of [<a href="#RFC1122" class="cite xref">RFC1122</a>]</span>
+partitions the Destination Unreachable codes it enumerates into hard
+errors, codes 2 through 4, which abort TCP connections, and soft
+errors, but prescribes nothing for codes it does not enumerate;
+<span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> likewise does not prescribe unknown-code mapping; and
+<span>[<a href="#RFC5461" class="cite xref">RFC5461</a>]</span> documents how divergent soft-error handling already is
+among implementations for the codes that are specified. Deployed
+stacks variously treat an unrecognized Destination Unreachable code
+as a generic unreachable, as a soft error, as a hard error, or
+discard it on a code range check.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<p id="section-8.2-2">Every point in that space is acceptable for this code. An abort is
+the intended outcome for unauthorized traffic. Soft-error handling
+reaches the same outcome through timer expiry, which is the status
+quo. Discard on a range check leaves the sender exactly where a
+silently discarding gateway leaves it today. There is no legacy
+behavior in which a host handles unauthorized traffic worse than it
+does now. <a href="#exp-questions" class="auto internal xref">Section 10.2</a> nonetheless lists recording actual
+behavior across target-environment stacks as an experiment question,
+since a stack whose unknown-code handling proved disruptive in some
+unanticipated way would be a significant finding.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="middleboxes">
+<section id="section-8.3">
+        <h3 id="name-middleboxes">
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-middleboxes" class="section-name selfRef">Middleboxes</a>
+        </h3>
+<p id="section-8.3-1">Stateful middleboxes and firewalls inside the deploying domain may
+discard an unknown ICMPv6 type or an unfamiliar Destination
+Unreachable code under default-deny policy. This fails safe, in that
+senders revert to status-quo behavior, but silently defeats the
+mechanism. Deployment of this specification therefore includes
+updating ICMP filtering policy on the paths between gateways and the
+hosts they serve, which is feasible precisely because
+<a href="#applicability" class="auto internal xref">Section 3</a> scopes the mechanism to administered domains;
+<span>[<a href="#RFC4890" class="cite xref">RFC4890</a>]</span> provides the relevant ICMPv6 filtering framework.
+Boundary filtering requirements appear in <a href="#generation" class="auto internal xref">Section 6</a> and
+<a href="#security" class="auto internal xref">Section 11</a>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="legacy-senders">
+<section id="section-8.4">
+        <h3 id="name-legacy-senders">
+<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-legacy-senders" class="section-name selfRef">Legacy Senders</a>
+        </h3>
+<p id="section-8.4-1">Hosts that predate this specification generate nothing new and are
+unaffected as senders. Where such hosts sit behind a
+performance-enhancing proxy, the proxy consumes these messages on
+their behalf (<a href="#uc-proxy" class="auto internal xref">Section 4.3.6</a>), and the mechanism's benefit does not
+depend on host adoption.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="operational">
+<section id="section-9">
+      <h2 id="name-operational-considerations">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-operational-considerations" class="section-name selfRef">Operational Considerations</a>
+      </h2>
+<p id="section-9-1">Gateways <span class="bcp14">SHOULD</span> count generation of each message, per code and per
+Admission Denial reason, and expose the counters through network
+management. In a correctly provisioned domain these messages are
+rare for authorized traffic, so the counters function as the
+divergence telemetry of <a href="#uc-divergence" class="auto internal xref">Section 4.3.7</a>: a PDN generated during a
+planned contact, or a denial generated for a flow the orchestrator
+believes it admitted, indicates that the control plane's model and
+the data plane's state disagree, independent of any effect on
+senders.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-2">ICMP rate limiters on gateways deserve attention at contact
+boundaries. When a contact ends, every active trans-boundary flow
+can elicit a PDN within a short interval; a token-bucket limiter
+tuned for steady-state error rates may suppress most of the burst,
+leaving many hosts without deferral entries for the entire gap.
+Operators <span class="bcp14">SHOULD</span> size gateway ICMP rate limits for the expected flow
+fan-out at gap onset; the per-destination amortization of the
+deferral cache keeps the burst brief.<a href="#section-9-2" class="pilcrow">¶</a></p>
+<p id="section-9-3">The timestamps of <a href="#pso" class="auto internal xref">Section 5.3</a> are only as meaningful as the domain's
+time synchronization. Gateways require a synchronized clock to
+generate them, which the contact-plan architecture already demands;
+hosts with poor synchronization fall back to the differential
+interpretation of <a href="#pso" class="auto internal xref">Section 5.3</a>. Operators measuring deferral accuracy
+(<a href="#exp-questions" class="auto internal xref">Section 10.2</a>) should account for host clock quality before
+attributing misses to plan divergence.<a href="#section-9-3" class="pilcrow">¶</a></p>
+<p id="section-9-4">Hosts <span class="bcp14">SHOULD</span> expose their deferral caches to local diagnostics, since
+a populated entry changes transmission behavior in ways otherwise
+invisible to troubleshooting.<a href="#section-9-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="experiment">
+<section id="section-10">
+      <h2 id="name-experimental-status-and-goa">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-experimental-status-and-goa" class="section-name selfRef">Experimental Status and Goals</a>
+      </h2>
+<p id="section-10-1">This document is published as Experimental. The message formats and
+generation rules are specified with normative precision, but the value
+of the mechanism rests on operational questions that can only be
+answered by deployment. This section defines the experiment: where it
+runs, what it is intended to find out, and what evidence would support
+advancing the mechanism on the standards track.<a href="#section-10-1" class="pilcrow">¶</a></p>
+<div id="exp-scope">
+<section id="section-10.1">
+        <h3 id="name-scope-of-the-experiment">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-scope-of-the-experiment" class="section-name selfRef">Scope of the Experiment</a>
+        </h3>
+<p id="section-10.1-1">The experiment runs within administered limited domains satisfying the
+applicability criterion of <a href="#applicability" class="auto internal xref">Section 3</a>: a low-delay IP domain
+adjacent to a scheduled or disruption-prone high-delay segment, with
+gateways that hold the contact plan and admission policy for that
+segment. Expected venues include space networking testbeds and
+missions, tactical and maritime networks with windowed reachback, and
+laboratory emulations of the same topologies. The messages are not
+exchanged across uncontrolled networks, and no behavior in this
+document affects hosts whose traffic never requires a trans-boundary
+link.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+<p id="section-10.1-2">Prior to IANA assignment of the type and code defined here,
+implementations use the experimental ICMP values reserved by
+<span>[<a href="#RFC4727" class="cite xref">RFC4727</a>]</span> and coordinate their interpretation bilaterally, per that
+document's rules. Interoperability reports from this phase are in
+scope for the experiment.<a href="#section-10.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="exp-questions">
+<section id="section-10.2">
+        <h3 id="name-questions-the-experiment-is">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-questions-the-experiment-is" class="section-name selfRef">Questions the Experiment Is Intended to Answer</a>
+        </h3>
+<p id="section-10.2-1">The experiment is intended to produce evidence on the following
+questions.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+<p id="section-10.2-2">Whether PDN-driven behavior outperforms timer expiry. The premise of
+the PDN is that deferral and fail-fast, driven by boundary knowledge,
+beat retransmission into a dead or preempted link followed by an
+undifferentiated timeout. Deployments can measure this directly:
+retransmission volume on trans-boundary paths, time from first send to
+application-visible disposition, and offered load at the gateway during
+contact gaps, each with and without PDN processing enabled.<a href="#section-10.2-2" class="pilcrow">¶</a></p>
+<p id="section-10.2-3">Whether contact-plan predictions are reliable enough to act on. A
+deferral cache is only as good as the next-contact times populating it.
+The experiment should measure how often a host that deferred to an
+advertised contact time found service available at that time, and the
+operational consequences when plan and reality diverged.<a href="#section-10.2-3" class="pilcrow">¶</a></p>
+<p id="section-10.2-4">How unmodified hosts respond to the new code. The Denied by Link
+Policy code is assigned under Destination Unreachable on the
+expectation that legacy stacks degrade to generic unreachable
+handling, which is the intended outcome for unauthorized traffic. The
+experiment should confirm this across the stacks actually present in
+target environments, including embedded and flight-heritage
+implementations, and record any stack whose handling of an
+unrecognized code is disruptive.<a href="#section-10.2-4" class="pilcrow">¶</a></p>
+<p id="section-10.2-5">Whether the conditional transport reaction is the right one.
+<a href="#transport" class="auto internal xref">Section 7.3</a> maps a PDN to a soft or hard error by comparing the
+deferral against the connection's tolerance. Deployment may show that
+a simpler rule is sufficient, that the tolerance comparison needs
+different inputs, or that suspended connections rarely survive the
+peer's own timers in practice; any of these findings should reshape
+the normative text before advancement.<a href="#section-10.2-5" class="pilcrow">¶</a></p>
+<p id="section-10.2-6">Whether one notification per destination per gap is sufficient. The
+rate-limiting and negative-caching design assumes a small number of
+notifications amortize across a gap. Environments with large host
+counts, short flows, or address-diverse traffic may stress this
+assumption, and the experiment should record gateway ICMP generation
+rates and cache hit behavior under realistic fan-out.<a href="#section-10.2-6" class="pilcrow">¶</a></p>
+<p id="section-10.2-7">Whether the extension objects carry the right information. Field
+experience may show that additional data (residual contact capacity,
+multiple future contacts, confidence indicators on predicted times) is
+needed, or that defined fields go unused. Unused fields are a finding,
+not a failure; they should be removed on advancement rather than
+carried forward.<a href="#section-10.2-7" class="pilcrow">¶</a></p>
+<p id="section-10.2-8">Whether divergence telemetry is operationally useful. <a href="#uc-divergence" class="auto internal xref">Section 4.3.7</a>
+positions these messages as a data-plane check on control-plane state.
+Operators should report whether counting and reporting their
+generation exposed real faults ahead of existing monitoring.<a href="#section-10.2-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="exp-criteria">
+<section id="section-10.3">
+        <h3 id="name-criteria-for-advancement">
+<a href="#section-10.3" class="section-number selfRef">10.3. </a><a href="#name-criteria-for-advancement" class="section-name selfRef">Criteria for Advancement</a>
+        </h3>
+<p id="section-10.3-1">Advancement to the standards track would be supported by: at least two
+independent interoperable implementations of both messages, including
+extension object processing; deployment experience from at least one
+operational (non-laboratory) domain meeting the applicability
+criterion; measurement showing that PDN processing reduces
+retransmission load or time-to-disposition on trans-boundary paths
+relative to timer-based behavior in the same environment; and no
+evidence of harmful interaction with unmodified hosts or with
+middleboxes present in the target environments. Findings on the
+transport reaction rule and extension object contents are expected to
+produce revisions, not to block advancement, provided the revised
+behavior is itself supported by the collected data.<a href="#section-10.3-1" class="pilcrow">¶</a></p>
+<p id="section-10.3-2">If deployment experience shows the mechanism is not useful, the
+honest outcome is to document that result. Reports of failed or
+inconclusive experiments are requested to the same degree as
+successful ones, through the DTN working group or its successor.<a href="#section-10.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="security">
-<section id="section-3">
+<section id="section-11">
       <h2 id="name-security-considerations">
-<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-3-1">TODO Security<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-11-1">ICMP carries no authentication, and both messages are actionable, so
+the principal threats are forgery by off-path attackers and
+information disclosure to the senders these messages answer. The
+containment for all of them is the limited-domain scoping of
+<a href="#applicability" class="auto internal xref">Section 3</a>: validation against sender state (<a href="#validation" class="auto internal xref">Section 7.1</a>),
+boundary filtering (<a href="#generation" class="auto internal xref">Section 6</a>), and a single administrative
+authority. None of these defenses is dependable across the open
+internet, which is among the reasons the mechanism is not specified
+for it.<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-2">A forged PDN is a traffic-suppression attack: a sender that accepts
+one pauses trans-boundary traffic for the advertised interval. The
+invoking-packet validation of <span>[<a href="#RFC5927" class="cite xref">RFC5927</a>]</span> forces the attacker to guess
+connection state, boundary filtering confines injection to on-path or
+in-domain attackers, and the deferral-cache lifetime bound of
+<a href="#deferral-cache" class="auto internal xref">Section 7.2</a> caps the damage of a far-future forged contact
+time. An in-domain attacker positioned to forge these convincingly is
+generally positioned to drop traffic outright, which bounds the
+marginal capability the message adds.<a href="#section-11-2" class="pilcrow">¶</a></p>
+<p id="section-11-3">A forged Denied by Link Policy message is a connection-reset attack
+in the class <span>[<a href="#RFC5927" class="cite xref">RFC5927</a>]</span> analyzes for existing hard-error codes; it
+adds no capability beyond forging the existing administratively
+prohibited codes, and the same mitigations apply.<a href="#section-11-3" class="pilcrow">¶</a></p>
+<p id="section-11-4">The Denied by Link Policy message discloses policy to the sender it
+refuses, and a responsive gateway is a probing oracle: an attacker
+varying markings, sources, and destinations can map which traffic the
+domain admits. <a href="#generation" class="auto internal xref">Section 6</a> therefore requires per-policy control
+over generation and reason granularity, including reason value 1,
+dimension not disclosed, and silent discard; toward any sender the
+operator does not trust, silent discard is the expected posture,
+consistent with existing firewall practice.<a href="#section-11-4" class="pilcrow">¶</a></p>
+<p id="section-11-5">The PDN's schedule fields disclose contact times, and in some
+deployments the contact schedule is itself sensitive operational
+information. <a href="#generation" class="auto internal xref">Section 6</a> permits omitting the time fields per
+policy; operators of such deployments should protect schedule fields
+as they protect the contact plan.<a href="#section-11-5" class="pilcrow">¶</a></p>
+<p id="section-11-6">Neither message creates an amplification vector: each is generated
+only toward the domain interior, is rate limited, and is no larger
+than ordinary extended ICMP errors.<a href="#section-11-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana">
-<section id="section-4">
+<section id="section-12">
       <h2 id="name-iana-considerations">
-<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-4-1">This document has no IANA actions.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-12-1">This document requests the following assignments, shown as TBD
+values throughout.<a href="#section-12-1" class="pilcrow">¶</a></p>
+<p id="section-12-2">From the ICMPv6 "Type" registry: a new error message type TBD1, Path
+Delay Notification, with a code sub-registry initialized per <a href="#pdn" class="auto internal xref">Section 5.1</a>
+(0, no contact active; 1, contact active, stated delay applies; 2,
+preempted within contact), registration policy Specification
+Required.<a href="#section-12-2" class="pilcrow">¶</a></p>
+<p id="section-12-3">From the ICMPv4 "Type" registry: a new type TBD2, Path Delay
+Notification, with the same code sub-registry.<a href="#section-12-3" class="pilcrow">¶</a></p>
+<p id="section-12-4">From the code registry for ICMPv6 Type 1, Destination Unreachable:
+code TBD3, Denied by Link Policy.<a href="#section-12-4" class="pilcrow">¶</a></p>
+<p id="section-12-5">From the code registry for ICMPv4 Type 3, Destination Unreachable:
+code TBD4, Denied by Link Policy.<a href="#section-12-5" class="pilcrow">¶</a></p>
+<p id="section-12-6">From the "ICMP Extension Object Classes and Class Sub-types" registry
+<span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>: a new class TBD5, Path Signaling Object, with C-Type 1,
+Path Schedule, and C-Type 2, Admission Denial, assigned by this
+document; further C-Types are Specification Required.<a href="#section-12-6" class="pilcrow">¶</a></p>
+<p id="section-12-7">A new registry, "Admission Denial Reason Codes," initialized per
+<a href="#ado" class="auto internal xref">Section 5.4</a>, registration policy Specification Required.<a href="#section-12-7" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="sec-normative-references">
-<section id="section-5">
-      <h2 id="name-normative-references">
-<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<div id="sec-combined-references">
+<section id="section-13">
+      <h2 id="name-references">
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
+<div id="sec-normative-references">
+<section id="section-13.1">
+        <h3 id="name-normative-references">
+<a href="#section-13.1" class="section-number selfRef">13.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
 <dl class="references">
+<dt id="RFC0792">[RFC0792]</dt>
+        <dd>
+<span class="refAuthor">Postel, J.</span>, <span class="refTitle">"Internet Control Message Protocol"</span>, <span class="seriesInfo">STD 5</span>, <span class="seriesInfo">RFC 792</span>, <span class="seriesInfo">DOI 10.17487/RFC792</span>, <time datetime="1981-09" class="refDate">September 1981</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc792">https://www.rfc-editor.org/rfc/rfc792</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC4443">[RFC4443]</dt>
+        <dd>
+<span class="refAuthor">Conta, A.</span>, <span class="refAuthor">Deering, S.</span>, and <span class="refAuthor">M. Gupta, Ed.</span>, <span class="refTitle">"Internet Control Message Protocol (ICMPv6) for the Internet Protocol Version 6 (IPv6) Specification"</span>, <span class="seriesInfo">STD 89</span>, <span class="seriesInfo">RFC 4443</span>, <span class="seriesInfo">DOI 10.17487/RFC4443</span>, <time datetime="2006-03" class="refDate">March 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4443">https://www.rfc-editor.org/rfc/rfc4443</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4727">[RFC4727]</dt>
+        <dd>
+<span class="refAuthor">Fenner, B.</span>, <span class="refTitle">"Experimental Values In IPv4, IPv6, ICMPv4, ICMPv6, UDP, and TCP Headers"</span>, <span class="seriesInfo">RFC 4727</span>, <span class="seriesInfo">DOI 10.17487/RFC4727</span>, <time datetime="2006-11" class="refDate">November 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4727">https://www.rfc-editor.org/rfc/rfc4727</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4884">[RFC4884]</dt>
+        <dd>
+<span class="refAuthor">Bonica, R.</span>, <span class="refAuthor">Gan, D.</span>, <span class="refAuthor">Tappan, D.</span>, and <span class="refAuthor">C. Pignataro</span>, <span class="refTitle">"Extended ICMP to Support Multi-Part Messages"</span>, <span class="seriesInfo">RFC 4884</span>, <span class="seriesInfo">DOI 10.17487/RFC4884</span>, <time datetime="2007-04" class="refDate">April 2007</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4884">https://www.rfc-editor.org/rfc/rfc4884</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5482">[RFC5482]</dt>
+        <dd>
+<span class="refAuthor">Eggert, L.</span> and <span class="refAuthor">F. Gont</span>, <span class="refTitle">"TCP User Timeout Option"</span>, <span class="seriesInfo">RFC 5482</span>, <span class="seriesInfo">DOI 10.17487/RFC5482</span>, <time datetime="2009-03" class="refDate">March 2009</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5482">https://www.rfc-editor.org/rfc/rfc5482</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5905">[RFC5905]</dt>
+        <dd>
+<span class="refAuthor">Mills, D.</span>, <span class="refAuthor">Martin, J., Ed.</span>, <span class="refAuthor">Burbank, J.</span>, and <span class="refAuthor">W. Kasch</span>, <span class="refTitle">"Network Time Protocol Version 4: Protocol and Algorithms Specification"</span>, <span class="seriesInfo">RFC 5905</span>, <span class="seriesInfo">DOI 10.17487/RFC5905</span>, <time datetime="2010-06" class="refDate">June 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5905">https://www.rfc-editor.org/rfc/rfc5905</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
-    <dd>
+        <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9293">[RFC9293]</dt>
+      <dd>
+<span class="refAuthor">Eddy, W., Ed.</span>, <span class="refTitle">"Transmission Control Protocol (TCP)"</span>, <span class="seriesInfo">STD 7</span>, <span class="seriesInfo">RFC 9293</span>, <span class="seriesInfo">DOI 10.17487/RFC9293</span>, <time datetime="2022-08" class="refDate">August 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9293">https://www.rfc-editor.org/rfc/rfc9293</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
 </div>
-<div id="acknowledgments">
+<div id="sec-informative-references">
+<section id="section-13.2">
+        <h3 id="name-informative-references">
+<a href="#section-13.2" class="section-number selfRef">13.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC1122">[RFC1122]</dt>
+        <dd>
+<span class="refAuthor">Braden, R., Ed.</span>, <span class="refTitle">"Requirements for Internet Hosts - Communication Layers"</span>, <span class="seriesInfo">STD 3</span>, <span class="seriesInfo">RFC 1122</span>, <span class="seriesInfo">DOI 10.17487/RFC1122</span>, <time datetime="1989-10" class="refDate">October 1989</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1122">https://www.rfc-editor.org/rfc/rfc1122</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC1812">[RFC1812]</dt>
+        <dd>
+<span class="refAuthor">Baker, F., Ed.</span>, <span class="refTitle">"Requirements for IP Version 4 Routers"</span>, <span class="seriesInfo">RFC 1812</span>, <span class="seriesInfo">DOI 10.17487/RFC1812</span>, <time datetime="1995-06" class="refDate">June 1995</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1812">https://www.rfc-editor.org/rfc/rfc1812</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4890">[RFC4890]</dt>
+        <dd>
+<span class="refAuthor">Davies, E.</span> and <span class="refAuthor">J. Mohacsi</span>, <span class="refTitle">"Recommendations for Filtering ICMPv6 Messages in Firewalls"</span>, <span class="seriesInfo">RFC 4890</span>, <span class="seriesInfo">DOI 10.17487/RFC4890</span>, <time datetime="2007-05" class="refDate">May 2007</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4890">https://www.rfc-editor.org/rfc/rfc4890</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4950">[RFC4950]</dt>
+        <dd>
+<span class="refAuthor">Bonica, R.</span>, <span class="refAuthor">Gan, D.</span>, <span class="refAuthor">Tappan, D.</span>, and <span class="refAuthor">C. Pignataro</span>, <span class="refTitle">"ICMP Extensions for Multiprotocol Label Switching"</span>, <span class="seriesInfo">RFC 4950</span>, <span class="seriesInfo">DOI 10.17487/RFC4950</span>, <time datetime="2007-08" class="refDate">August 2007</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4950">https://www.rfc-editor.org/rfc/rfc4950</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5461">[RFC5461]</dt>
+        <dd>
+<span class="refAuthor">Gont, F.</span>, <span class="refTitle">"TCP's Reaction to Soft Errors"</span>, <span class="seriesInfo">RFC 5461</span>, <span class="seriesInfo">DOI 10.17487/RFC5461</span>, <time datetime="2009-02" class="refDate">February 2009</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5461">https://www.rfc-editor.org/rfc/rfc5461</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5837">[RFC5837]</dt>
+        <dd>
+<span class="refAuthor">Atlas, A., Ed.</span>, <span class="refAuthor">Bonica, R., Ed.</span>, <span class="refAuthor">Pignataro, C., Ed.</span>, <span class="refAuthor">Shen, N.</span>, and <span class="refAuthor">JR. Rivers</span>, <span class="refTitle">"Extending ICMP for Interface and Next-Hop Identification"</span>, <span class="seriesInfo">RFC 5837</span>, <span class="seriesInfo">DOI 10.17487/RFC5837</span>, <time datetime="2010-04" class="refDate">April 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5837">https://www.rfc-editor.org/rfc/rfc5837</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5927">[RFC5927]</dt>
+        <dd>
+<span class="refAuthor">Gont, F.</span>, <span class="refTitle">"ICMP Attacks against TCP"</span>, <span class="seriesInfo">RFC 5927</span>, <span class="seriesInfo">DOI 10.17487/RFC5927</span>, <time datetime="2010-07" class="refDate">July 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5927">https://www.rfc-editor.org/rfc/rfc5927</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8799">[RFC8799]</dt>
+        <dd>
+<span class="refAuthor">Carpenter, B.</span> and <span class="refAuthor">B. Liu</span>, <span class="refTitle">"Limited Domains and Internet Protocols"</span>, <span class="seriesInfo">RFC 8799</span>, <span class="seriesInfo">DOI 10.17487/RFC8799</span>, <time datetime="2020-07" class="refDate">July 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8799">https://www.rfc-editor.org/rfc/rfc8799</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8877">[RFC8877]</dt>
+        <dd>
+<span class="refAuthor">Mizrahi, T.</span>, <span class="refAuthor">Fabini, J.</span>, and <span class="refAuthor">A. Morton</span>, <span class="refTitle">"Guidelines for Defining Packet Timestamps"</span>, <span class="seriesInfo">RFC 8877</span>, <span class="seriesInfo">DOI 10.17487/RFC8877</span>, <time datetime="2020-09" class="refDate">September 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8877">https://www.rfc-editor.org/rfc/rfc8877</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8883">[RFC8883]</dt>
+        <dd>
+<span class="refAuthor">Herbert, T.</span>, <span class="refTitle">"ICMPv6 Errors for Discarding Packets Due to Processing Limits"</span>, <span class="seriesInfo">RFC 8883</span>, <span class="seriesInfo">DOI 10.17487/RFC8883</span>, <time datetime="2020-09" class="refDate">September 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8883">https://www.rfc-editor.org/rfc/rfc8883</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9171">[RFC9171]</dt>
+      <dd>
+<span class="refAuthor">Burleigh, S.</span>, <span class="refAuthor">Fall, K.</span>, and <span class="refAuthor">E. Birrane, III</span>, <span class="refTitle">"Bundle Protocol Version 7"</span>, <span class="seriesInfo">RFC 9171</span>, <span class="seriesInfo">DOI 10.17487/RFC9171</span>, <time datetime="2022-01" class="refDate">January 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9171">https://www.rfc-editor.org/rfc/rfc9171</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="example">
 <section id="appendix-A">
+      <h2 id="name-worked-example">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-worked-example" class="section-name selfRef">Worked Example</a>
+      </h2>
+<p id="appendix-A-1">A gateway with no active contact receives a packet for a
+trans-boundary destination at 18:00:00 UTC on 16 September 2026. Its
+contact plan shows the next contact serving the destination starting
+42 minutes later, at 18:42:00 UTC, lasting 15 minutes. It
+generates a PDN, code 0, whose Path Schedule Object decodes as
+follows. The object's Class-Num octet is TBD5 and is omitted from
+the field listing.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<span id="name-worked-example-path-schedul"></span><div id="tab-example">
+<table class="center" id="table-3">
+        <caption>
+<a href="#table-3" class="selfRef">Table 3</a>:
+<a href="#name-worked-example-path-schedul" class="selfRef">Worked Example Path Schedule Object</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Field</th>
+            <th class="text-left" rowspan="1" colspan="1">Wire value</th>
+            <th class="text-left" rowspan="1" colspan="1">Decoded</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Generation Time</td>
+            <td class="text-left" rowspan="1" colspan="1">0xEE5557A0 0x00000000</td>
+            <td class="text-left" rowspan="1" colspan="1">2026-09-16 18:00:00Z</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Next Contact Time</td>
+            <td class="text-left" rowspan="1" colspan="1">0xEE556178 0x00000000</td>
+            <td class="text-left" rowspan="1" colspan="1">2026-09-16 18:42:00Z</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Expected Delay</td>
+            <td class="text-left" rowspan="1" colspan="1">0xFFFFFFFF</td>
+            <td class="text-left" rowspan="1" colspan="1">no finite bound</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Contact Duration</td>
+            <td class="text-left" rowspan="1" colspan="1">0x000DBBA0</td>
+            <td class="text-left" rowspan="1" colspan="1">900000 ms (15 min)</td>
+          </tr>
+        </tbody>
+      </table>
+</div>
+<p id="appendix-A-3">The timestamps are NTP 64-bit values: the seconds words above are the
+Unix times of the two instants plus 2208988800, and both fraction
+words are zero. A synchronized receiver caches a deferral entry for
+the destination expiring at 18:42:00Z. A receiver that does not
+trust its clock computes Next Contact Time minus Generation Time,
+2520 seconds, and defers for that interval from message receipt.
+The all-ones Expected Delay is the disrupted case: no finite delay
+bound exists until the contact opens.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-B">
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-A-1">TODO acknowledge.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-1">TODO acknowledge.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-B">
+<section id="appendix-C">
       <h2 id="name-authors-address">
 <a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
       </h2>
 <address class="vcard">
-        <div dir="auto" class="left"><span class="fn nameRole">Your Name Here</span></div>
-<div dir="auto" class="left"><span class="org">Your Organization Here</span></div>
+        <div dir="auto" class="left"><span class="fn nameRole">Erik Kline</span></div>
+<div dir="auto" class="left"><span class="org">Aalyria Technologies, Inc.</span></div>
 <div class="email">
 <span>Email:</span>
-<a href="mailto:your.email@example.com" class="email">your.email@example.com</a>
+<a href="mailto:ek.ietf@gmail.com" class="email">ek.ietf@gmail.com</a>
 </div>
 </address>
 </section>
