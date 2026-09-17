@@ -9,8 +9,8 @@ number:
 date:
 consensus: true
 v: 3
-# area: INT
-# workgroup: WG
+area: INT
+workgroup: Internet Area Working Group
 keyword:
  - IP enclave
  - delay/disruption links
@@ -18,10 +18,10 @@ keyword:
  - ICMPv4
  - ICMPv6
 venue:
-#  group: INTAREA
-#  type: Working Group
-#  mail: intarea@ietf.org
-#  arch: https://ietf.org/wg/intarea
+  group: INTAREA
+  type: Working Group
+  mail: int-area@ietf.org
+  arch: https://mailarchive.ietf.org/arch/browse/int-area/
   github: "ekline/draft-icmp-boundary-signaling"
   latest: "https://ekline.github.io/draft-icmp-boundary-signaling/draft-ek-icmp-boundary-signaling.html"
 
@@ -957,4 +957,7 @@ bound exists until the contact opens.
 # Acknowledgments
 {:numbered="false"}
 
-TODO acknowledge.
+The author used AI-assisted tooling in preparing this document,
+including drafting and editing text and converting it to the
+kramdown-rfc source format. All technical content, design decisions,
+and the final text are the responsibility of the author.
