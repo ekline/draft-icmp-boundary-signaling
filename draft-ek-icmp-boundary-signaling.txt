@@ -2,7 +2,7 @@
 
 
 
-Network Working Group                                           E. Kline
+Internet Area Working Group                                     E. Kline
 Internet-Draft                                Aalyria Technologies, Inc.
 Intended status: Experimental                          17 September 2026
 Expires: 21 March 2027
@@ -35,6 +35,11 @@ About This Document
    boundary-signaling.html.  Status information for this document may be
    found at https://datatracker.ietf.org/doc/draft-ek-icmp-boundary-
    signaling/.
+
+   Discussion of this document takes place on the INTAREA Working Group
+   mailing list (mailto:int-area@ietf.org), which is archived at
+   https://mailarchive.ietf.org/arch/browse/int-area/.  Subscribe at
+   https://www.ietf.org/mailman/listinfo/int-area/.
 
    Source for this draft and an issue tracker can be found at
    https://github.com/ekline/draft-icmp-boundary-signaling.
@@ -1100,7 +1105,10 @@ Appendix A.  Worked Example
 
 Acknowledgments
 
-   TODO acknowledge.
+   The author used AI-assisted tooling in preparing this document,
+   including drafting and editing text and converting it to the
+   kramdown-rfc source format.  All technical content, design decisions,
+   and the final text are the responsibility of the author.
 
 Author's Address
 
