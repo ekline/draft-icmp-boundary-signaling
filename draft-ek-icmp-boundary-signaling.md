@@ -9,8 +9,8 @@ number:
 date:
 consensus: true
 v: 3
-area: INT
-workgroup: WG
+# area: INT
+# workgroup: WG
 keyword:
  - IP enclave
  - delay/distruption links
@@ -18,12 +18,12 @@ keyword:
  - ICMPv4
  - ICMPv6
 venue:
-  group: INTAREA
-  type: Working Group
-  mail: intarea@ietf.org
-  arch: https://ietf.org/wg/intarea
-  github: USER/REPO
-  latest: https://example.com/LATEST
+#  group: INTAREA
+#  type: Working Group
+#  mail: intarea@ietf.org
+#  arch: https://ietf.org/wg/intarea
+  github: "ekline/draft-icmp-boundary-signaling"
+  latest: "https://ekline.github.io/draft-icmp-boundary-signaling/draft-ek-icmp-boundary-signaling.html"
 
 author:
  -
