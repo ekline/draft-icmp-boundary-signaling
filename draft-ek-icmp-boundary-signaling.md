@@ -529,6 +529,26 @@ Generation Time object. Their interpretation does not depend on the
 absolute timestamp representation, so that representation could later
 be revised or superseded without changing them.
 
+#### Duration Format {#durations}
+
+Both duration objects carry an unsigned 32-bit integer count of
+milliseconds. Millisecond precision is not intrinsically necessary for
+every value of Expected Time Until Link Usability, but a single
+representation for both duration-valued objects reduces
+implementation complexity and the risk of unit-conversion errors.
+{{RFC4884}} defines the extension object framework but no duration
+datatype; the representation is defined here.
+
+The maximum representable duration, 0xFFFFFFFF milliseconds, is
+4,294,967.295 seconds, approximately 49.7 days. It is a valid finite
+value, not a sentinel. If an otherwise available estimate exceeds the
+maximum representable duration, the corresponding object MUST NOT be
+included. No value is reserved to mean infinite, unknown, or greater
+than the maximum, and no saturation is defined; absence of an object
+means only that no representable estimate was supplied, and the
+protocol does not distinguish an unknown estimate from one that is
+known but not representable.
+
 ### Generation Time {#gen-time}
 
 ~~~
@@ -578,8 +598,8 @@ Expected Time Until Link Usability (ETU) is the gateway's estimate, at
 the moment it generated the notification, of the interval from
 generation until the constrained link is expected to become usable for
 forwarding traffic. It is an unsigned 32-bit integer count of
-milliseconds, giving a range of approximately 49.7 days. The value
-refers to data-plane usability, not to the start of a scheduled
+milliseconds, in the format of {{durations}}. The value refers to
+data-plane usability, not to the start of a scheduled
 contact or of preparation for one: antenna pointing, modem
 configuration, acquisition, synchronization, and analogous
 link-establishment operations complete within the interval and are
@@ -602,11 +622,12 @@ Doing so is conservative when delivery of the notification was
 delayed, since the true remaining interval can only be shorter. This
 document does not assume that ICMP delivery is prompt.
 
-Editor's note (to be removed before publication): the 32-bit
-millisecond encoding is chosen for consistency with Expected Link
-Delay and comfortably covers planned gaps such as solar conjunction.
-Whether a coarser unit or wider field is preferable is for author
-review.
+The finite range of {{durations}} provides a practical horizon for
+this experimental network-layer signal. Unavailability on longer
+timescales is not represented by ETU; such timescales may instead
+bear on broader application, storage, provisioning, or
+communication-mechanism decisions, which this document does not
+address.
 
 ### Expected Link Delay {#eld}
 
@@ -624,12 +645,21 @@ review.
 
 Expected Link Delay is the approximate one-way delay associated with
 traversal of the constrained link whose unavailability prevented
-forwarding, as an unsigned 32-bit integer count of milliseconds. It is
-an estimate, not a bound; a quantity of the link, not an end-to-end
-path delay; and independent of ETU and of Generation Time. This
-document does not require receivers to combine it with other metadata
-or otherwise compute an end-to-end delivery time; how the estimate is
-used is a matter of endpoint and application policy.
+forwarding, as an unsigned 32-bit integer count of milliseconds in
+the format of {{durations}}. It is an estimate, not a bound; a
+quantity of the link, not an end-to-end path delay; and independent of
+ETU and of Generation Time. This document does not require receivers
+to combine it with other metadata or otherwise compute an end-to-end
+delivery time; how the estimate is used is a matter of endpoint and
+application policy.
+
+For perspective only, the maximum representable duration, if it were
+pure propagation delay at the speed of light in vacuum, would
+correspond to a distance of approximately 1.29 x 10^12 km, roughly
+1.29 trillion km. The range is therefore very large even for the
+long-delay environments that motivate this document. This observation
+is explanatory; Expected Link Delay remains an estimated one-way link
+delay comprising whatever components contribute to it.
 
 ### Admission Denial {#ado}
 
