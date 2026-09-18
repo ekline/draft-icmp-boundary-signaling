@@ -1246,6 +1246,9 @@ experimentation with such reactions.<a href="#section-abstract-1" class="pilcrow
 </li>
                 </ul>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5">
+                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="auto internal xref">5.5</a>.  <a href="#name-object-applicability-by-cod" class="internal xref">Object Applicability by Code</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
@@ -1757,7 +1760,11 @@ backwards-compatibility ambiguities of <span><a href="https://rfc-editor.org/rfc
 arise.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
 <p id="section-5.1-4">A receiver <span class="bcp14">MUST</span> ignore extension objects of the class defined here
 with an unrecognized C-Type, and <span class="bcp14">MUST</span> process at most one object of
-each C-Type per message, taking the first if several are present.<a href="#section-5.1-4" class="pilcrow">¶</a></p>
+each C-Type per message, taking the first if several are present. A
+receiver <span class="bcp14">MUST</span> ignore a Link Condition Object that is not applicable to
+the received Destination Unreachable code (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>);
+the presence of such an object does not make an otherwise valid
+message malformed.<a href="#section-5.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="ltu">
@@ -1797,11 +1804,12 @@ down, and it does not report ordinary routing failure or congestion.
 "Temporarily" describes the domain's model of the condition; it does
 not guarantee recovery, and the gateway need not know when the
 condition will clear.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
-<p id="section-5.2-4">The message <span class="bcp14">MAY</span> carry any combination of the Generation Time, Expected
-Time Until Link Usability, and Expected Link Delay objects
-(<a href="#objects" class="auto internal xref">Section 5.4</a>). Each is independently optional. A message carrying none
-of them is valid and meaningful: it reports the condition, and the
-objects add prediction where the gateway has it.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
+<p id="section-5.2-4">The message <span class="bcp14">MAY</span> carry any combination of the Expected Time Until Link
+Usability, Generation Time, and Expected Link Delay objects
+(<a href="#objects" class="auto internal xref">Section 5.4</a>), subject to <a href="#applicability-objects" class="auto internal xref">Section 5.5</a>. A message
+carrying none of them is valid and meaningful: it reports the
+condition, and the objects add prediction where the gateway has it.
+The message <span class="bcp14">MUST NOT</span> carry an Admission Denial object.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="dlp">
@@ -1825,7 +1833,9 @@ IETF review (<a href="#experiment" class="auto internal xref">Section 10</a>).<a
 <p id="section-5.3-3">The message <span class="bcp14">SHOULD</span> include exactly one Admission Denial Object
 (<a href="#ado" class="auto internal xref">Section 5.4.5</a>). A message without one reports the denial with no reason,
 which a gateway <span class="bcp14">MAY</span> choose where policy forbids disclosure
-(<a href="#generation" class="auto internal xref">Section 6</a>).<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+(<a href="#generation" class="auto internal xref">Section 6</a>). The message <span class="bcp14">MUST NOT</span> carry Expected Time Until Link
+Usability or Expected Link Delay, and <span class="bcp14">SHOULD NOT</span> carry Generation Time
+(<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>).<a href="#section-5.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="objects">
@@ -1835,10 +1845,12 @@ which a gateway <span class="bcp14">MAY</span> choose where policy forbids discl
         </h3>
 <p id="section-5.4-1">The objects below share a single ICMP Extension Object class, the Link
 Condition Object class (Class-Num TBD5), distinguished by C-Type. The
-object header is as defined in <span><a href="https://rfc-editor.org/rfc/rfc4884#section-8" class="relref">Section 8</a> of [<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>. Each object
-is independently optional; presence conveys availability, and absence
-means the gateway did not supply that information. No sentinel values
-are defined for absent data.<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+object header is as defined in <span><a href="https://rfc-editor.org/rfc/rfc4884#section-8" class="relref">Section 8</a> of [<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>. No object is
+mandatory. Which objects a message may carry depends on the
+Destination Unreachable code it reports (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>);
+within that set, each object is optional, presence conveys
+availability, and absence means the gateway did not supply that
+information. No sentinel values are defined for absent data.<a href="#section-5.4-1" class="pilcrow">¶</a></p>
 <p id="section-5.4-2">The two duration objects, Expected Time Until Link Usability and
 Expected Link Delay, are defined and encoded independently of the
 Generation Time object. Their interpretation does not depend on the
@@ -1901,10 +1913,15 @@ seconds, wrapping every 2^32 seconds. Following the template of
 value absolutely resolves the era as the one placing it nearest its
 own current time.<a href="#section-5.4.2-2" class="pilcrow">¶</a></p>
 <p id="section-5.4.2-3">Generation Time identifies when the notification and any estimates in
-it were generated. A receiver that can relate it to its local time
-reference can compensate for the age of the notification on receipt
-(<a href="#etu" class="auto internal xref">Section 5.4.3</a>). A receiver that cannot relate it to its local time
-reference ignores it; nothing else in the message depends on it.<a href="#section-5.4.2-3" class="pilcrow">¶</a></p>
+it were generated. It is principally intended to allow a receiver that
+can relate it to its local time reference to account for the time
+elapsed since an accompanying ETU estimate was generated (<a href="#etu" class="auto internal xref">Section 5.4.3</a>). A
+receiver that cannot relate it to its local time reference ignores
+it; nothing else in the message depends on it, and it remains
+independently parseable. In the absence of ETU this document defines
+no use for Generation Time, so a Link Temporarily Unavailable message
+<span class="bcp14">SHOULD NOT</span> include Generation Time unless it also includes ETU
+(<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>).<a href="#section-5.4.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="etu">
@@ -1934,12 +1951,13 @@ reference ignores it; nothing else in the message depends on it.<a href="#sectio
 the moment it generated the notification, of the interval from
 generation until the constrained link is expected to become usable for
 forwarding traffic. It is an unsigned 32-bit integer count of
-milliseconds, in the format of <a href="#durations" class="auto internal xref">Section 5.4.1</a>. The value refers to
-data-plane usability, not to the start of a scheduled
-contact or of preparation for one: antenna pointing, modem
-configuration, acquisition, synchronization, and analogous
-link-establishment operations complete within the interval and are
-not represented separately.<a href="#section-5.4.3-2" class="pilcrow">¶</a></p>
+milliseconds, in the format of <a href="#durations" class="auto internal xref">Section 5.4.1</a>. ETU refers to expected
+data-plane usability, not to the start of a scheduled contact or of
+preparation for one. Preparatory operations necessary to make the
+link usable, such as antenna pointing, modem configuration,
+acquisition, synchronization, or analogous link-establishment
+operations, are expected to have completed by the end of the reported
+interval and are not represented separately.<a href="#section-5.4.3-2" class="pilcrow">¶</a></p>
 <p id="section-5.4.3-3">ETU is measured from notification generation, not from receipt. It is
 an estimate, not a guarantee. It is not a retry interval and not an
 instruction to transmit at any particular time. It does not include
@@ -2098,6 +2116,88 @@ Specification Required.<a href="#section-5.4.5-4" class="pilcrow">¶</a></p>
 </div>
 </section>
 </div>
+<div id="applicability-objects">
+<section id="section-5.5">
+        <h3 id="name-object-applicability-by-cod">
+<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-object-applicability-by-cod" class="section-name selfRef">Object Applicability by Code</a>
+        </h3>
+<p id="section-5.5-1">Each Link Condition Object is applicable to one of the two codes, as
+summarized in <a href="#tab-applicability" class="auto internal xref">Table 2</a>.<a href="#section-5.5-1" class="pilcrow">¶</a></p>
+<span id="name-link-condition-object-appli"></span><div id="tab-applicability">
+<table class="center" id="table-2">
+          <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-link-condition-object-appli" class="selfRef">Link Condition Object Applicability by Destination Unreachable Code</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Object</th>
+              <th class="text-left" rowspan="1" colspan="1">Link Temporarily Unavailable</th>
+              <th class="text-left" rowspan="1" colspan="1">Denied by Link Policy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Expected Time Until Link Usability</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span class="bcp14">MAY</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span class="bcp14">MUST NOT</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Generation Time</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span class="bcp14">MAY</span>; <span class="bcp14">SHOULD NOT</span> without ETU</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span class="bcp14">SHOULD NOT</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Expected Link Delay</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span class="bcp14">MAY</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span class="bcp14">MUST NOT</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Admission Denial</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span class="bcp14">MUST NOT</span>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <span class="bcp14">SHOULD</span>
+</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<p id="section-5.5-3">Expected Time Until Link Usability and Expected Link Delay reveal
+characteristics of a constrained link to which the invoking traffic
+was not admitted, and admission policy is intentionally evaluated
+before any link-state information is disclosed (<a href="#generation" class="auto internal xref">Section 6</a>); a
+Denied by Link Policy message therefore <span class="bcp14">MUST NOT</span> carry either. It
+<span class="bcp14">SHOULD NOT</span> carry Generation Time, for which this document defines no
+use without ETU. Admission Denial describes a policy refusal and <span class="bcp14">MUST NOT</span> be sent with Link Temporarily Unavailable; its inclusion with
+Denied by Link Policy remains subject to the disclosure controls of
+<a href="#generation" class="auto internal xref">Section 6</a>.<a href="#section-5.5-3" class="pilcrow">¶</a></p>
+<p id="section-5.5-4">A Link Temporarily Unavailable message <span class="bcp14">SHOULD NOT</span> include Generation
+Time unless it also includes Expected Time Until Link Usability, since
+this document defines no other use for it and unnecessary
+absolute-time information should not normally be disclosed. This is
+not a prohibition; experimentation or later experience may identify
+another legitimate use.<a href="#section-5.5-4" class="pilcrow">¶</a></p>
+<p id="section-5.5-5">These are sender restrictions. A receiver <span class="bcp14">MUST</span> ignore a Link Condition
+Object that is not applicable to the received code rather than
+rejecting the message (<a href="#common" class="auto internal xref">Section 5.1</a>); this tolerance exists for
+robustness and extensibility and does not relax the sender rules.
+Unknown C-Types continue to follow the extension processing rules of
+<span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>.<a href="#section-5.5-5" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="generation">
@@ -2122,12 +2222,15 @@ the traffic. If so, use that path and generate neither code.<a href="#section-6-
 </li>
         <li id="section-6-3.3">
           <p id="section-6-3.3.1">If the traffic is not admitted, drop it and, where configured,
-send Denied by Link Policy.<a href="#section-6-3.3.1" class="pilcrow">¶</a></p>
+send Denied by Link Policy, without Expected Time Until Link
+Usability or Expected Link Delay (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>).<a href="#section-6-3.3.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-6-3.4">
           <p id="section-6-3.4.1">If the traffic is admitted but the required link is presently
 unusable under a transient condition known to the domain, drop it
-and send Link Temporarily Unavailable.<a href="#section-6-3.4.1" class="pilcrow">¶</a></p>
+and send Link Temporarily Unavailable, optionally including
+Expected Time Until Link Usability, Generation Time, and Expected
+Link Delay (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>).<a href="#section-6-3.4.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-6-3.5">
           <p id="section-6-3.5.1">If the traffic is admitted and the link is usable, forward it
@@ -2147,7 +2250,8 @@ constrained link's availability (<a href="#applicability" class="auto internal x
 <p id="section-6-6">A gateway <span class="bcp14">MUST NOT</span> send an ETU value not derived from its current
 knowledge of the link. A gateway that does not know when the link is
 expected to become usable omits the ETU object. A gateway <span class="bcp14">MAY</span> send ETU
-without Generation Time, and <span class="bcp14">MAY</span> send Generation Time without ETU.<a href="#section-6-6" class="pilcrow">¶</a></p>
+without Generation Time; it <span class="bcp14">SHOULD NOT</span> send Generation Time without
+ETU (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>).<a href="#section-6-6" class="pilcrow">¶</a></p>
 <p id="section-6-7">Generation of both codes <span class="bcp14">MUST</span> be configurable per policy. An operator
 <span class="bcp14">MUST</span> be able to configure, per source, prefix, or policy class,
 whether Denied by Link Policy is generated at all (the alternative
@@ -2621,9 +2725,9 @@ The gateway drops the packet and returns Destination Unreachable, code
 Link Temporarily Unavailable, with three extension objects. The
 Class-Num octet of each is TBD5 and is omitted from the listing.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <span id="name-worked-example-extension-ob"></span><div id="tab-example">
-<table class="center" id="table-2">
+<table class="center" id="table-3">
         <caption>
-<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#table-3" class="selfRef">Table 3</a>:
 <a href="#name-worked-example-extension-ob" class="selfRef">Worked Example Extension Objects</a>
         </caption>
 <thead>
