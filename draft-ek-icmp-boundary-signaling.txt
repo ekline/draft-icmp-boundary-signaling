@@ -26,8 +26,8 @@ Abstract
    admission policy does not admit it.  This document specifies the
    conditions under which the codes are generated and the information
    they convey.  It does not specify how transports, applications, or
-   hosts react to them; making a precise signal available is intended to
-   enable experimentation with such reactions.
+   hosts react to them; making the boundary's knowledge available to
+   senders is intended to enable experimentation with such reactions.
 
 About This Document
 
@@ -125,17 +125,18 @@ Table of Contents
 1.  Introduction
 
    In networks that include constrained links -- deep-space links,
-   windowed satellite reachback, periodic store-and-forward contacts --
-   an IP sender has no visibility into the condition of the path beyond
-   its own timers.  The router at the boundary between the sender's low-
-   delay network and the constrained link knows more: it knows, from a
-   contact plan or equivalent domain knowledge, when the link is
-   expected to carry traffic, and it enforces an admission policy
-   describing whose traffic the link will carry.  Today that knowledge
-   shapes forwarding at the boundary but is not communicated to senders,
-   whose transports retransmit into unavailable or unauthorized links
-   until timers expire and whose applications receive a failure
-   indistinguishable from a routing fault or a crashed peer.
+   satellite links available only during scheduled passes, periodic
+   store-and-forward contacts -- an IP sender has no visibility into the
+   condition of the path beyond its own timers.  The router at the
+   boundary between the sender's low-delay network and the constrained
+   link knows more: it knows, from a contact plan or equivalent domain
+   knowledge, when the link is expected to carry traffic, and it
+   enforces an admission policy describing whose traffic the link will
+   carry.  Today that knowledge shapes forwarding at the boundary but is
+   not communicated to senders, whose transports retransmit into
+   unavailable or unauthorized links until timers expire and whose
+   applications receive a failure indistinguishable from a routing fault
+   or a crashed peer.
 
    This document defines two ICMP Destination Unreachable codes, for
    both ICMPv4 and ICMPv6, that move that knowledge to senders.  Link
@@ -933,15 +934,15 @@ Table of Contents
 10.  Experimental Status and Goals
 
    This document is published as Experimental.  The codes and metadata
-   are specified with normative precision so that independent
-   implementations interoperate at the ICMP layer.  The value of the
-   mechanism, however, rests on two kinds of questions that only
-   deployment can answer: whether gateways can generate the signals
-   correctly and usefully, and whether consumers of the signals can do
-   anything worthwhile with them.  Consumer behaviors are deliberately
-   not standardized here and are not prerequisites for interoperability;
-   the experiment is intended to produce the experience on which later
-   specification of such behaviors might be based.
+   are specified normatively so that independent implementations
+   interoperate at the ICMP layer.  The value of the mechanism, however,
+   rests on two kinds of questions that only deployment can answer:
+   whether gateways can generate the signals correctly and usefully, and
+   whether consumers of the signals can do anything worthwhile with
+   them.  Consumer behaviors are deliberately not standardized here and
+   are not prerequisites for interoperability; the experiment is
+   intended to produce the experience on which later specification of
+   such behaviors might be based.
 
 10.1.  Scope of the Experiment
 
