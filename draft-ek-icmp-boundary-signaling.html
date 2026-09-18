@@ -1063,7 +1063,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Kline</td>
-<td class="center">Expires 21 March 2027</td>
+<td class="center">Expires 22 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1076,12 +1076,12 @@ svg {
 <dd class="internet-draft">draft-ek-icmp-boundary-signaling-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-09-17" class="published">17 September 2026</time>
+<time datetime="2026-09-18" class="published">18 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-03-21">21 March 2027</time></dd>
+<dd class="expires"><time datetime="2027-03-22">22 March 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1145,7 +1145,7 @@ reactions.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 21 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 22 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1230,16 +1230,19 @@ reactions.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
                 <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-extension-objects" class="internal xref">Extension Objects</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4.2.1">
-                    <p id="section-toc.1-1.5.2.4.2.1.1"><a href="#section-5.4.1" class="auto internal xref">5.4.1</a>.  <a href="#name-generation-time" class="internal xref">Generation Time</a></p>
+                    <p id="section-toc.1-1.5.2.4.2.1.1"><a href="#section-5.4.1" class="auto internal xref">5.4.1</a>.  <a href="#name-duration-format" class="internal xref">Duration Format</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4.2.2">
-                    <p id="section-toc.1-1.5.2.4.2.2.1"><a href="#section-5.4.2" class="auto internal xref">5.4.2</a>.  <a href="#name-expected-time-until-link-us" class="internal xref">Expected Time Until Link Usability</a></p>
+                    <p id="section-toc.1-1.5.2.4.2.2.1"><a href="#section-5.4.2" class="auto internal xref">5.4.2</a>.  <a href="#name-generation-time" class="internal xref">Generation Time</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4.2.3">
-                    <p id="section-toc.1-1.5.2.4.2.3.1"><a href="#section-5.4.3" class="auto internal xref">5.4.3</a>.  <a href="#name-expected-link-delay" class="internal xref">Expected Link Delay</a></p>
+                    <p id="section-toc.1-1.5.2.4.2.3.1"><a href="#section-5.4.3" class="auto internal xref">5.4.3</a>.  <a href="#name-expected-time-until-link-us" class="internal xref">Expected Time Until Link Usability</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4.2.4">
-                    <p id="section-toc.1-1.5.2.4.2.4.1"><a href="#section-5.4.4" class="auto internal xref">5.4.4</a>.  <a href="#name-admission-denial" class="internal xref">Admission Denial</a></p>
+                    <p id="section-toc.1-1.5.2.4.2.4.1"><a href="#section-5.4.4" class="auto internal xref">5.4.4</a>.  <a href="#name-expected-link-delay" class="internal xref">Expected Link Delay</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4.2.5">
+                    <p id="section-toc.1-1.5.2.4.2.5.1"><a href="#section-5.4.5" class="auto internal xref">5.4.5</a>.  <a href="#name-admission-denial" class="internal xref">Admission Denial</a></p>
 </li>
                 </ul>
 </li>
@@ -1449,7 +1452,7 @@ traffic may use a constrained link.<a href="#section-2-2.18.1" class="pilcrow">�
         <dd style="margin-left: 1.5em" id="section-2-2.20">
           <p id="section-2-2.20.1">the gateway's estimate, at generation of a notification, of the
 interval from generation until the constrained link is expected to
-become usable for forwarding (<a href="#etu" class="auto internal xref">Section 5.4.2</a>).<a href="#section-2-2.20.1" class="pilcrow">¶</a></p>
+become usable for forwarding (<a href="#etu" class="auto internal xref">Section 5.4.3</a>).<a href="#section-2-2.20.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
@@ -1644,7 +1647,7 @@ with a reason identifying the dimension that failed. The code is
 diagnostic, not prescriptive: it does not describe what traffic would
 be admitted, since admission policy is multidimensional and local, and
 coaching senders on acceptable markings would invert an admission
-model in which access is granted through the control plane (<a href="#ado" class="auto internal xref">Section 5.4.4</a>).
+model in which access is granted through the control plane (<a href="#ado" class="auto internal xref">Section 5.4.5</a>).
 The host, or the operator debugging it, learns why the traffic was
 refused; obtaining admission is a provisioning action.<a href="#section-4.3.3-1" class="pilcrow">¶</a></p>
 <p id="section-4.3.3-2">A flow that policy admitted at contact start and later displaces in
@@ -1820,7 +1823,7 @@ reason. Whether that distinction warrants a permanent distinct code is
 not established by this document; it is left for experimentation and
 IETF review (<a href="#experiment" class="auto internal xref">Section 10</a>).<a href="#section-5.3-2" class="pilcrow">¶</a></p>
 <p id="section-5.3-3">The message <span class="bcp14">SHOULD</span> include exactly one Admission Denial Object
-(<a href="#ado" class="auto internal xref">Section 5.4.4</a>). A message without one reports the denial with no reason,
+(<a href="#ado" class="auto internal xref">Section 5.4.5</a>). A message without one reports the denial with no reason,
 which a gateway <span class="bcp14">MAY</span> choose where policy forbids disclosure
 (<a href="#generation" class="auto internal xref">Section 6</a>).<a href="#section-5.3-3" class="pilcrow">¶</a></p>
 </section>
@@ -1841,14 +1844,37 @@ Expected Link Delay, are defined and encoded independently of the
 Generation Time object. Their interpretation does not depend on the
 absolute timestamp representation, so that representation could later
 be revised or superseded without changing them.<a href="#section-5.4-2" class="pilcrow">¶</a></p>
-<div id="gen-time">
+<div id="durations">
 <section id="section-5.4.1">
+          <h4 id="name-duration-format">
+<a href="#section-5.4.1" class="section-number selfRef">5.4.1. </a><a href="#name-duration-format" class="section-name selfRef">Duration Format</a>
+          </h4>
+<p id="section-5.4.1-1">Both duration objects carry an unsigned 32-bit integer count of
+milliseconds. Millisecond precision is not intrinsically necessary for
+every value of Expected Time Until Link Usability, but a single
+representation for both duration-valued objects reduces
+implementation complexity and the risk of unit-conversion errors.
+<span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> defines the extension object framework but no duration
+datatype; the representation is defined here.<a href="#section-5.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.4.1-2">The maximum representable duration, 0xFFFFFFFF milliseconds, is
+4,294,967.295 seconds, approximately 49.7 days. It is a valid finite
+value, not a sentinel. If an otherwise available estimate exceeds the
+maximum representable duration, the corresponding object <span class="bcp14">MUST NOT</span> be
+included. No value is reserved to mean infinite, unknown, or greater
+than the maximum, and no saturation is defined; absence of an object
+means only that no representable estimate was supplied, and the
+protocol does not distinguish an unknown estimate from one that is
+known but not representable.<a href="#section-5.4.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="gen-time">
+<section id="section-5.4.2">
           <h4 id="name-generation-time">
-<a href="#section-5.4.1" class="section-number selfRef">5.4.1. </a><a href="#name-generation-time" class="section-name selfRef">Generation Time</a>
+<a href="#section-5.4.2" class="section-number selfRef">5.4.2. </a><a href="#name-generation-time" class="section-name selfRef">Generation Time</a>
           </h4>
 <span id="name-generation-time-object"></span><div id="fig-gen-time">
 <figure id="figure-2">
-            <div class="alignLeft art-text artwork" id="section-5.4.1-1.1">
+            <div class="alignLeft art-text artwork" id="section-5.4.2-1.1">
 <pre>
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -1866,29 +1892,29 @@ be revised or superseded without changing them.<a href="#section-5.4-2" class="p
 <a href="#name-generation-time-object" class="selfRef">Generation Time Object</a>
             </figcaption></figure>
 </div>
-<p id="section-5.4.1-2">Generation Time is the gateway's clock reading at the time it
+<p id="section-5.4.2-2">Generation Time is the gateway's clock reading at the time it
 generated the message, as a 64-bit NTP timestamp per
 <span><a href="https://rfc-editor.org/rfc/rfc5905#section-6" class="relref">Section 6</a> of [<a href="#RFC5905" class="cite xref">RFC5905</a>]</span>: 32 bits of seconds since the NTP epoch of 1
 January 1900 UTC and 32 bits of fraction, with resolution 2^-32
 seconds, wrapping every 2^32 seconds. Following the template of
 <span>[<a href="#RFC8877" class="cite xref">RFC8877</a>]</span>, no era number is carried; a receiver interpreting the
 value absolutely resolves the era as the one placing it nearest its
-own current time.<a href="#section-5.4.1-2" class="pilcrow">¶</a></p>
-<p id="section-5.4.1-3">Generation Time identifies when the notification and any estimates in
+own current time.<a href="#section-5.4.2-2" class="pilcrow">¶</a></p>
+<p id="section-5.4.2-3">Generation Time identifies when the notification and any estimates in
 it were generated. A receiver that can relate it to its local time
 reference can compensate for the age of the notification on receipt
-(<a href="#etu" class="auto internal xref">Section 5.4.2</a>). A receiver that cannot relate it to its local time
-reference ignores it; nothing else in the message depends on it.<a href="#section-5.4.1-3" class="pilcrow">¶</a></p>
+(<a href="#etu" class="auto internal xref">Section 5.4.3</a>). A receiver that cannot relate it to its local time
+reference ignores it; nothing else in the message depends on it.<a href="#section-5.4.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="etu">
-<section id="section-5.4.2">
+<section id="section-5.4.3">
           <h4 id="name-expected-time-until-link-us">
-<a href="#section-5.4.2" class="section-number selfRef">5.4.2. </a><a href="#name-expected-time-until-link-us" class="section-name selfRef">Expected Time Until Link Usability</a>
+<a href="#section-5.4.3" class="section-number selfRef">5.4.3. </a><a href="#name-expected-time-until-link-us" class="section-name selfRef">Expected Time Until Link Usability</a>
           </h4>
 <span id="name-expected-time-until-link-usa"></span><div id="fig-etu">
 <figure id="figure-3">
-            <div class="alignLeft art-text artwork" id="section-5.4.2-1.1">
+            <div class="alignLeft art-text artwork" id="section-5.4.3-1.1">
 <pre>
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -1904,22 +1930,22 @@ reference ignores it; nothing else in the message depends on it.<a href="#sectio
 <a href="#name-expected-time-until-link-usa" class="selfRef">Expected Time Until Link Usability Object</a>
             </figcaption></figure>
 </div>
-<p id="section-5.4.2-2">Expected Time Until Link Usability (ETU) is the gateway's estimate, at
+<p id="section-5.4.3-2">Expected Time Until Link Usability (ETU) is the gateway's estimate, at
 the moment it generated the notification, of the interval from
 generation until the constrained link is expected to become usable for
 forwarding traffic. It is an unsigned 32-bit integer count of
-milliseconds, giving a range of approximately 49.7 days. The value
-refers to data-plane usability, not to the start of a scheduled
+milliseconds, in the format of <a href="#durations" class="auto internal xref">Section 5.4.1</a>. The value refers to
+data-plane usability, not to the start of a scheduled
 contact or of preparation for one: antenna pointing, modem
 configuration, acquisition, synchronization, and analogous
 link-establishment operations complete within the interval and are
-not represented separately.<a href="#section-5.4.2-2" class="pilcrow">¶</a></p>
-<p id="section-5.4.2-3">ETU is measured from notification generation, not from receipt. It is
+not represented separately.<a href="#section-5.4.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.4.3-3">ETU is measured from notification generation, not from receipt. It is
 an estimate, not a guarantee. It is not a retry interval and not an
 instruction to transmit at any particular time. It does not include
 Expected Link Delay, which describes traversal of the link once
-usable.<a href="#section-5.4.2-3" class="pilcrow">¶</a></p>
-<p id="section-5.4.2-4">ETU is meaningful on its own. A receiver that can relate a supplied
+usable.<a href="#section-5.4.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.4.3-4">ETU is meaningful on its own. A receiver that can relate a supplied
 Generation Time to its local time reference may compute the expected
 absolute usability time as Generation Time + ETU, and may thereby
 account for the time the notification spent in delivery; any NTP era
@@ -1928,22 +1954,23 @@ interpretation. A receiver without Generation Time, or unable to
 relate it to local time, may apply ETU from the moment of receipt.
 Doing so is conservative when delivery of the notification was
 delayed, since the true remaining interval can only be shorter. This
-document does not assume that ICMP delivery is prompt.<a href="#section-5.4.2-4" class="pilcrow">¶</a></p>
-<p id="section-5.4.2-5">Editor's note (to be removed before publication): the 32-bit
-millisecond encoding is chosen for consistency with Expected Link
-Delay and comfortably covers planned gaps such as solar conjunction.
-Whether a coarser unit or wider field is preferable is for author
-review.<a href="#section-5.4.2-5" class="pilcrow">¶</a></p>
+document does not assume that ICMP delivery is prompt.<a href="#section-5.4.3-4" class="pilcrow">¶</a></p>
+<p id="section-5.4.3-5">The finite range of <a href="#durations" class="auto internal xref">Section 5.4.1</a> provides a practical horizon for
+this experimental network-layer signal. Unavailability on longer
+timescales is not represented by ETU; such timescales may instead
+bear on broader application, storage, provisioning, or
+communication-mechanism decisions, which this document does not
+address.<a href="#section-5.4.3-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="eld">
-<section id="section-5.4.3">
+<section id="section-5.4.4">
           <h4 id="name-expected-link-delay">
-<a href="#section-5.4.3" class="section-number selfRef">5.4.3. </a><a href="#name-expected-link-delay" class="section-name selfRef">Expected Link Delay</a>
+<a href="#section-5.4.4" class="section-number selfRef">5.4.4. </a><a href="#name-expected-link-delay" class="section-name selfRef">Expected Link Delay</a>
           </h4>
 <span id="name-expected-link-delay-object"></span><div id="fig-eld">
 <figure id="figure-4">
-            <div class="alignLeft art-text artwork" id="section-5.4.3-1.1">
+            <div class="alignLeft art-text artwork" id="section-5.4.4-1.1">
 <pre>
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -1959,24 +1986,32 @@ review.<a href="#section-5.4.2-5" class="pilcrow">¶</a></p>
 <a href="#name-expected-link-delay-object" class="selfRef">Expected Link Delay Object</a>
             </figcaption></figure>
 </div>
-<p id="section-5.4.3-2">Expected Link Delay is the approximate one-way delay associated with
+<p id="section-5.4.4-2">Expected Link Delay is the approximate one-way delay associated with
 traversal of the constrained link whose unavailability prevented
-forwarding, as an unsigned 32-bit integer count of milliseconds. It is
-an estimate, not a bound; a quantity of the link, not an end-to-end
-path delay; and independent of ETU and of Generation Time. This
-document does not require receivers to combine it with other metadata
-or otherwise compute an end-to-end delivery time; how the estimate is
-used is a matter of endpoint and application policy.<a href="#section-5.4.3-2" class="pilcrow">¶</a></p>
+forwarding, as an unsigned 32-bit integer count of milliseconds in
+the format of <a href="#durations" class="auto internal xref">Section 5.4.1</a>. It is an estimate, not a bound; a
+quantity of the link, not an end-to-end path delay; and independent of
+ETU and of Generation Time. This document does not require receivers
+to combine it with other metadata or otherwise compute an end-to-end
+delivery time; how the estimate is used is a matter of endpoint and
+application policy.<a href="#section-5.4.4-2" class="pilcrow">¶</a></p>
+<p id="section-5.4.4-3">For perspective only, the maximum representable duration, if it were
+pure propagation delay at the speed of light in vacuum, would
+correspond to a distance of approximately 1.29 x 10^12 km, roughly
+1.29 trillion km. The range is therefore very large even for the
+long-delay environments that motivate this document. This observation
+is explanatory; Expected Link Delay remains an estimated one-way link
+delay comprising whatever components contribute to it.<a href="#section-5.4.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="ado">
-<section id="section-5.4.4">
+<section id="section-5.4.5">
           <h4 id="name-admission-denial">
-<a href="#section-5.4.4" class="section-number selfRef">5.4.4. </a><a href="#name-admission-denial" class="section-name selfRef">Admission Denial</a>
+<a href="#section-5.4.5" class="section-number selfRef">5.4.5. </a><a href="#name-admission-denial" class="section-name selfRef">Admission Denial</a>
           </h4>
 <span id="name-admission-denial-object"></span><div id="fig-ado">
 <figure id="figure-5">
-            <div class="alignLeft art-text artwork" id="section-5.4.4-1.1">
+            <div class="alignLeft art-text artwork" id="section-5.4.5-1.1">
 <pre>
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -1992,9 +2027,9 @@ used is a matter of endpoint and application policy.<a href="#section-5.4.3-2" c
 <a href="#name-admission-denial-object" class="selfRef">Admission Denial Object</a>
             </figcaption></figure>
 </div>
-<p id="section-5.4.4-2">Reserved <span class="bcp14">MUST</span> be zero on transmission and ignored on receipt. Reason
+<p id="section-5.4.5-2">Reserved <span class="bcp14">MUST</span> be zero on transmission and ignored on receipt. Reason
 identifies the policy dimension on which admission failed, from a new
-IANA registry with the following initial values:<a href="#section-5.4.4-2" class="pilcrow">¶</a></p>
+IANA registry with the following initial values:<a href="#section-5.4.5-2" class="pilcrow">¶</a></p>
 <span id="name-admission-denial-reason-cod"></span><div id="tab-ado-reasons">
 <table class="center" id="table-1">
             <caption>
@@ -2051,14 +2086,14 @@ IANA registry with the following initial values:<a href="#section-5.4.4-2" class
             </tbody>
           </table>
 </div>
-<p id="section-5.4.4-4">Reasons identify the failed dimension and never describe what would
+<p id="section-5.4.5-4">Reasons identify the failed dimension and never describe what would
 be admitted (<a href="#uc-denied" class="auto internal xref">Section 4.3.3</a>). Values 5 and 6 cover refusals arising
 from resource allocation and precedence, including conditions an
 implementation may internally regard as preemption; they remain
 policy refusals from the sender's perspective. Value 1 allows a
 gateway to deliver a definite denial while disclosing nothing, as an
 alternative to silent discard. Registration policy for new values is
-Specification Required.<a href="#section-5.4.4-4" class="pilcrow">¶</a></p>
+Specification Required.<a href="#section-5.4.5-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2250,7 +2285,7 @@ load that would otherwise sustain the burst.<a href="#section-9-2" class="pilcro
 <p id="section-9-3">ETU is only as meaningful as the gateway's knowledge of the link.
 Absolute interpretation of Generation Time additionally depends on the
 receiver being able to relate it to its local time reference;
-receivers that cannot may apply ETU from receipt (<a href="#etu" class="auto internal xref">Section 5.4.2</a>).<a href="#section-9-3" class="pilcrow">¶</a></p>
+receivers that cannot may apply ETU from receipt (<a href="#etu" class="auto internal xref">Section 5.4.3</a>).<a href="#section-9-3" class="pilcrow">¶</a></p>
 <p id="section-9-4">Hosts that maintain state derived from these codes <span class="bcp14">SHOULD</span> expose it to
 local diagnostics, since such state changes transmission behavior in
 ways otherwise invisible to troubleshooting.<a href="#section-9-4" class="pilcrow">¶</a></p>
@@ -2467,7 +2502,7 @@ Generation Time; C-Type 2, Expected Time Until Link Usability; C-Type
 3, Expected Link Delay; and C-Type 4, Admission Denial, assigned by
 this document. Further C-Types are Specification Required.<a href="#section-12-4" class="pilcrow">¶</a></p>
 <p id="section-12-5">A new registry, "Admission Denial Reason Codes," initialized per
-<a href="#ado" class="auto internal xref">Section 5.4.4</a>, registration policy Specification Required.<a href="#section-12-5" class="pilcrow">¶</a></p>
+<a href="#ado" class="auto internal xref">Section 5.4.5</a>, registration policy Specification Required.<a href="#section-12-5" class="pilcrow">¶</a></p>
 <p id="section-12-6">Publication as Experimental does not by itself satisfy the
 registration procedures for the Destination Unreachable code
 registries. Should the requested code assignments not be approved,

@@ -4,8 +4,8 @@
 
 Internet Area Working Group                                     E. Kline
 Internet-Draft                                Aalyria Technologies, Inc.
-Intended status: Experimental                          17 September 2026
-Expires: 21 March 2027
+Intended status: Experimental                          18 September 2026
+Expires: 22 March 2027
 
 
                     ICMP Enclave Boundary Signaling
@@ -62,7 +62,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 March 2027.
+   This Internet-Draft will expire on 22 March 2027.
 
 Copyright Notice
 
@@ -97,10 +97,11 @@ Table of Contents
      5.2.  Link Temporarily Unavailable
      5.3.  Denied by Link Policy
      5.4.  Extension Objects
-       5.4.1.  Generation Time
-       5.4.2.  Expected Time Until Link Usability
-       5.4.3.  Expected Link Delay
-       5.4.4.  Admission Denial
+       5.4.1.  Duration Format
+       5.4.2.  Generation Time
+       5.4.3.  Expected Time Until Link Usability
+       5.4.4.  Expected Link Delay
+       5.4.5.  Admission Denial
    6.  Generation Rules
    7.  Receiver Processing
      7.1.  Validation
@@ -230,7 +231,7 @@ Table of Contents
    Expected Time Until Link Usability (ETU):  the gateway's estimate, at
       generation of a notification, of the interval from generation
       until the constrained link is expected to become usable for
-      forwarding (Section 5.4.2).
+      forwarding (Section 5.4.3).
 
 3.  Applicability
 
@@ -408,7 +409,7 @@ Table of Contents
    would be admitted, since admission policy is multidimensional and
    local, and coaching senders on acceptable markings would invert an
    admission model in which access is granted through the control plane
-   (Section 5.4.4).  The host, or the operator debugging it, learns why
+   (Section 5.4.5).  The host, or the operator debugging it, learns why
    the traffic was refused; obtaining admission is a provisioning
    action.
 
@@ -552,7 +553,7 @@ Table of Contents
    left for experimentation and IETF review (Section 10).
 
    The message SHOULD include exactly one Admission Denial Object
-   (Section 5.4.4).  A message without one reports the denial with no
+   (Section 5.4.5).  A message without one reports the denial with no
    reason, which a gateway MAY choose where policy forbids disclosure
    (Section 6).
 
@@ -571,7 +572,27 @@ Table of Contents
    absolute timestamp representation, so that representation could later
    be revised or superseded without changing them.
 
-5.4.1.  Generation Time
+5.4.1.  Duration Format
+
+   Both duration objects carry an unsigned 32-bit integer count of
+   milliseconds.  Millisecond precision is not intrinsically necessary
+   for every value of Expected Time Until Link Usability, but a single
+   representation for both duration-valued objects reduces
+   implementation complexity and the risk of unit-conversion errors.
+   [RFC4884] defines the extension object framework but no duration
+   datatype; the representation is defined here.
+
+   The maximum representable duration, 0xFFFFFFFF milliseconds, is
+   4,294,967.295 seconds, approximately 49.7 days.  It is a valid finite
+   value, not a sentinel.  If an otherwise available estimate exceeds
+   the maximum representable duration, the corresponding object MUST NOT
+   be included.  No value is reserved to mean infinite, unknown, or
+   greater than the maximum, and no saturation is defined; absence of an
+   object means only that no representable estimate was supplied, and
+   the protocol does not distinguish an unknown estimate from one that
+   is known but not representable.
+
+5.4.2.  Generation Time
 
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -597,10 +618,10 @@ Table of Contents
    Generation Time identifies when the notification and any estimates in
    it were generated.  A receiver that can relate it to its local time
    reference can compensate for the age of the notification on receipt
-   (Section 5.4.2).  A receiver that cannot relate it to its local time
+   (Section 5.4.3).  A receiver that cannot relate it to its local time
    reference ignores it; nothing else in the message depends on it.
 
-5.4.2.  Expected Time Until Link Usability
+5.4.3.  Expected Time Until Link Usability
 
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -617,12 +638,12 @@ Table of Contents
    at the moment it generated the notification, of the interval from
    generation until the constrained link is expected to become usable
    for forwarding traffic.  It is an unsigned 32-bit integer count of
-   milliseconds, giving a range of approximately 49.7 days.  The value
-   refers to data-plane usability, not to the start of a scheduled
-   contact or of preparation for one: antenna pointing, modem
-   configuration, acquisition, synchronization, and analogous link-
-   establishment operations complete within the interval and are not
-   represented separately.
+   milliseconds, in the format of Section 5.4.1.  The value refers to
+   data-plane usability, not to the start of a scheduled contact or of
+   preparation for one: antenna pointing, modem configuration,
+   acquisition, synchronization, and analogous link-establishment
+   operations complete within the interval and are not represented
+   separately.
 
    ETU is measured from notification generation, not from receipt.  It
    is an estimate, not a guarantee.  It is not a retry interval and not
@@ -641,13 +662,13 @@ Table of Contents
    delayed, since the true remaining interval can only be shorter.  This
    document does not assume that ICMP delivery is prompt.
 
-   Editor's note (to be removed before publication): the 32-bit
-   millisecond encoding is chosen for consistency with Expected Link
-   Delay and comfortably covers planned gaps such as solar conjunction.
-   Whether a coarser unit or wider field is preferable is for author
-   review.
+   The finite range of Section 5.4.1 provides a practical horizon for
+   this experimental network-layer signal.  Unavailability on longer
+   timescales is not represented by ETU; such timescales may instead
+   bear on broader application, storage, provisioning, or communication-
+   mechanism decisions, which this document does not address.
 
-5.4.3.  Expected Link Delay
+5.4.4.  Expected Link Delay
 
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -662,14 +683,23 @@ Table of Contents
 
    Expected Link Delay is the approximate one-way delay associated with
    traversal of the constrained link whose unavailability prevented
-   forwarding, as an unsigned 32-bit integer count of milliseconds.  It
-   is an estimate, not a bound; a quantity of the link, not an end-to-
-   end path delay; and independent of ETU and of Generation Time.  This
-   document does not require receivers to combine it with other metadata
-   or otherwise compute an end-to-end delivery time; how the estimate is
-   used is a matter of endpoint and application policy.
+   forwarding, as an unsigned 32-bit integer count of milliseconds in
+   the format of Section 5.4.1.  It is an estimate, not a bound; a
+   quantity of the link, not an end-to-end path delay; and independent
+   of ETU and of Generation Time.  This document does not require
+   receivers to combine it with other metadata or otherwise compute an
+   end-to-end delivery time; how the estimate is used is a matter of
+   endpoint and application policy.
 
-5.4.4.  Admission Denial
+   For perspective only, the maximum representable duration, if it were
+   pure propagation delay at the speed of light in vacuum, would
+   correspond to a distance of approximately 1.29 x 10^12 km, roughly
+   1.29 trillion km.  The range is therefore very large even for the
+   long-delay environments that motivate this document.  This
+   observation is explanatory; Expected Link Delay remains an estimated
+   one-way link delay comprising whatever components contribute to it.
+
+5.4.5.  Admission Denial
 
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -894,7 +924,7 @@ Table of Contents
    ETU is only as meaningful as the gateway's knowledge of the link.
    Absolute interpretation of Generation Time additionally depends on
    the receiver being able to relate it to its local time reference;
-   receivers that cannot may apply ETU from receipt (Section 5.4.2).
+   receivers that cannot may apply ETU from receipt (Section 5.4.3).
 
    Hosts that maintain state derived from these codes SHOULD expose it
    to local diagnostics, since such state changes transmission behavior
@@ -1080,7 +1110,7 @@ Table of Contents
    this document.  Further C-Types are Specification Required.
 
    A new registry, "Admission Denial Reason Codes," initialized per
-   Section 5.4.4, registration policy Specification Required.
+   Section 5.4.5, registration policy Specification Required.
 
    Publication as Experimental does not by itself satisfy the
    registration procedures for the Destination Unreachable code
