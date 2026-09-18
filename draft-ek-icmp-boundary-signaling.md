@@ -67,9 +67,9 @@ link becomes usable. Denied by Link Policy reports that the packet was
 not forwarded because the link's admission policy does not admit it.
 This document specifies the conditions under which the codes are
 generated and the information they convey. It does not specify how
-transports, applications, or hosts react to them; making a precise
-signal available is intended to enable experimentation with such
-reactions.
+transports, applications, or hosts react to them; making the
+boundary's knowledge available to senders is intended to enable
+experimentation with such reactions.
 
 
 --- middle
@@ -77,8 +77,8 @@ reactions.
 # Introduction {#intro}
 
 In networks that include constrained links -- deep-space links,
-windowed satellite reachback, periodic store-and-forward contacts --
-an IP sender has no visibility into the condition of the path beyond
+satellite links available only during scheduled passes, periodic
+store-and-forward contacts -- an IP sender has no visibility into the condition of the path beyond
 its own timers. The router at the boundary between the sender's
 low-delay network and the constrained link knows more: it knows, from
 a contact plan or equivalent domain knowledge, when the link is
@@ -886,8 +886,8 @@ ways otherwise invisible to troubleshooting.
 # Experimental Status and Goals {#experiment}
 
 This document is published as Experimental. The codes and metadata
-are specified with normative precision so that independent
-implementations interoperate at the ICMP layer. The value of the
+are specified normatively so that independent implementations
+interoperate at the ICMP layer. The value of the
 mechanism, however, rests on two kinds of questions that only
 deployment can answer: whether gateways can generate the signals
 correctly and usefully, and whether consumers of the signals can do
