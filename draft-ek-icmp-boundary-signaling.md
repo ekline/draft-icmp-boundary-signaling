@@ -99,8 +99,7 @@ metadata in ICMP extension objects {{RFC4884}}: the time at which it
 generated the message, its estimate of the time until the link becomes
 usable, and the approximate one-way delay of the link. Denied by Link
 Policy reports that the packet was not forwarded because the link's
-admission policy does not admit it, and MAY identify the policy
-dimension on which admission failed. Neither code describes what
+admission policy does not admit it. Neither code describes what
 traffic would be admitted, and neither reports on a packet that was
 forwarded.
 
@@ -360,14 +359,16 @@ A misconfigured or newly integrated payload host sends best-effort
 traffic toward Earth during a contact whose capacity is allocated to
 command and telemetry classes. The gateway classifies the traffic
 against its local policy, which may consider DSCP, addresses, protocol
-and port, or any other criteria, and returns Denied by Link Policy
-with a reason identifying the dimension that failed. The code is
-diagnostic, not prescriptive: it does not describe what traffic would
-be admitted, since admission policy is multidimensional and local, and
-coaching senders on acceptable markings would invert an admission
-model in which access is granted through the control plane ({{ado}}).
-The host, or the operator debugging it, learns why the traffic was
-refused; obtaining admission is a provisioning action.
+and port, or any other criteria, and returns Denied by Link Policy.
+The code is diagnostic, not prescriptive: it reports only that the
+link's admission policy refused the traffic, not why or what traffic
+would be admitted, since admission policy is multidimensional and
+local, and coaching senders on acceptable markings would invert an
+admission model in which access is granted through the control plane.
+The host learns that the traffic was refused by link policy rather
+than lost to a routing fault; the operator debugging it consults the
+gateway's own logs and counters ({{operational}}). Obtaining admission
+is a provisioning action.
 
 A flow that policy admitted at contact start and later displaces in
 favor of higher-precedence traffic falls under the same code. Whether
@@ -495,7 +496,6 @@ Usability, Generation Time, and Expected Link Delay objects
 ({{objects}}), subject to {{applicability-objects}}. A message
 carrying none of them is valid and meaningful: it reports the
 condition, and the objects add prediction where the gateway has it.
-The message MUST NOT carry an Admission Denial object.
 
 ## Denied by Link Policy {#dlp}
 
@@ -506,20 +506,25 @@ admission policy governing the constrained link required to reach its
 destination does not admit it, independent of the link's current
 usability.
 
+The code conveys only this coarse condition. It does not identify the
+policy dimension, rule, precedence threshold, allocation state, or
+other detail on which admission failed, and it does not describe what
+traffic would be admitted.
+
 The outcome resembles that of the existing administratively prohibited
 codes, and those codes are capable of representing the broad outcome.
 This experimental code differs in identifying refusal by the admission
-policy of a specific constrained link, and in carrying a structured
-reason. Whether that distinction warrants a permanent distinct code is
-not established by this document; it is left for experimentation and
-IETF review ({{experiment}}).
+policy of a specific constrained link. Whether that distinction
+warrants a permanent distinct code is not established by this
+document; it is left for experimentation and IETF review
+({{experiment}}).
 
-The message SHOULD include exactly one Admission Denial Object
-({{ado}}). A message without one reports the denial with no reason,
-which a gateway MAY choose where policy forbids disclosure
-({{generation}}). The message MUST NOT carry Expected Time Until Link
-Usability or Expected Link Delay, and SHOULD NOT carry Generation Time
-({{applicability-objects}}).
+The message uses the extension-capable format of {{common}}, but this
+document defines no extension objects applicable to it
+({{applicability-objects}}). Future specifications may define
+extension objects for Denied by Link Policy if operational experience
+identifies information that is both useful to receivers and
+appropriate to disclose.
 
 ## Extension Objects {#objects}
 
@@ -676,58 +681,18 @@ long-delay environments that motivate this document. This observation
 is explanatory; Expected Link Delay remains an estimated one-way link
 delay comprising whatever components contribute to it.
 
-### Admission Denial {#ado}
-
-~~~
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|          Length = 8           |  Class-Num =  |  C-Type = 4   |
-|                               |     TBD5      |               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|            Reason             |            Reserved           |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-~~~
-{: #fig-ado title="Admission Denial Object"}
-
-Reserved MUST be zero on transmission and ignored on receipt. Reason
-identifies the policy dimension on which admission failed, from a new
-IANA registry with the following initial values:
-
-| Value | Name |
-|------:|:-----|
-| 0 | Reserved |
-| 1 | Denied; dimension not disclosed |
-| 2 | Traffic classification not admitted |
-| 3 | Source not admitted |
-| 4 | Destination not admitted |
-| 5 | Allocation exhausted for admitted classification |
-| 6 | Precedence below admission threshold |
-| 7-65279 | Unassigned |
-| 65280-65534 | Experimental use |
-| 65535 | Reserved |
-{: #tab-ado-reasons title="Admission Denial Reason Codes"}
-
-Reasons identify the failed dimension and never describe what would
-be admitted ({{uc-denied}}). Values 5 and 6 cover refusals arising
-from resource allocation and precedence, including conditions an
-implementation may internally regard as preemption; they remain
-policy refusals from the sender's perspective. Value 1 allows a
-gateway to deliver a definite denial while disclosing nothing, as an
-alternative to silent discard. Registration policy for new values is
-Specification Required.
-
 ## Object Applicability by Code {#applicability-objects}
 
-Each Link Condition Object is applicable to one of the two codes, as
-summarized in {{tab-applicability}}.
+The Link Condition Objects defined in this document are applicable
+only to Link Temporarily Unavailable, as summarized in
+{{tab-applicability}}. This document defines no Link Condition Object
+applicable to Denied by Link Policy.
 
 | Object | Link Temporarily Unavailable | Denied by Link Policy |
 |:-------|:-----------------------------|:----------------------|
 | Expected Time Until Link Usability | MAY | MUST NOT |
 | Generation Time | MAY; SHOULD NOT without ETU | SHOULD NOT |
 | Expected Link Delay | MAY | MUST NOT |
-| Admission Denial | MUST NOT | SHOULD |
 {: #tab-applicability title="Link Condition Object Applicability by Destination Unreachable Code"}
 
 Expected Time Until Link Usability and Expected Link Delay reveal
@@ -736,10 +701,7 @@ was not admitted, and admission policy is intentionally evaluated
 before any link-state information is disclosed ({{generation}}); a
 Denied by Link Policy message therefore MUST NOT carry either. It
 SHOULD NOT carry Generation Time, for which this document defines no
-use without ETU. Admission Denial describes a policy refusal and MUST
-NOT be sent with Link Temporarily Unavailable; its inclusion with
-Denied by Link Policy remains subject to the disclosure controls of
-{{generation}}.
+use without ETU.
 
 A Link Temporarily Unavailable message SHOULD NOT include Generation
 Time unless it also includes Expected Time Until Link Usability, since
@@ -805,11 +767,10 @@ ETU ({{applicability-objects}}).
 
 Generation of both codes MUST be configurable per policy. An operator
 MUST be able to configure, per source, prefix, or policy class,
-whether Denied by Link Policy is generated at all (the alternative
-being silent discard) and whether its Admission Denial Object carries
-a specific reason or the value 1, dimension not disclosed. An operator
-SHOULD be able to configure omission of the predictive metadata
-objects from Link Temporarily Unavailable ({{security}}).
+whether Denied by Link Policy is generated at all, the alternative
+being silent discard. An operator SHOULD be able to configure omission
+of the predictive metadata objects from Link Temporarily Unavailable
+({{security}}).
 
 A gateway MUST NOT generate these codes toward the constrained link
 and MUST NOT generate them in response to traffic arriving from it
@@ -841,8 +802,8 @@ codes, and no such reaction is required for interoperability. Receipt
 of Link Temporarily Unavailable informs the receiver that the domain
 models the path as transiently unavailable and, where ETU is present,
 roughly when usability is expected; receipt of Denied by Link Policy
-informs it that the traffic is not admitted and, where a reason is
-present, on what dimension. What follows are possibilities that the
+informs it that the link's admission policy did not admit the traffic.
+What follows are possibilities that the
 signals enable and that the experiment of {{experiment}} is intended
 to explore.
 
@@ -914,11 +875,15 @@ unaffected as senders.
 
 # Operational Considerations {#operational}
 
-Gateways SHOULD count generation of each code, per Admission Denial
-reason where applicable, and expose the counters through network
-management. In a correctly provisioned domain these codes are rare
-for authorized traffic, so the counters serve as the divergence
-telemetry of {{uc-divergence}}.
+Gateways SHOULD count generation of each code and expose the counters
+through network management. A gateway generating Denied by Link
+Policy knows which policy dimension refused the traffic even though
+the code does not convey it; gateways MAY log or report that detail
+through local operational telemetry, which is where operators
+debugging a refused flow should look. This document does not
+prescribe a management or telemetry mechanism. In a correctly
+provisioned domain these codes are rare for authorized traffic, so
+the counters serve as the divergence telemetry of {{uc-divergence}}.
 
 ICMP rate limiters deserve attention at contact boundaries. When a
 link becomes unusable, every active trans-boundary flow can elicit
@@ -996,15 +961,17 @@ The first layer of the experiment concerns the signals themselves:
   any hard-error handling of Link Temporarily Unavailable is harmful
   ({{legacy}}); and what filtering changes deployments required.
 
-- Security and disclosure: whether the information disclosed by
-  Denied by Link Policy reasons and by predictive metadata is
+- Security and disclosure: whether the information disclosed by the
+  Denied by Link Policy code and by predictive metadata is
   operationally acceptable, whether the disclosure controls of
   {{generation}} are sufficient, and whether forged or stale
   notifications caused harm.
 
-- Whether Denied by Link Policy warrants a permanent distinct code, or
-  whether an existing administratively prohibited code with the
-  Admission Denial Object would serve.
+- Whether the coarse Denied by Link Policy signal is operationally
+  useful, whether it warrants a permanent distinct code or an existing
+  administratively prohibited code would serve, and whether experience
+  establishes a need for richer policy-denial metadata. This document
+  does not speculate about the format of any such metadata.
 
 ## Consumer Behavior Exploration {#exp-questions}
 
@@ -1075,14 +1042,15 @@ A forged Denied by Link Policy message is in the class of attacks
 capability beyond forging the existing administratively prohibited
 codes, and the same mitigations apply.
 
-Denied by Link Policy discloses policy to the sender it refuses, and a
-responsive gateway is a probing oracle: an attacker varying markings,
-sources, and destinations can map which traffic the domain admits.
-{{generation}} therefore requires per-policy control over generation
-and reason granularity, including reason value 1, dimension not
-disclosed, and silent discard; toward any sender the operator does not
-trust, silent discard is the expected posture, consistent with
-existing firewall practice.
+Denied by Link Policy reveals to the sender that constrained-link
+admission policy refused its traffic, and a responsive gateway is a
+probing oracle: an attacker varying markings, sources, and
+destinations can map which traffic the domain admits, even without
+being told why any particular packet was refused. {{generation}}
+therefore requires per-policy control over whether the code is
+generated at all; toward any sender the operator does not trust,
+silent discard is the expected posture, consistent with existing
+firewall practice.
 
 The predictive metadata of Link Temporarily Unavailable discloses link
 schedule information, which in some deployments is sensitive
@@ -1116,12 +1084,9 @@ requests IESG Approval.
 
 From the "ICMP Extension Object Classes and Class Sub-types" registry
 {{RFC4884}}: a new class TBD5, Link Condition Object, with C-Type 1,
-Generation Time; C-Type 2, Expected Time Until Link Usability; C-Type
-3, Expected Link Delay; and C-Type 4, Admission Denial, assigned by
-this document. Further C-Types are Specification Required.
-
-A new registry, "Admission Denial Reason Codes," initialized per
-{{ado}}, registration policy Specification Required.
+Generation Time; C-Type 2, Expected Time Until Link Usability; and
+C-Type 3, Expected Link Delay, assigned by this document. Further
+C-Types are Specification Required.
 
 Publication as Experimental does not by itself satisfy the
 registration procedures for the Destination Unreachable code
