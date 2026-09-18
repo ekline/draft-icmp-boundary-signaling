@@ -456,7 +456,11 @@ arise.
 
 A receiver MUST ignore extension objects of the class defined here
 with an unrecognized C-Type, and MUST process at most one object of
-each C-Type per message, taking the first if several are present.
+each C-Type per message, taking the first if several are present. A
+receiver MUST ignore a Link Condition Object that is not applicable to
+the received Destination Unreachable code ({{applicability-objects}});
+the presence of such an object does not make an otherwise valid
+message malformed.
 
 ## Link Temporarily Unavailable {#ltu}
 
@@ -486,11 +490,12 @@ down, and it does not report ordinary routing failure or congestion.
 not guarantee recovery, and the gateway need not know when the
 condition will clear.
 
-The message MAY carry any combination of the Generation Time, Expected
-Time Until Link Usability, and Expected Link Delay objects
-({{objects}}). Each is independently optional. A message carrying none
-of them is valid and meaningful: it reports the condition, and the
-objects add prediction where the gateway has it.
+The message MAY carry any combination of the Expected Time Until Link
+Usability, Generation Time, and Expected Link Delay objects
+({{objects}}), subject to {{applicability-objects}}. A message
+carrying none of them is valid and meaningful: it reports the
+condition, and the objects add prediction where the gateway has it.
+The message MUST NOT carry an Admission Denial object.
 
 ## Denied by Link Policy {#dlp}
 
@@ -512,16 +517,20 @@ IETF review ({{experiment}}).
 The message SHOULD include exactly one Admission Denial Object
 ({{ado}}). A message without one reports the denial with no reason,
 which a gateway MAY choose where policy forbids disclosure
-({{generation}}).
+({{generation}}). The message MUST NOT carry Expected Time Until Link
+Usability or Expected Link Delay, and SHOULD NOT carry Generation Time
+({{applicability-objects}}).
 
 ## Extension Objects {#objects}
 
 The objects below share a single ICMP Extension Object class, the Link
 Condition Object class (Class-Num TBD5), distinguished by C-Type. The
-object header is as defined in {{Section 8 of RFC4884}}. Each object
-is independently optional; presence conveys availability, and absence
-means the gateway did not supply that information. No sentinel values
-are defined for absent data.
+object header is as defined in {{Section 8 of RFC4884}}. No object is
+mandatory. Which objects a message may carry depends on the
+Destination Unreachable code it reports ({{applicability-objects}});
+within that set, each object is optional, presence conveys
+availability, and absence means the gateway did not supply that
+information. No sentinel values are defined for absent data.
 
 The two duration objects, Expected Time Until Link Usability and
 Expected Link Delay, are defined and encoded independently of the
@@ -575,10 +584,15 @@ value absolutely resolves the era as the one placing it nearest its
 own current time.
 
 Generation Time identifies when the notification and any estimates in
-it were generated. A receiver that can relate it to its local time
-reference can compensate for the age of the notification on receipt
-({{etu}}). A receiver that cannot relate it to its local time
-reference ignores it; nothing else in the message depends on it.
+it were generated. It is principally intended to allow a receiver that
+can relate it to its local time reference to account for the time
+elapsed since an accompanying ETU estimate was generated ({{etu}}). A
+receiver that cannot relate it to its local time reference ignores
+it; nothing else in the message depends on it, and it remains
+independently parseable. In the absence of ETU this document defines
+no use for Generation Time, so a Link Temporarily Unavailable message
+SHOULD NOT include Generation Time unless it also includes ETU
+({{applicability-objects}}).
 
 ### Expected Time Until Link Usability {#etu}
 
@@ -598,12 +612,13 @@ Expected Time Until Link Usability (ETU) is the gateway's estimate, at
 the moment it generated the notification, of the interval from
 generation until the constrained link is expected to become usable for
 forwarding traffic. It is an unsigned 32-bit integer count of
-milliseconds, in the format of {{durations}}. The value refers to
-data-plane usability, not to the start of a scheduled
-contact or of preparation for one: antenna pointing, modem
-configuration, acquisition, synchronization, and analogous
-link-establishment operations complete within the interval and are
-not represented separately.
+milliseconds, in the format of {{durations}}. ETU refers to expected
+data-plane usability, not to the start of a scheduled contact or of
+preparation for one. Preparatory operations necessary to make the
+link usable, such as antenna pointing, modem configuration,
+acquisition, synchronization, or analogous link-establishment
+operations, are expected to have completed by the end of the reported
+interval and are not represented separately.
 
 ETU is measured from notification generation, not from receipt. It is
 an estimate, not a guarantee. It is not a retry interval and not an
@@ -702,6 +717,44 @@ gateway to deliver a definite denial while disclosing nothing, as an
 alternative to silent discard. Registration policy for new values is
 Specification Required.
 
+## Object Applicability by Code {#applicability-objects}
+
+Each Link Condition Object is applicable to one of the two codes, as
+summarized in {{tab-applicability}}.
+
+| Object | Link Temporarily Unavailable | Denied by Link Policy |
+|:-------|:-----------------------------|:----------------------|
+| Expected Time Until Link Usability | MAY | MUST NOT |
+| Generation Time | MAY; SHOULD NOT without ETU | SHOULD NOT |
+| Expected Link Delay | MAY | MUST NOT |
+| Admission Denial | MUST NOT | SHOULD |
+{: #tab-applicability title="Link Condition Object Applicability by Destination Unreachable Code"}
+
+Expected Time Until Link Usability and Expected Link Delay reveal
+characteristics of a constrained link to which the invoking traffic
+was not admitted, and admission policy is intentionally evaluated
+before any link-state information is disclosed ({{generation}}); a
+Denied by Link Policy message therefore MUST NOT carry either. It
+SHOULD NOT carry Generation Time, for which this document defines no
+use without ETU. Admission Denial describes a policy refusal and MUST
+NOT be sent with Link Temporarily Unavailable; its inclusion with
+Denied by Link Policy remains subject to the disclosure controls of
+{{generation}}.
+
+A Link Temporarily Unavailable message SHOULD NOT include Generation
+Time unless it also includes Expected Time Until Link Usability, since
+this document defines no other use for it and unnecessary
+absolute-time information should not normally be disclosed. This is
+not a prohibition; experimentation or later experience may identify
+another legitimate use.
+
+These are sender restrictions. A receiver MUST ignore a Link Condition
+Object that is not applicable to the received code rather than
+rejecting the message ({{common}}); this tolerance exists for
+robustness and extensibility and does not relax the sender rules.
+Unknown C-Types continue to follow the extension processing rules of
+{{RFC4884}}.
+
 
 # Generation Rules {#generation}
 
@@ -720,11 +773,14 @@ On receiving trans-boundary traffic, a gateway proceeds as follows:
 2. Apply the constrained link's admission policy.
 
 3. If the traffic is not admitted, drop it and, where configured,
-   send Denied by Link Policy.
+   send Denied by Link Policy, without Expected Time Until Link
+   Usability or Expected Link Delay ({{applicability-objects}}).
 
 4. If the traffic is admitted but the required link is presently
    unusable under a transient condition known to the domain, drop it
-   and send Link Temporarily Unavailable.
+   and send Link Temporarily Unavailable, optionally including
+   Expected Time Until Link Usability, Generation Time, and Expected
+   Link Delay ({{applicability-objects}}).
 
 5. If the traffic is admitted and the link is usable, forward it
    normally. A forwarded packet MUST NOT elicit either code.
@@ -744,7 +800,8 @@ constrained link's availability ({{applicability}}).
 A gateway MUST NOT send an ETU value not derived from its current
 knowledge of the link. A gateway that does not know when the link is
 expected to become usable omits the ETU object. A gateway MAY send ETU
-without Generation Time, and MAY send Generation Time without ETU.
+without Generation Time; it SHOULD NOT send Generation Time without
+ETU ({{applicability-objects}}).
 
 Generation of both codes MUST be configurable per policy. An operator
 MUST be able to configure, per source, prefix, or policy class,
