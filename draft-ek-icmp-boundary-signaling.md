@@ -36,7 +36,7 @@ normative:
   RFC1812:
   RFC4443:
   RFC4884:
-  RFC5905:
+  RFC8877:
 
 informative:
   RFC1122:
@@ -44,10 +44,10 @@ informative:
   RFC4950:
   RFC5461:
   RFC5837:
+  RFC5905:
   RFC5927:
   RFC6069:
   RFC8799:
-  RFC8877:
   RFC8883:
   RFC9171:
   RFC9293:
@@ -210,19 +210,26 @@ Admission:
 : a gateway's determination, against local policy, that particular
   traffic may use a constrained long-haul link.
 
-: an ICMP extension object of the class defined in {{objects}}, carrying
-  constrained long-haul link metadata on a Destination Unreachable
-  message.
-  message.
+Link Condition Object:
+: an ICMP extension object of the class defined in {{objects}},
+  carrying constrained long-haul link metadata on a Destination
+  Unreachable message.
 
 Carrier code:
 : an existing Destination Unreachable code on which one or more Link
   Condition Objects may be carried ({{carriers}}).
 
+Expected Time Until Link Usability (ETU):
 : the gateway's estimate, at generation of a notification, of the
-  interval from generation until the relevant constrained long-haul link
-  is expected to become usable for forwarding ({{etu}}).
-  expected to become usable for forwarding ({{etu}}).
+  interval from generation until the relevant constrained long-haul
+  link is expected to become usable for forwarding ({{etu}}).
+
+Enclave time reference:
+: the shared time reference, established by the specification or
+  provisioning of the managed deployment, against which Generation
+  Time is expressed ({{gen-time}}). Its time scale, epoch, and
+  discontinuity treatment are deployment choices, not protocol
+  prerequisites; UTC is one permitted choice.
 
 
 # Applicability {#applicability}
@@ -384,13 +391,16 @@ conceptual information, not a management protocol, data model, or
 scheduling algorithm; any existing management channel, controller
 interface, or local provisioning may carry it.
 
-The orchestration function determines that traffic for a terrestrial
+Times in this example are expressed in the enclave time reference
+({{gen-time}}) as seconds from its epoch; the deployment has chosen
+the reference, and nothing here depends on which one. The
+orchestration function determines that traffic for a terrestrial
 destination prefix should, for an upcoming period, leave the enclave
 via a particular relay orbiter's deep-space link, whose next contact
-begins at 18:40:00 UTC. Allowing for antenna pointing, acquisition,
-and modem configuration, it expects the link to be ready to forward
-traffic at 18:42:00 UTC, and it estimates the one-way delay over the
-link at that time as 20 minutes. It installs or schedules the routing
+begins at reference time 12,400 s. Allowing for antenna pointing,
+acquisition, and modem configuration, it expects the link to be ready
+to forward traffic at reference time 12,520 s, and it estimates the
+one-way delay over the link at that time as 20 minutes. It installs or schedules the routing
 and admission policy needed for that link, and it supplies the
 gateway with an associated record containing at least:
 
@@ -417,12 +427,12 @@ forwarding fails, including when the route to the destination has
 been withdrawn between contacts and the failure is reported as a
 no-route error.
 
-At 18:00:03 UTC, a packet for the prefix arrives at the gateway. No
-usable route exists, so ordinary rules produce a Destination
-Unreachable error. The gateway consults its record, finds it current
-and applicable, confirms the traffic is admitted, and attaches
-Generation Time (18:00:03 UTC), ETU (the interval from 18:00:03 to
-18:42:00, 2,517,000 ms), and Expected Link Delay (1,200,000 ms).
+At reference time 10,000 s, a packet for the prefix arrives at the
+gateway. No usable route exists, so ordinary rules produce a
+Destination Unreachable error. The gateway consults its record, finds
+it current and applicable, confirms the traffic is admitted, and
+attaches Generation Time (10,000 s), ETU (the interval from 10,000 s
+to 12,520 s, 2,520,000 ms), and Expected Link Delay (1,200,000 ms).
 Generation Time is the time the ICMP message was generated, not the
 time the orchestrator created or distributed the plan.
 
@@ -823,25 +833,78 @@ known but not representable.
 ~~~
 {: #fig-gen-time title="Generation Time Object"}
 
-Generation Time is the gateway's clock reading at the time it
-generated the ICMP message, as a 64-bit NTP timestamp per
-{{Section 6 of RFC5905}}: 32 bits of seconds since the NTP epoch of 1
-January 1900 UTC and 32 bits of fraction, with resolution 2^-32
-seconds, wrapping every 2^32 seconds. Following the template of
-{{RFC8877}}, no era number is carried; a receiver interpreting the
-value absolutely resolves the era as the one placing it nearest its
-own current time. It is the time of the notification, not the time at
-which any underlying plan was created or distributed.
+Generation Time is the gateway's reading of the applicable enclave
+time reference at the moment it generated the ICMP message. It is the
+time of the notification, not the time at which any underlying plan
+was created or distributed, and not an arbitrary device-local clock.
+
+Following the timestamp specification template of
+{{Section 3 of RFC8877}}, this document fixes the timestamp syntax and
+units and leaves the remaining semantics to the deployment:
+
+Size:
+: 64 bits in network byte order: a 32-bit unsigned count of whole
+  seconds followed by a 32-bit unsigned binary fraction of a second.
+
+Units and resolution:
+: seconds and 2^-32 seconds respectively; 1,000 milliseconds per
+  second, consistent with the duration objects. No planetary or
+  calendar units are used on the wire.
+
+Wraparound:
+: the seconds field wraps every 2^32 seconds. No era number is
+  carried; era resolution is performed against the applicable enclave
+  time reference, not against an implicit wall clock.
+
+Epoch, time scale, and leap seconds:
+: supplied by the enclave time reference. The specification or
+  provisioning of the managed deployment MUST establish the time
+  scale, epoch, treatment of discontinuities such as leap seconds or
+  clock resets, and era or wraparound interpretation, and MUST define
+  the relationship needed to interpret elapsed seconds so that
+  Generation Time can be combined with ETU. Choosing an epoch alone
+  does not settle time-scale or discontinuity behavior. UTC with a
+  conventional epoch is one permitted choice; it is not a protocol
+  prerequisite, and this document does not presuppose the time scale
+  a future deployment will adopt.
+
+Synchronization aspects:
+: a receiver MAY use Generation Time for a calculation only when it
+  knows the applicable enclave time reference and can relate it to
+  its own clock with confidence sufficient for that calculation. A
+  shared time-scale name alone does not establish clock
+  synchronization, and a common orchestration function is not by
+  itself evidence of a shared reference or a known conversion;
+  cooperating administrative domains need one or the other before
+  their receivers compare timestamps. Where the reference, the
+  conversion, the era, or the effect of a clock discontinuity is
+  unknown or ambiguous, the receiver ignores Generation Time for that
+  calculation. No synchronization accuracy is required by this
+  document and no synchronization protocol is specified.
+
+The seconds/fraction layout is the same as the 64-bit timestamp
+format of {{Section 6 of RFC5905}}, and implementations may reuse
+code that handles it. Reusing the layout is separate from adopting
+NTP's timestamp semantics: the NTP epoch, the UTC time scale, and
+NTP's era conventions are not imported by this document, and apply
+only where a deployment selects them as its enclave time reference.
+No time-scale identifier or negotiation is carried in this version;
+the applicable reference is established through the managed
+deployment context. Reference changes and clock resets require
+operational handling so that receivers do not unknowingly interpret
+timestamps generated under one reference using another
+({{operational}}).
 
 Generation Time identifies when the notification and any estimates in
 it were generated. It is principally intended to allow a receiver that
-can relate it to its local time reference to account for the time
-elapsed since an accompanying ETU estimate was generated ({{etu}}). A
-receiver that cannot relate it to its local time reference ignores
-it; nothing else in the message depends on it, and it remains
-independently parseable. In the absence of ETU this document defines
-no use for Generation Time, so a message SHOULD NOT include Generation
-Time unless it also includes ETU ({{applicability-objects}}).
+can interpret it to account for the time elapsed since an accompanying
+ETU estimate was generated ({{etu}}). A receiver that cannot interpret
+it ignores it; nothing else in the message depends on it, it remains
+independently parseable, and ignoring it does not invalidate ETU, any
+other applicable object, or the ordinary ICMP error. In the absence of
+ETU this document defines no use for Generation Time, so a message
+SHOULD NOT include Generation Time unless it also includes ETU
+({{applicability-objects}}).
 
 ### Expected Time Until Link Usability {#etu}
 
@@ -856,6 +919,7 @@ Time unless it also includes ETU ({{applicability-objects}}).
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ~~~
 {: #fig-etu title="Expected Time Until Link Usability Object"}
+
 Expected Time Until Link Usability (ETU) is the gateway's estimate, at
 the moment it generated the notification, of the interval from
 generation until the constrained long-haul link selected for the
@@ -863,11 +927,11 @@ invoking traffic is expected to become usable for forwarding it. It is
 an unsigned 32-bit integer count of milliseconds, in the format of
 {{durations}}. ETU refers to expected data-plane usability, not to the
 start of a scheduled contact or of preparation for one. Preparatory
-operations necessary to make the link usable, such as antenna pointing,
-modem configuration, acquisition, synchronization, or analogous
-link-establishment operations, are expected to have completed by the end
-of the reported interval and are not represented separately.
-end of the reported interval and are not represented separately.
+operations necessary to make the link usable, such as antenna
+pointing, modem configuration, acquisition, synchronization, or
+analogous link-establishment operations, are expected to have
+completed by the end of the reported interval and are not represented
+separately.
 
 ETU is measured from notification generation, not from receipt. It is
 an estimate, not a guarantee. It is not a retry interval and not an
@@ -878,13 +942,14 @@ they MUST describe the same link or managed opportunity; a gateway
 MUST NOT combine the earliest usability of one exit with the delay of
 another.
 
-ETU is meaningful on its own. A receiver that can relate a supplied
-Generation Time to its local time reference may compute the expected
-absolute usability time as Generation Time + ETU, and may thereby
-account for the time the notification spent in delivery; any NTP era
-or wraparound considerations apply only to that absolute
-interpretation. A receiver without Generation Time, or unable to
-relate it to local time, may apply ETU from the moment of receipt.
+ETU is meaningful on its own. A receiver that can interpret a supplied
+Generation Time against the enclave time reference ({{gen-time}}) may
+compute the expected usability time in that reference as Generation
+Time + ETU, and may thereby account for the time the notification
+spent in delivery; any era or wraparound considerations apply only to
+that interpretation and are resolved against the enclave reference. A
+receiver without Generation Time, or unable to interpret it, may apply
+ETU from the moment of receipt.
 Doing so is a conservative interpretation of the same forecast: it
 expires no earlier than the forecast itself, and later by however long
 the notification spent in delivery. It is not a guarantee about the
@@ -911,6 +976,7 @@ address.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ~~~
 {: #fig-eld title="Expected Link Delay Object"}
+
 Expected Link Delay is the approximate one-way delay associated with
 traversal of the constrained long-haul link selected for the invoking
 traffic -- the link whose unavailability prevented forwarding or, where
@@ -987,6 +1053,7 @@ ICMPv6 Type 1 code 1 ({{carriers-policy}}).
 | Expected Link Delay (C-Type 3) | MAY, subject to {{ltu}} | MUST NOT |
 | Denied by Link Policy (C-Type 4) | MUST NOT | MAY, subject to {{generation}} |
 {: #tab-applicability title="Link Condition Object Applicability by Carrier Group"}
+
 Expected Time Until Link Usability and Expected Link Delay reveal
 characteristics of a constrained long-haul link to which the invoking
 traffic was not admitted, and admission policy is intentionally
@@ -1095,10 +1162,10 @@ independently whether the Denied by Link Policy object is attached to
 it; withholding the object does not by itself mean suppressing the
 base error. An operator SHOULD be able to configure omission of the
 availability metadata objects ({{security}}).
-A gateway MUST NOT attach Link Condition Objects to messages sent toward
-the constrained long-haul link, and MUST NOT attach them in response to
-traffic arriving from it ({{applicability}}).
-traffic arriving from it ({{applicability}}).
+
+A gateway MUST NOT attach Link Condition Objects to messages sent
+toward the constrained long-haul link, and MUST NOT attach them in
+response to traffic arriving from it ({{applicability}}).
 
 The absence of these objects promises nothing. ICMP delivery is
 unreliable and rate limited, and a gateway MUST NOT assume that a
@@ -1259,9 +1326,17 @@ the metadata to avoid repeated attempts reduce the offered load that
 would otherwise sustain the burst.
 
 ETU is only as meaningful as the gateway's knowledge of the link.
-Absolute interpretation of Generation Time additionally depends on the
-receiver being able to relate it to its local time reference;
-receivers that cannot may apply ETU from receipt ({{etu}}).
+Using Generation Time additionally depends on the receiver knowing the
+enclave time reference and being able to relate it to its own clock
+({{gen-time}}); receivers that cannot may apply ETU from receipt
+({{etu}}). The deployment is responsible for establishing and
+distributing the reference. When the reference changes or a gateway's
+clock is reset, operators need to ensure that receivers do not
+interpret timestamps generated under the old reference using the new
+one; until that is assured, receivers fall back to ignoring Generation
+Time. Cooperating administrative domains need a shared reference or a
+known conversion before their receivers compare timestamps; sharing an
+orchestration function does not by itself provide either.
 
 Hosts that maintain state derived from these objects SHOULD expose it
 to local diagnostics, since such state changes transmission behavior
@@ -1497,31 +1572,36 @@ ICMPv6 Type 1 codes 0, 1, and 3, and ICMPv4 Type 3 codes 0, 1, and 13
 
 ## Availability Metadata {#example-avail}
 
-A gateway whose deep-space link is presently unusable receives an
-IPv6 packet for a trans-boundary destination at 18:00:03 UTC on 16
-September 2026. According to its current coordinated forwarding
-state, no other policy-permitted path within the coordination scope
-is available for the traffic. The packet is admitted under the
-service's policy. The gateway retains a route toward the destination,
-but the next hop over the deep-space link is unusable; under
-{{Section 3.1 of RFC4443}} this is a link-specific problem not covered
-by another code, so the gateway generates ICMPv6 Destination
-Unreachable, Code 3 (Address unreachable). Its managed-service record
-({{orchestration}}) shows the link expected to be ready to forward at
-18:42:00 UTC, and its one-way delay estimate for the link is 20
-minutes, so it attaches three Link Condition Objects. The Class-Num
-octet of each is TBD5 and is omitted from the listing.
+Times in this example are expressed in the enclave time reference
+({{gen-time}}) as seconds from its epoch. A gateway whose deep-space
+link is presently unusable receives an IPv6 packet for a
+trans-boundary destination at reference time 10,000 s. According to
+its current coordinated forwarding state, no other policy-permitted
+path within the coordination scope is available for the traffic. The
+packet is admitted under the service's policy. The gateway retains a
+route toward the destination, but the next hop over the deep-space
+link is unusable; under {{Section 3.1 of RFC4443}} this is a
+link-specific problem not covered by another code, so the gateway
+generates ICMPv6 Destination Unreachable, Code 3 (Address
+unreachable). Its managed-service record ({{orchestration}}) shows the
+link expected to be ready to forward at reference time 12,520 s, and
+its one-way delay estimate for the link is 20 minutes, so it attaches
+three Link Condition Objects. The Class-Num octet of each is TBD5 and
+is omitted from the listing.
 
 | Object | C-Type | Length | Wire value | Decoded |
 |:-------|-------:|-------:|:-----------|:--------|
-| Generation Time | 1 | 12 | 0xEE5557A3 0x00000000 | 2026-09-16 18:00:03Z |
-| Expected Time Until Link Usability | 2 | 8 | 0x00266808 | 2517000 ms (41 min 57 s) |
-| Expected Link Delay | 3 | 8 | 0x00124F80 | 1200000 ms (20 min) |
+| Generation Time | 1 | 12 | 0x00002710 0x00000000 | 10,000 s in the enclave reference |
+| Expected Time Until Link Usability | 2 | 8 | 0x00267360 | 2,520,000 ms (42 min) |
+| Expected Link Delay | 3 | 8 | 0x00124F80 | 1,200,000 ms (20 min) |
 {: #tab-example title="Availability Metadata Example"}
 
-The Generation Time seconds word is the Unix time of the instant plus
-2208988800; the fraction word is zero. ETU is the interval from
-18:00:03 to 18:42:00.
+The Generation Time seconds word is 10,000 and the fraction word is
+zero. ETU is the interval from reference time 10,000 s to 12,520 s.
+If this deployment had chosen UTC as its enclave time reference, the
+seconds word would instead be the corresponding count of seconds from
+the epoch the deployment specified; that is the deployment's choice
+and is not required by this document.
 
 Had the gateway attached no objects -- because it had no estimate,
 withheld it by policy, or could not establish an applicable
@@ -1530,19 +1610,21 @@ Address Unreachable error, meaning only that the packet was not
 delivered. A receiver that does not process {{RFC4884}} extensions
 sees exactly that in either case.
 
-A receiver that processes the objects but cannot relate Generation
-Time to its own clock, or that did not receive it, needs no timestamp
-arithmetic: it knows that, as of generation, the link was expected to
-become usable in 41 minutes 57 seconds, and it may apply that
-interval from the moment of receipt. If the notification spent time
-in delivery, this interpretation expires later than the original
-forecast; it remains a conservative reading of the same forecast, not
-a guarantee, and the link may in fact become usable later than either.
+A receiver that processes the objects but does not know the enclave
+time reference, cannot relate it to its own clock, or did not receive
+Generation Time needs no timestamp arithmetic: it knows that, as of
+generation, the link was expected to become usable in 42 minutes, and
+it may apply that interval from the moment of receipt. If the
+notification spent time in delivery, this interpretation expires later
+than the original forecast; it remains a conservative reading of the
+same forecast, not a guarantee, and the link may in fact become usable
+later than either.
 
-A receiver that can relate Generation Time to its local clock may
-compute Generation Time + ETU = 18:42:00Z and, on receiving the
-message at, say, 18:00:04Z, understand that about 41 minutes 56
-seconds remain.
+A receiver that knows the enclave time reference and can relate it to
+its own clock may compute Generation Time + ETU = 12,520 s and, on
+receiving the message at reference time 10,003 s, understand that
+about 2,517 s remain, subject to its own clock uncertainty and to the
+accuracy of the forecast.
 
 Either receiver might, as a matter of local policy, use the 20-minute
 link delay estimate in deciding whether the destination suits its
