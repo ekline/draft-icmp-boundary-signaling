@@ -7,23 +7,25 @@
 <title>ICMP Enclave Boundary Signaling</title>
 <meta content="Erik Kline" name="author">
 <meta content="
-       This document defines two ICMP Destination Unreachable codes generated
-by the gateway at the boundary between a low-delay IP network and a
-constrained link, such as a scheduled deep-space link, whose usability
-is intermittent and whose use is governed by admission policy. Link
-Temporarily Unavailable reports that an otherwise admissible packet
-was not forwarded because the required link is presently unusable
-under a transient condition known to the domain, and may carry
-optional predictive metadata including the expected time until the
-link becomes usable. Denied by Link Policy reports that the packet was
-not forwarded because the link's admission policy does not admit it.
-This document specifies the conditions under which the codes are
+       This document defines optional ICMP extension objects that a gateway at
+the boundary between a low-delay IP network and a constrained link,
+such as a scheduled deep-space link, can attach to existing Destination
+Unreachable messages when an otherwise admissible packet is not
+forwarded because the required link is presently unusable under a
+transient condition known to the domain. The objects convey the
+expected time until the link becomes usable, the time the estimate was
+generated, and the expected one-way delay of the link; the underlying
+Destination Unreachable code retains its existing meaning. This
+document also provisionally defines one new Destination Unreachable
+code, Denied by Link Policy, reporting that a packet was not forwarded
+because the link's admission policy does not admit it. This document
+specifies the conditions under which the objects and the code are
 generated and the information they convey. It does not specify how
 transports, applications, or hosts react to them; making the
 boundary's knowledge available to senders is intended to enable
 experimentation with such reactions. 
     " name="description">
-<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="xml2rfc 3.34.1" name="generator">
 <meta content="IP enclave" name="keyword">
 <meta content="delay/disruption links" name="keyword">
 <meta content="ICMP" name="keyword">
@@ -31,19 +33,19 @@ experimentation with such reactions.
 <meta content="ICMPv6" name="keyword">
 <meta content="draft-ek-icmp-boundary-signaling-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.0
+  xml2rfc 3.34.1
     Python 3.14.7
-    ConfigArgParse 1.7.5
+    ConfigArgParse 1.7.7
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.11.7
+    platformdirs 4.11.10
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.3
+    wcwidth 0.8.4
 -->
 <link href="draft-ek-icmp-boundary-signaling.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1063,7 +1065,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Kline</td>
-<td class="center">Expires 22 March 2027</td>
+<td class="center">Expires 24 March 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1076,12 +1078,12 @@ svg {
 <dd class="internet-draft">draft-ek-icmp-boundary-signaling-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-09-18" class="published">18 September 2026</time>
+<time datetime="2026-09-20" class="published">20 September 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-03-22">22 March 2027</time></dd>
+<dd class="expires"><time datetime="2027-03-24">24 March 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1094,17 +1096,19 @@ svg {
 <h1 id="title">ICMP Enclave Boundary Signaling</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This document defines two ICMP Destination Unreachable codes generated
-by the gateway at the boundary between a low-delay IP network and a
-constrained link, such as a scheduled deep-space link, whose usability
-is intermittent and whose use is governed by admission policy. Link
-Temporarily Unavailable reports that an otherwise admissible packet
-was not forwarded because the required link is presently unusable
-under a transient condition known to the domain, and may carry
-optional predictive metadata including the expected time until the
-link becomes usable. Denied by Link Policy reports that the packet was
-not forwarded because the link's admission policy does not admit it.
-This document specifies the conditions under which the codes are
+<p id="section-abstract-1">This document defines optional ICMP extension objects that a gateway at
+the boundary between a low-delay IP network and a constrained link,
+such as a scheduled deep-space link, can attach to existing Destination
+Unreachable messages when an otherwise admissible packet is not
+forwarded because the required link is presently unusable under a
+transient condition known to the domain. The objects convey the
+expected time until the link becomes usable, the time the estimate was
+generated, and the expected one-way delay of the link; the underlying
+Destination Unreachable code retains its existing meaning. This
+document also provisionally defines one new Destination Unreachable
+code, Denied by Link Policy, reporting that a packet was not forwarded
+because the link's admission policy does not admit it. This document
+specifies the conditions under which the objects and the code are
 generated and the information they convey. It does not specify how
 transports, applications, or hosts react to them; making the
 boundary's knowledge available to senders is intended to enable
@@ -1145,7 +1149,7 @@ experimentation with such reactions.<a href="#section-abstract-1" class="pilcrow
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 22 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 24 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1210,7 +1214,7 @@ experimentation with such reactions.<a href="#section-abstract-1" class="pilcrow
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
-                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-interaction-of-the-two-code" class="internal xref">Interaction of the Two Codes</a></p>
+                <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-interaction-of-the-two-sign" class="internal xref">Interaction of the Two Signals</a></p>
 </li>
             </ul>
 </li>
@@ -1221,7 +1225,12 @@ experimentation with such reactions.<a href="#section-abstract-1" class="pilcrow
                 <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-common-message-format" class="internal xref">Common Message Format</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
-                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-link-temporarily-unavailabl" class="internal xref">Link Temporarily Unavailable</a></p>
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-constrained-link-metadata-o" class="internal xref">Constrained-Link Metadata on Destination Unreachable Errors</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2.2.1">
+                    <p id="section-toc.1-1.5.2.2.2.1.1"><a href="#section-5.2.1" class="auto internal xref">5.2.1</a>.  <a href="#name-eligible-carrier-codes" class="internal xref">Eligible Carrier Codes</a></p>
+</li>
+                </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
                 <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-denied-by-link-policy" class="internal xref">Denied by Link Policy</a></p>
@@ -1322,56 +1331,61 @@ experimentation with such reactions.<a href="#section-abstract-1" class="pilcrow
       </h2>
 <p id="section-1-1">In networks that include constrained links -- deep-space links,
 satellite links available only during scheduled passes, periodic
-store-and-forward contacts -- an IP sender has no visibility into the condition of the path beyond
-its own timers. The router at the boundary between the sender's
-low-delay network and the constrained link knows more: it knows, from
-a contact plan or equivalent domain knowledge, when the link is
-expected to carry traffic, and it enforces an admission policy
-describing whose traffic the link will carry. Today that knowledge
-shapes forwarding at the boundary but is not communicated to senders,
-whose transports retransmit into unavailable or unauthorized links
-until timers expire and whose applications receive a failure
-indistinguishable from a routing fault or a crashed peer.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">This document defines two ICMP Destination Unreachable codes, for both
-ICMPv4 and ICMPv6, that move that knowledge to senders. Link
-Temporarily Unavailable reports that a packet which was otherwise
-admissible was not forwarded because the constrained link required to
-reach its destination is presently unusable under a transient
-condition the domain knows about. The gateway <span class="bcp14">MAY</span> attach predictive
-metadata in ICMP extension objects <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>: the time at which it
-generated the message, its estimate of the time until the link becomes
-usable, and the approximate one-way delay of the link. Denied by Link
-Policy reports that the packet was not forwarded because the link's
-admission policy does not admit it. Neither code describes what
-traffic would be admitted, and neither reports on a packet that was
-forwarded.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">This document specifies the network-layer signals: when a gateway
-generates each code, what each means, and the semantics and encoding
-of the optional metadata. It does not specify how a transport,
-application, host cache, provisioning system, or orchestrator reacts
-to them. Such reactions are not required for interoperability, and
-they are not merely out of scope: a purpose of publishing the signals
-is to enable experimentation with them. A host might defer further
-attempts; a transport might use the information as an input to its
-timeout and failure decisions; an application might expose the
-condition, select another communication mechanism such as a Bundle
-Protocol <span>[<a href="#RFC9171" class="cite xref">RFC9171</a>]</span> agent for store-and-forward delivery, or trigger
-provisioning. Experience with such reactions may motivate later
-specifications (<a href="#experiment" class="auto internal xref">Section 10</a>).<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">The mechanism depends on the boundary being close and the condition
+store-and-forward contacts -- an IP sender has no visibility into the
+condition of the path beyond its own timers. The router at the boundary
+between the sender's low-delay network and the constrained link knows
+more: it knows, from a contact plan or equivalent domain knowledge,
+when the link is expected to carry traffic, and it enforces an
+admission policy describing whose traffic the link will carry. Today
+that knowledge shapes forwarding at the boundary but is not
+communicated to senders, whose transports retransmit into unavailable
+or unauthorized links until timers expire and whose applications
+receive a failure indistinguishable from a routing fault or a crashed
+peer.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Existing Destination Unreachable messages can report forwarding
+failures that are transient. This document defines optional ICMP
+extension objects <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> that allow a gateway in a managed
+constrained-link domain to supply additional information about such a
+failure: the time at which it generated the message, its estimate of
+the time until the link becomes usable, and the approximate one-way
+delay of the link. The underlying Destination Unreachable code retains
+its existing meaning. When the objects are absent, or a receiver does
+not process them, the message provides the ordinary Destination
+Unreachable indication; it does not separately identify the
+constrained-link condition described here.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">This document also provisionally defines one new Destination
+Unreachable code, for both ICMPv4 and ICMPv6. Denied by Link Policy
+reports that a packet was not forwarded because the link's admission
+policy does not admit it. Neither the objects nor the code describe
+what traffic would be admitted, and neither reports on a packet that
+was forwarded.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">This document specifies the network-layer signals: when a gateway
+attaches the objects or generates the code, what each means, and the
+semantics and encoding of the metadata. It does not specify how a
+transport, application, host cache, provisioning system, or
+orchestrator reacts to them. Such reactions are not required for
+interoperability, and they are not merely out of scope: a purpose of
+publishing the signals is to enable experimentation with them. A host
+might defer further attempts; a transport might use the information as
+an input to its timeout and failure decisions; an application might
+expose the condition, select another communication mechanism such as a
+Bundle Protocol <span>[<a href="#RFC9171" class="cite xref">RFC9171</a>]</span> agent for store-and-forward delivery, or
+trigger provisioning. Experience with such reactions may motivate
+later specifications (<a href="#experiment" class="auto internal xref">Section 10</a>).<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">The mechanism depends on the boundary being close and the condition
 being long-lived: gateway feedback reaches senders in local round-trip
 times, while the unavailability it reports lasts minutes to hours
-(<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">Where an application can learn in advance which communication
+(<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">Where an application can learn in advance which communication
 mechanisms suit a destination -- through configuration, provisioning,
 DNS, or orchestration -- selecting an appropriate mechanism before
 initiating unsuitable IP communication is preferable to discovering
 the condition reactively. Such discovery and selection mechanisms are
 out of scope for this document, which addresses only what a gateway
-reports once a packet has been sent.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">These codes are specified for use within administered limited domains
-<span>[<a href="#RFC8799" class="cite xref">RFC8799</a>]</span>. <a href="#experiment" class="auto internal xref">Section 10</a> defines the experiment this document
-proposes.<a href="#section-1-6" class="pilcrow">¶</a></p>
+reports once a packet has been sent.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-7">The objects and the code are specified for use within administered
+limited domains <span>[<a href="#RFC8799" class="cite xref">RFC8799</a>]</span>. <a href="#experiment" class="auto internal xref">Section 10</a> defines the experiment
+this document proposes.<a href="#section-1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1424,8 +1438,8 @@ constrained link.<a href="#section-2-2.10.1" class="pilcrow">¶</a></p>
         <dd style="margin-left: 1.5em" id="section-2-2.12">
           <p id="section-2-2.12.1">the router at the boundary between a low-delay domain and a
 constrained link, holding the domain's knowledge of that link's
-availability and admission policy and generating the codes defined
-in this document.<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
+availability and admission policy and generating the metadata and
+code defined in this document.<a href="#section-2-2.12.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
 <dt id="section-2-2.13">Signaling domain:</dt>
@@ -1447,11 +1461,24 @@ authority.<a href="#section-2-2.14.1" class="pilcrow">¶</a></p>
 traffic may use a constrained link.<a href="#section-2-2.18.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
-<dt id="section-2-2.19">Expected Time Until Link Usability (ETU):</dt>
+<dt id="section-2-2.19">Link Condition Object:</dt>
         <dd style="margin-left: 1.5em" id="section-2-2.20">
-          <p id="section-2-2.20.1">the gateway's estimate, at generation of a notification, of the
+          <p id="section-2-2.20.1">an ICMP extension object of the class defined in <a href="#objects" class="auto internal xref">Section 5.4</a>,
+carrying constrained-link metadata on a Destination Unreachable
+message.<a href="#section-2-2.20.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.21">Carrier code:</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.22">
+          <p id="section-2-2.22.1">an existing Destination Unreachable code on which Link Condition
+Objects may be carried (<a href="#carriers" class="auto internal xref">Section 5.2.1</a>).<a href="#section-2-2.22.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-2-2.23">Expected Time Until Link Usability (ETU):</dt>
+        <dd style="margin-left: 1.5em" id="section-2-2.24">
+          <p id="section-2-2.24.1">the gateway's estimate, at generation of a notification, of the
 interval from generation until the constrained link is expected to
-become usable for forwarding (<a href="#etu" class="auto internal xref">Section 5.4.3</a>).<a href="#section-2-2.20.1" class="pilcrow">¶</a></p>
+become usable for forwarding (<a href="#etu" class="auto internal xref">Section 5.4.3</a>).<a href="#section-2-2.24.1" class="pilcrow">¶</a></p>
 </dd>
       <dd class="break"></dd>
 </dl>
@@ -1467,60 +1494,66 @@ low-delay domain and a constrained link whose unavailability lasts
 long enough that feedback generated at the boundary reaches senders in
 time to change their behavior.<a href="#section-3-1" class="pilcrow">¶</a></p>
 <p id="section-3-2">Let R be the round-trip time between a sender and the gateway
-generating these codes, D the duration of the unavailability being
+generating these signals, D the duration of the unavailability being
 reported, and T the timescale on which the sender's transport would
 otherwise detect failure through retransmission timer growth and user
-timeout. The codes are useful when R is small relative to T, so the
+timeout. The metadata is useful when R is small relative to T, so the
 notification arrives while the sender still has options, and R is
 small relative to D, so the reported condition is still in effect when
 the notification arrives. In the Mars enclave of <a href="#conops" class="auto internal xref">Section 4</a>, R is
 milliseconds to seconds, T is seconds to minutes, and D is minutes to
 hours.<a href="#section-3-2" class="pilcrow">¶</a></p>
 <p id="section-3-3">When R approaches D, a notification describes a link state that may no
-longer exist on arrival. Gateways therefore generate these codes only
-into their local low-delay domain and never across the constrained
-link: an Earth-side gateway signals terrestrial senders, a Mars-side
-gateway signals enclave hosts, and neither signals across the link
-between them. "Local" is consequently relative, not absolute. The
-entire terrestrial internet, at sub-second internal round-trip times,
-is a single low-delay domain relative to a link whose unavailability
-is measured in minutes, and a vehicle-area network is one relative to a
-SATCOM link whose availability is measured in scheduled windows of tens
-of minutes.<a href="#section-3-3" class="pilcrow">¶</a></p>
-<p id="section-3-4">The mechanism applies only to links whose availability the domain
+longer exist on arrival. Gateways therefore attach the metadata and
+generate Denied by Link Policy only into their local low-delay domain
+and never across the constrained link: an Earth-side gateway signals
+terrestrial senders, a Mars-side gateway signals enclave hosts, and
+neither signals across the link between them. "Local" is consequently
+relative, not absolute. The entire terrestrial internet, at sub-second
+internal round-trip times, is a single low-delay domain relative to a
+link whose unavailability is measured in minutes, and a vehicle-area
+network is one relative to a SATCOM link whose availability is
+measured in scheduled windows of tens of minutes.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-4">The metadata applies only to links whose availability the domain
 deliberately models as a constrained resource: the gateway asserts a
 transient service condition on the basis of domain or service
 knowledge about the link, not on the basis of observed local carrier
 or interface state. A router that merely notices its outgoing
-interface is down has no basis to generate Link Temporarily
-Unavailable, and ordinary transient link failures are not the
+interface is down generates whatever Destination Unreachable error
+ordinary ICMP rules call for, but has no basis to attach Link
+Condition Objects to it; ordinary transient link failures are not the
 condition this document addresses. How the domain acquires its
 knowledge -- a contact plan, orchestration, link-management
 signaling, or other domain-specific means -- is not specified; the
-codes encode what the gateway is entitled to assert, not how it
+objects encode what the gateway is entitled to assert, not how it
 learned it.<a href="#section-3-4" class="pilcrow">¶</a></p>
-<p id="section-3-5">The mechanism is further applicable only where the signaling domain
-can determine that no path within it can serve the invoking traffic
-toward its destination. The codes describe the domain's aggregate
-ability to serve the traffic, not the local state of the gateway that
-happened to receive the packet; a signal is meaningful only when
-receiving it tells the sender something true about every path the
-domain could offer. The mechanism is not applicable to arbitrary
-routing architectures in which a gateway cannot make this
-determination (<a href="#generation" class="auto internal xref">Section 6</a>).<a href="#section-3-5" class="pilcrow">¶</a></p>
+<p id="section-3-5">The metadata and Denied by Link Policy are further applicable only
+where the signaling domain can determine that no path within it can
+serve the invoking traffic toward its destination. They describe the
+domain's aggregate ability to serve the traffic, not the local state
+of the gateway that happened to receive the packet; the signal is
+meaningful only when receiving it tells the sender something true
+about every path the domain could offer. This restriction applies to
+the metadata and to Denied by Link Policy; it does not alter when a
+router generates ordinary Destination Unreachable errors. The
+mechanism is not applicable to arbitrary routing architectures in
+which a gateway cannot make this determination (<a href="#generation" class="auto internal xref">Section 6</a>).<a href="#section-3-5" class="pilcrow">¶</a></p>
 <p id="section-3-6">The same criteria identify deployments beyond the interplanetary case,
 wherever a domain manages a scheduled or intermittently available
 link on the basis of advance knowledge. Conversely, the mechanism
 offers nothing on paths that are merely lossy or congested; existing
 congestion signaling and routing convergence address those conditions.<a href="#section-3-6" class="pilcrow">¶</a></p>
-<p id="section-3-7">These codes are specified for use within limited domains <span>[<a href="#RFC8799" class="cite xref">RFC8799</a>]</span>
-under a single administrative authority. ICMP carries no
-authentication, so forged notifications are contained only by
-validation against sender state and filtering at domain boundaries,
-and the Denied by Link Policy code discloses admission policy that is
-diagnostic within a cooperative domain but reconnaissance outside it
-(<a href="#security" class="auto internal xref">Section 11</a>). Boundary routers discard these codes on ingress from
-and egress to uncontrolled networks.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-7">The metadata and Denied by Link Policy are specified for use within
+limited domains <span>[<a href="#RFC8799" class="cite xref">RFC8799</a>]</span> under a single administrative authority.
+ICMP carries no authentication, so forged notifications are contained
+only by validation against sender state and filtering at domain
+boundaries, and the Denied by Link Policy code discloses admission
+policy that is diagnostic within a cooperative domain but
+reconnaissance outside it (<a href="#security" class="auto internal xref">Section 11</a>). Boundary routers discard
+Denied by Link Policy on ingress from and egress to uncontrolled
+networks. The carrier codes are ordinary Destination Unreachable
+codes whose filtering remains a matter of existing operational
+policy; see <a href="#validation" class="auto internal xref">Section 7.1</a> regarding the metadata they may carry.<a href="#section-3-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conops">
@@ -1557,8 +1590,8 @@ traffic on its behalf.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
 <p id="section-4.1-4">The same structure exists on the Earth side. A terrestrial sender's
 traffic crosses an Earth-side gateway that holds the same contact plan
 and enforces its own admission policy, and that gateway generates the
-same codes toward terrestrial senders. This section describes the Mars
-side for concreteness.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+same signals toward terrestrial senders. This section describes the
+Mars side for concreteness.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="roles">
@@ -1572,26 +1605,27 @@ traffic to one; others are unmodified IP hosts, including legacy
 instruments and commercial payloads whose stacks predate this
 specification. Where a performance-enhancing proxy (PEP) terminates
 transport sessions on behalf of such hosts, the PEP can consume these
-codes for them, so that the mechanism's benefit need not depend on
+signals for them, so that the mechanism's benefit need not depend on
 universal host adoption.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <p id="section-4.2-2">Gateways hold the contact plan for their deep-space links, enforce
 admission and precedence policy on contact capacity, and generate the
-codes defined in this document: Link Temporarily Unavailable when
-admitted trans-boundary traffic arrives while the link is not usable,
-and Denied by Link Policy when traffic arrives that policy does not
-admit. In this deployment, enclave routing is driven by the same
-contact plan the gateways hold, so traffic reaches a gateway that
-cannot serve it only when no gateway can; this is what makes the
-aggregate-domain invariant of <a href="#applicability" class="auto internal xref">Section 3</a> hold. Because the
-signal already accounts for every path the domain could offer,
-immediately retrying the same traffic is likely to be futile.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+signals defined in this document: a Destination Unreachable error
+carrying Link Condition Objects when admitted trans-boundary traffic
+arrives while the link is not usable, and Denied by Link Policy when
+traffic arrives that policy does not admit. In this deployment,
+enclave routing is driven by the same contact plan the gateways hold,
+so traffic reaches a gateway that cannot serve it only when no gateway
+can; this is what makes the aggregate-domain invariant of
+<a href="#applicability" class="auto internal xref">Section 3</a> hold. Because the metadata already accounts for
+every path the domain could offer, immediately retrying the same
+traffic is likely to be futile.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
 <p id="section-4.2-3">An orchestration function, which may be Earth-based, distributes
 contact plans and admission policy to gateways in advance. Since
 distribution itself crosses the deep-space link, gateways operate
 autonomously between management contacts, and their local plan and
 policy are authoritative for their links.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
-<p id="section-4.2-4">Intra-enclave traffic is unaffected. The codes are generated only for
-traffic that requires a trans-boundary link, and hosts that never
+<p id="section-4.2-4">Intra-enclave traffic is unaffected. The signals are generated only
+for traffic that requires a trans-boundary link, and hosts that never
 originate such traffic need not implement them.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1606,15 +1640,17 @@ originate such traffic need not implement them.<a href="#section-4.2-4" class="p
 <a href="#section-4.3.1" class="section-number selfRef">4.3.1. </a><a href="#name-traffic-sent-while-the-link" class="section-name selfRef">Traffic Sent While the Link Is Unusable</a>
           </h4>
 <p id="section-4.3.1-1">A surface host begins a bulk transfer toward Earth between contacts.
-The first packet reaches the gateway, which drops it and returns Link
-Temporarily Unavailable carrying its Expected Time Until Link
-Usability. The host now knows that the domain regards the path as
-transiently unavailable and roughly how long that is expected to last.
-It might use this to avoid repeated attempts that would elicit the
-same error, and to tell the application that the path is deferred
-rather than failed. Whether and how a host does so is an experiment
-question; ICMP is unreliable, and the gateway cannot assume that any
-particular notification was received.<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
+The first packet reaches the gateway, which drops it and returns a
+Destination Unreachable error carrying an Expected Time Until Link
+Usability object. From the object, the host knows that the domain
+regards the path as transiently unavailable and roughly how long that
+is expected to last; from the bare error alone it would know only that
+the packet was not delivered. It might use the metadata to avoid
+repeated attempts that would elicit the same error, and to tell the
+application that the path is deferred rather than failed. Whether and
+how a host does so is an experiment question; ICMP is unreliable, and
+the gateway cannot assume that any particular notification was
+received.<a href="#section-4.3.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="uc-handoff">
@@ -1622,14 +1658,14 @@ particular notification was received.<a href="#section-4.3.1-1" class="pilcrow">
           <h4 id="name-selection-of-another-commun">
 <a href="#section-4.3.2" class="section-number selfRef">4.3.2. </a><a href="#name-selection-of-another-commun" class="section-name selfRef">Selection of Another Communication Mechanism</a>
           </h4>
-<p id="section-4.3.2-1">A DTN-aware host receiving Link Temporarily Unavailable might, as a
-matter of local policy, hand the affected traffic to its local BP
-agent, which originates bundles toward the destination; these queue at
-the gateway and are forwarded during the next contact. An application
-with its own delay tolerance might instead compare the expected wait
-against that tolerance and fail fast. The code does not prescribe
-either response; it supplies the information on which the endpoint
-decides.<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.3.2-1">A DTN-aware host receiving an unreachable error with Link Condition
+Objects might, as a matter of local policy, hand the affected traffic
+to its local BP agent, which originates bundles toward the
+destination; these queue at the gateway and are forwarded during the
+next contact. An application with its own delay tolerance might
+instead compare the expected wait against that tolerance and fail
+fast. The metadata does not prescribe either response; it supplies the
+information on which the endpoint decides.<a href="#section-4.3.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="uc-denied">
@@ -1664,39 +1700,43 @@ the sender learns only that the traffic is not presently admitted.<a href="#sect
 <a href="#section-4.3.4" class="section-number selfRef">4.3.4. </a><a href="#name-plan-reality-divergence" class="section-name selfRef">Plan/Reality Divergence</a>
           </h4>
 <p id="section-4.3.4-1">In nominal operation, provisioned traffic should never elicit these
-codes. Link Temporarily Unavailable generated during a planned
-contact, or Denied by Link Policy generated for a flow the
-orchestrator believes it admitted, indicates that the control plane's
+signals. Metadata-bearing unreachable errors generated during a
+planned contact, or Denied by Link Policy generated for a flow the
+orchestrator believes it admitted, indicate that the control plane's
 model and the data plane's state have diverged: an unplanned outage, a
 policy distribution failure, or traffic outside the provisioning
-workflow. Gateways count and report generation of these codes so that
-operators can use them as a diagnostic feed (<a href="#operational" class="auto internal xref">Section 9</a>).<a href="#section-4.3.4-1" class="pilcrow">¶</a></p>
+workflow. Gateways count and report generation of these signals so
+that operators can use them as a diagnostic feed (<a href="#operational" class="auto internal xref">Section 9</a>).<a href="#section-4.3.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
 <div id="interaction">
 <section id="section-4.4">
-        <h3 id="name-interaction-of-the-two-code">
-<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-interaction-of-the-two-code" class="section-name selfRef">Interaction of the Two Codes</a>
+        <h3 id="name-interaction-of-the-two-sign">
+<a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-interaction-of-the-two-sign" class="section-name selfRef">Interaction of the Two Signals</a>
         </h3>
-<p id="section-4.4-1">The two codes answer different questions and may both apply to one
+<p id="section-4.4-1">The two signals answer different questions and may both apply to one
 flow: a link can be simultaneously restricted and unavailable.
 Admission is evaluated first. Traffic that would be refused regardless
 of link state receives Denied by Link Policy, which avoids disclosing
 link schedule information to traffic that could not use the link
 anyway; traffic that is admitted but whose link is not presently
-usable receives Link Temporarily Unavailable. A sender whose denial is
-resolved through provisioning may then receive Link Temporarily
-Unavailable for the same flow: first become admissible, then wait for
-the link.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
-<p id="section-4.4-2">Both codes are distinct from the existing Destination Unreachable
-codes reporting no route or service absence. Those codes retain their
-meaning: the domain has no way to reach the destination. Link
-Temporarily Unavailable means that service exists and the traffic is
-admitted, but the required link is presently unusable under a
-transient condition; Denied by Link Policy means that the link may
-exist and be usable, but this traffic is not admitted to it.<a href="#section-4.4-2" class="pilcrow">¶</a></p>
+usable receives the ordinary Destination Unreachable error, to which
+the gateway may attach Link Condition Objects. A sender whose denial
+is resolved through provisioning may then receive a metadata-bearing
+unreachable error for the same flow: first become admissible, then
+wait for the link.<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4-2">Ordinary Destination Unreachable errors do not by themselves establish
+that service is permanently absent; <span><a href="https://rfc-editor.org/rfc/rfc1122#section-3.2.2.1" class="relref">Section 3.2.2.1</a> of [<a href="#RFC1122" class="cite xref">RFC1122</a>]</span>
+notes that they can result from routing transients, and <span>[<a href="#RFC6069" class="cite xref">RFC6069</a>]</span>
+has previously used them experimentally as indications of connectivity
+disruption. This document does not change their meaning. Link
+Condition Objects add to such an error the domain's assertion that the
+failure reflects a modeled transient condition of a constrained link
+to which the traffic was admitted, and, where supplied, an estimate of
+its duration. Denied by Link Policy means that the link may exist and
+be usable, but this traffic is not admitted to it.<a href="#section-4.4-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1706,22 +1746,25 @@ exist and be usable, but this traffic is not admitted to it.<a href="#section-4.
       <h2 id="name-message-formats-and-extensi">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-message-formats-and-extensi" class="section-name selfRef">Message Formats and Extension Objects</a>
       </h2>
-<p id="section-5-1">This section is normative. Code and object class values are shown as
-TBD pending IANA assignment (<a href="#iana" class="auto internal xref">Section 12</a>); prior to assignment,
-implementations use the experimental values of <span>[<a href="#RFC4727" class="cite xref">RFC4727</a>]</span> as
-described in <a href="#exp-scope" class="auto internal xref">Section 10.1</a>.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-1">This section is normative. The Denied by Link Policy code and the Link
+Condition Object class are shown as TBD pending IANA assignment
+(<a href="#iana" class="auto internal xref">Section 12</a>); prior to assignment, implementations use the experimental
+values of <span>[<a href="#RFC4727" class="cite xref">RFC4727</a>]</span> for those as described in <a href="#exp-scope" class="auto internal xref">Section 10.1</a>. The
+carrier codes of <a href="#carriers" class="auto internal xref">Section 5.2.1</a> are already assigned.<a href="#section-5-1" class="pilcrow">¶</a></p>
 <div id="common">
 <section id="section-5.1">
         <h3 id="name-common-message-format">
 <a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-common-message-format" class="section-name selfRef">Common Message Format</a>
         </h3>
-<p id="section-5.1-1">Both codes are carried in Destination Unreachable messages: ICMPv6
-Type 1 <span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> and ICMPv4 Type 3 <span>[<a href="#RFC0792" class="cite xref">RFC0792</a>]</span>. The message layout is
-the extended Destination Unreachable message of <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>, which
-permits an ICMP Extension Structure on Destination Unreachable
-messages of both versions; this document adds no fields. The Length
-field, original-datagram truncation and padding, and extension
-structure placement follow <span><a href="https://rfc-editor.org/rfc/rfc4884#section-4" class="relref">Section 4</a> of [<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>. Attaching
+<p id="section-5.1-1">Both signals are carried in Destination Unreachable messages: ICMPv6
+Type 1 <span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> and ICMPv4 Type 3 <span>[<a href="#RFC0792" class="cite xref">RFC0792</a>]</span>. <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> already
+permits an ICMP Extension Structure on the existing Destination
+Unreachable message types of both IP versions; no new type or code is
+needed to carry the objects defined here. The message layout is the
+extended Destination Unreachable message of <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>; this document
+adds no fields. The Length field, original-datagram truncation and
+padding, extension header, and checksum rules follow
+<span><a href="https://rfc-editor.org/rfc/rfc4884#section-4" class="relref">Section 4</a> of [<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> and <span><a href="https://rfc-editor.org/rfc/rfc4884#section-7" class="relref">Section 7</a> of [<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>. Attaching
 extension objects to Destination Unreachable is an established pattern
 (<span>[<a href="#RFC4950" class="cite xref">RFC4950</a>]</span>, <span>[<a href="#RFC5837" class="cite xref">RFC5837</a>]</span>, <span>[<a href="#RFC8883" class="cite xref">RFC8883</a>]</span>).<a href="#section-5.1-1" class="pilcrow">¶</a></p>
 <span id="name-extended-destination-unreac"></span><div id="fig-du">
@@ -1749,64 +1792,172 @@ extension objects to Destination Unreachable is an established pattern
 <a href="#name-extended-destination-unreac" class="selfRef">Extended Destination Unreachable (ICMPv6 layout shown; ICMPv4 places Length in the second octet of the second word)</a>
           </figcaption></figure>
 </div>
-<p id="section-5.1-3">A receiver that does not recognize a code treats the message as a
-generic Destination Unreachable; the extension structure lies beyond
-the portion of the original datagram such receivers examine. Any
-receiver that recognizes either code postdates this specification and
-parses the extension structure unconditionally, so the
-backwards-compatibility ambiguities of <span><a href="https://rfc-editor.org/rfc/rfc4884#section-5" class="relref">Section 5</a> of [<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> do not
-arise.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
-<p id="section-5.1-4">A receiver <span class="bcp14">MUST</span> ignore extension objects of the class defined here
-with an unrecognized C-Type, and <span class="bcp14">MUST</span> process at most one object of
-each C-Type per message, taking the first if several are present. A
-receiver <span class="bcp14">MUST</span> ignore a Link Condition Object that is not applicable to
-the received Destination Unreachable code (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>);
-the presence of such an object does not make an otherwise valid
-message malformed.<a href="#section-5.1-4" class="pilcrow">¶</a></p>
+<p id="section-5.1-3">A message that carries no objects defined by this document need not
+carry an extension structure at all; it is then an ordinary
+Destination Unreachable message. An extension structure, when
+present, may also carry other independently applicable <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>
+objects.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+<p id="section-5.1-4">Recognition of a carrier code implies nothing about extension support.
+Receivers that do not process <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> extensions process the
+message as the ordinary error its code denotes; the extension
+structure lies beyond the portion of the original datagram such
+receivers examine.<a href="#section-5.1-4" class="pilcrow">¶</a></p>
+<p id="section-5.1-5">A receiver that processes extensions <span class="bcp14">MUST</span> ignore Link Condition
+Objects with an unrecognized C-Type, and <span class="bcp14">MUST</span> process at most one
+object of each C-Type per message, taking the first if several are
+present. A receiver <span class="bcp14">MUST</span> ignore a Link Condition Object that is not
+applicable to the received Destination Unreachable code
+(<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>). An unrecognized or inapplicable Link
+Condition Object does not by itself invalidate the underlying ICMP
+error; this tolerance does not extend to malformed extension framing
+or an invalid extension checksum, which are handled per <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>.<a href="#section-5.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="ltu">
 <section id="section-5.2">
-        <h3 id="name-link-temporarily-unavailabl">
-<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-link-temporarily-unavailabl" class="section-name selfRef">Link Temporarily Unavailable</a>
+        <h3 id="name-constrained-link-metadata-o">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-constrained-link-metadata-o" class="section-name selfRef">Constrained-Link Metadata on Destination Unreachable Errors</a>
         </h3>
-<p id="section-5.2-1">Link Temporarily Unavailable is code TBD1 under ICMPv6 Destination
-Unreachable and code TBD2 under ICMPv4 Destination Unreachable. A
-gateway generating it asserts all of the following:<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-1">When a gateway does not forward an otherwise admissible packet because
+the constrained link required to reach its destination is presently
+unusable, it generates whatever Destination Unreachable error the
+ordinary rules of <span>[<a href="#RFC1812" class="cite xref">RFC1812</a>]</span> or <span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> call for, according to
+its own forwarding state. This document does not change which code is
+generated or when. It permits the gateway to attach Link Condition
+Objects to that error, subject to the conditions in this section, so
+that the sender can learn what the bare error does not convey.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">A gateway <span class="bcp14">MAY</span> attach Link Condition Objects to a Destination
+Unreachable message only when all of the following hold:<a href="#section-5.2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.2-2.1">
-            <p id="section-5.2-2.1.1">the signaling domain determined that the invoking packet would
-otherwise be served using a constrained link;<a href="#section-5.2-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.2-3.1">
+            <p id="section-5.2-3.1.1">the signaling domain determined that the invoking packet would
+otherwise be served using a constrained link;<a href="#section-5.2-3.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.2-2.2">
-            <p id="section-5.2-2.2.1">no alternative path in the signaling domain can provide service
-inconsistent with the signal;<a href="#section-5.2-2.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.2-3.2">
+            <p id="section-5.2-3.2.1">no alternative path in the signaling domain can provide service
+inconsistent with the metadata;<a href="#section-5.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.2-2.3">
-            <p id="section-5.2-2.3.1">the traffic is otherwise admitted to that link;<a href="#section-5.2-2.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.2-3.3">
+            <p id="section-5.2-3.3.1">the traffic is otherwise admitted to that link;<a href="#section-5.2-3.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.2-2.4">
-            <p id="section-5.2-2.4.1">the required constrained link is presently unusable;<a href="#section-5.2-2.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.2-3.4">
+            <p id="section-5.2-3.4.1">the required constrained link is presently unusable;<a href="#section-5.2-3.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.2-2.5">
-            <p id="section-5.2-2.5.1">the domain represents that unusability as a transient service
+          <li class="normal" id="section-5.2-3.5">
+            <p id="section-5.2-3.5.1">the domain represents that unusability as a transient service
 condition, on the basis of its knowledge of the link, rather than as
-absence of a route or of service; and<a href="#section-5.2-2.5.1" class="pilcrow">¶</a></p>
+absence of a route or of service;<a href="#section-5.2-3.5.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.2-2.6">
-            <p id="section-5.2-2.6.1">the invoking packet was not forwarded.<a href="#section-5.2-2.6.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.2-3.6">
+            <p id="section-5.2-3.6.1">the invoking packet was not forwarded; and<a href="#section-5.2-3.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.2-3.7">
+            <p id="section-5.2-3.7.1">the message's code is an eligible carrier code (<a href="#carriers" class="auto internal xref">Section 5.2.1</a>).<a href="#section-5.2-3.7.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.2-3">The code does not mean merely that a local outgoing interface is
-down, and it does not report ordinary routing failure or congestion.
-"Temporarily" describes the domain's model of the condition; it does
-not guarantee recovery, and the gateway need not know when the
-condition will clear.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
-<p id="section-5.2-4">The message <span class="bcp14">MAY</span> carry any combination of the Expected Time Until Link
-Usability, Generation Time, and Expected Link Delay objects
-(<a href="#objects" class="auto internal xref">Section 5.4</a>), subject to <a href="#applicability-objects" class="auto internal xref">Section 5.5</a>. A message
-carrying none of them is valid and meaningful: it reports the
-condition, and the objects add prediction where the gateway has it.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
+<p id="section-5.2-4">A gateway that meets these conditions but has no estimate to supply,
+or withholds estimates by policy, sends the ordinary error without
+Link Condition Objects. The gateway need not know when the condition
+will clear.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
+<p id="section-5.2-5">None of these assertions attaches to a bare Destination Unreachable
+error. A message without Link Condition Objects means only what its
+code has always meant; it does not imply that admission succeeded,
+that a managed constrained link caused the failure, or that the domain
+predicts recovery. The presence of an Expected Time Until Link
+Usability or Expected Link Delay object supplied under this
+specification carries the constrained-link meaning defined for that
+object in <a href="#objects" class="auto internal xref">Section 5.4</a>. A Generation Time object supplies a timestamp
+and is not by itself evidence of any particular cause of failure.<a href="#section-5.2-5" class="pilcrow">¶</a></p>
+<div id="carriers">
+<section id="section-5.2.1">
+          <h4 id="name-eligible-carrier-codes">
+<a href="#section-5.2.1" class="section-number selfRef">5.2.1. </a><a href="#name-eligible-carrier-codes" class="section-name selfRef">Eligible Carrier Codes</a>
+          </h4>
+<p id="section-5.2.1-1">Link Condition Objects are applicable only to the Destination
+Unreachable codes listed in this section. They <span class="bcp14">MUST NOT</span> be attached to
+other Destination Unreachable codes or to other ICMP error types. The
+code is selected by existing ICMP rules according to the gateway's
+forwarding state; this document neither alters that selection nor
+redefines any code.<a href="#section-5.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.2.1-2">For ICMPv6, per <span><a href="https://rfc-editor.org/rfc/rfc4443#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC4443" class="cite xref">RFC4443</a>]</span>:<a href="#section-5.2.1-2" class="pilcrow">¶</a></p>
+<span id="name-eligible-icmpv6-carrier-cod"></span><div id="tab-carriers-v6">
+<table class="center" id="table-1">
+            <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-eligible-icmpv6-carrier-cod" class="selfRef">Eligible ICMPv6 Carrier Codes</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-right" rowspan="1" colspan="1">Type 1 Code</th>
+                <th class="text-left" rowspan="1" colspan="1">Name</th>
+                <th class="text-left" rowspan="1" colspan="1">Eligibility</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-right" rowspan="1" colspan="1">0</td>
+                <td class="text-left" rowspan="1" colspan="1">No route to destination</td>
+                <td class="text-left" rowspan="1" colspan="1">Eligible when the forwarding table lacks a matching entry for the destination and the gateway independently holds the constrained-service knowledge required by <a href="#ltu" class="auto internal xref">Section 5.2</a>.</td>
+              </tr>
+              <tr>
+                <td class="text-right" rowspan="1" colspan="1">3</td>
+                <td class="text-left" rowspan="1" colspan="1">Address unreachable</td>
+                <td class="text-left" rowspan="1" colspan="1">Eligible when the gateway retains a route whose required link is unusable and no more specific code applies. <span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> names a link-specific problem as an example of this code.</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+<p id="section-5.2.1-4">For ICMPv4, per <span><a href="https://rfc-editor.org/rfc/rfc1812#section-4.3.3.1" class="relref">Section 4.3.3.1</a> of [<a href="#RFC1812" class="cite xref">RFC1812</a>]</span> and
+<span><a href="https://rfc-editor.org/rfc/rfc1812#section-5.2.7.1" class="relref">Section 5.2.7.1</a> of [<a href="#RFC1812" class="cite xref">RFC1812</a>]</span>:<a href="#section-5.2.1-4" class="pilcrow">¶</a></p>
+<span id="name-eligible-icmpv4-carrier-cod"></span><div id="tab-carriers-v4">
+<table class="center" id="table-2">
+            <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-eligible-icmpv4-carrier-cod" class="selfRef">Eligible ICMPv4 Carrier Codes</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-right" rowspan="1" colspan="1">Type 3 Code</th>
+                <th class="text-left" rowspan="1" colspan="1">Name</th>
+                <th class="text-left" rowspan="1" colspan="1">Eligibility</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-right" rowspan="1" colspan="1">0</td>
+                <td class="text-left" rowspan="1" colspan="1">Network unreachable</td>
+                <td class="text-left" rowspan="1" colspan="1">Eligible when ordinary forwarding failure warrants Network Unreachable, such as absence of any route to the destination network.</td>
+              </tr>
+              <tr>
+                <td class="text-right" rowspan="1" colspan="1">1</td>
+                <td class="text-left" rowspan="1" colspan="1">Host unreachable</td>
+                <td class="text-left" rowspan="1" colspan="1">Eligible when ordinary forwarding failure warrants Host Unreachable; see the note below.</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
+<p id="section-5.2.1-6">The existence of a managed service and the presence of a currently
+usable forwarding-table entry are distinct. A domain may withdraw the
+route to a destination between contacts while retaining knowledge of
+the future service, yielding No Route or Network Unreachable; or it
+may retain a route toward a presently unusable link, yielding Address
+Unreachable. Both are legitimate carriers. This document does not
+require a particular routing implementation, and a gateway that would
+have sent a given code before implementing this specification does not
+change that code because of it.<a href="#section-5.2.1-6" class="pilcrow">¶</a></p>
+<p id="section-5.2.1-7">Editor's note (IPv4 applicability, to be resolved before publication):
+<span>[<a href="#RFC1812" class="cite xref">RFC1812</a>]</span>'s code-specific text ties Host Unreachable to a
+destination on a directly connected network, while its general
+Destination Unreachable text covers an unreachable next hop.
+Implementations are known to send Host Unreachable on transit-link
+failure, but that is precedent rather than mandate, and ICMPv4 has no
+residual code equivalent to ICMPv6 Address Unreachable. The
+retained-route, unusable-transit-link case therefore requires an
+explicit IPv4 applicability clarification that this document does not
+yet supply. The worked example in <a href="#example" class="auto internal xref">Appendix A</a> uses ICMPv6 so that its
+interpretation does not depend on resolving this point.<a href="#section-5.2.1-7" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="dlp">
@@ -1851,7 +2002,9 @@ mandatory. Which objects a message may carry depends on the
 Destination Unreachable code it reports (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>);
 within that set, each object is optional, presence conveys
 availability, and absence means the gateway did not supply that
-information. No sentinel values are defined for absent data.<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+information. No sentinel values are defined for absent data. A
+message carrying none of these objects has only the ordinary meaning
+of its code (<a href="#ltu" class="auto internal xref">Section 5.2</a>).<a href="#section-5.4-1" class="pilcrow">¶</a></p>
 <p id="section-5.4-2">The two duration objects, Expected Time Until Link Usability and
 Expected Link Delay, are defined and encoded independently of the
 Generation Time object. Their interpretation does not depend on the
@@ -1920,9 +2073,8 @@ elapsed since an accompanying ETU estimate was generated (<a href="#etu" class="
 receiver that cannot relate it to its local time reference ignores
 it; nothing else in the message depends on it, and it remains
 independently parseable. In the absence of ETU this document defines
-no use for Generation Time, so a Link Temporarily Unavailable message
-<span class="bcp14">SHOULD NOT</span> include Generation Time unless it also includes ETU
-(<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>).<a href="#section-5.4.2-3" class="pilcrow">¶</a></p>
+no use for Generation Time, so a message <span class="bcp14">SHOULD NOT</span> include Generation
+Time unless it also includes ETU (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>).<a href="#section-5.4.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="etu">
@@ -2031,19 +2183,19 @@ delay comprising whatever components contribute to it.<a href="#section-5.4.4-3"
 <a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-object-applicability-by-cod" class="section-name selfRef">Object Applicability by Code</a>
         </h3>
 <p id="section-5.5-1">The Link Condition Objects defined in this document are applicable
-only to Link Temporarily Unavailable, as summarized in
-<a href="#tab-applicability" class="auto internal xref">Table 1</a>. This document defines no Link Condition Object
+only to the eligible carrier codes of <a href="#carriers" class="auto internal xref">Section 5.2.1</a>, as summarized in
+<a href="#tab-applicability" class="auto internal xref">Table 3</a>. This document defines no Link Condition Object
 applicable to Denied by Link Policy.<a href="#section-5.5-1" class="pilcrow">¶</a></p>
 <span id="name-link-condition-object-appli"></span><div id="tab-applicability">
-<table class="center" id="table-1">
+<table class="center" id="table-3">
           <caption>
-<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#table-3" class="selfRef">Table 3</a>:
 <a href="#name-link-condition-object-appli" class="selfRef">Link Condition Object Applicability by Destination Unreachable Code</a>
           </caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Object</th>
-              <th class="text-left" rowspan="1" colspan="1">Link Temporarily Unavailable</th>
+              <th class="text-left" rowspan="1" colspan="1">Eligible carrier codes</th>
               <th class="text-left" rowspan="1" colspan="1">Denied by Link Policy</th>
             </tr>
           </thead>
@@ -2084,12 +2236,12 @@ before any link-state information is disclosed (<a href="#generation" class="aut
 Denied by Link Policy message therefore <span class="bcp14">MUST NOT</span> carry either. It
 <span class="bcp14">SHOULD NOT</span> carry Generation Time, for which this document defines no
 use without ETU.<a href="#section-5.5-3" class="pilcrow">¶</a></p>
-<p id="section-5.5-4">A Link Temporarily Unavailable message <span class="bcp14">SHOULD NOT</span> include Generation
-Time unless it also includes Expected Time Until Link Usability, since
-this document defines no other use for it and unnecessary
-absolute-time information should not normally be disclosed. This is
-not a prohibition; experimentation or later experience may identify
-another legitimate use.<a href="#section-5.5-4" class="pilcrow">¶</a></p>
+<p id="section-5.5-4">A metadata-bearing message <span class="bcp14">SHOULD NOT</span> include Generation Time unless
+it also includes Expected Time Until Link Usability, since this
+document defines no other use for it and unnecessary absolute-time
+information should not normally be disclosed. This is not a
+prohibition; experimentation or later experience may identify another
+legitimate use.<a href="#section-5.5-4" class="pilcrow">¶</a></p>
 <p id="section-5.5-5">These are sender restrictions. A receiver <span class="bcp14">MUST</span> ignore a Link Condition
 Object that is not applicable to the received code rather than
 rejecting the message (<a href="#common" class="auto internal xref">Section 5.1</a>); this tolerance exists for
@@ -2110,15 +2262,22 @@ rules apply in addition: <span><a href="https://rfc-editor.org/rfc/rfc4443#secti
 including its rate-limiting requirements, and <span>[<a href="#RFC1812" class="cite xref">RFC1812</a>]</span> for ICMPv4.
 Nothing in this document permits generating an error in response to
 an ICMP error, to a packet addressed to a multicast destination, or
-in the other cases those documents prohibit.<a href="#section-6-1" class="pilcrow">¶</a></p>
+in the other cases those documents prohibit. Nothing in this document
+suppresses a Destination Unreachable error that those documents
+otherwise require.<a href="#section-6-1" class="pilcrow">¶</a></p>
 <p id="section-6-2">On receiving trans-boundary traffic, a gateway proceeds as follows:<a href="#section-6-2" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6-3">
 <li id="section-6-3.1">
-          <p id="section-6-3.1.1">Determine whether another path in the signaling domain can serve
-the traffic. If so, use that path and generate neither code.<a href="#section-6-3.1.1" class="pilcrow">¶</a></p>
+          <p id="section-6-3.1.1">Assess forwarding and service state, including whether another
+path in the signaling domain can serve the traffic. If so, use that
+path and generate neither signal. The aggregate-domain restriction
+below applies to attaching Link Condition Objects and to generating
+Denied by Link Policy; it does not alter when ordinary Destination
+Unreachable errors are generated.<a href="#section-6-3.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-6-3.2">
-          <p id="section-6-3.2.1">Apply the constrained link's admission policy.<a href="#section-6-3.2.1" class="pilcrow">¶</a></p>
+          <p id="section-6-3.2.1">Apply the constrained link's admission policy before disclosing
+any link state or prediction.<a href="#section-6-3.2.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-6-3.3">
           <p id="section-6-3.3.1">If the traffic is not admitted, drop it and, where configured,
@@ -2126,42 +2285,49 @@ send Denied by Link Policy, without Expected Time Until Link
 Usability or Expected Link Delay (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>).<a href="#section-6-3.3.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-6-3.4">
-          <p id="section-6-3.4.1">If the traffic is admitted but the required link is presently
-unusable under a transient condition known to the domain, drop it
-and send Link Temporarily Unavailable, optionally including
-Expected Time Until Link Usability, Generation Time, and Expected
-Link Delay (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>).<a href="#section-6-3.4.1" class="pilcrow">¶</a></p>
+          <p id="section-6-3.4.1">If the traffic is admitted but cannot be forwarded because the
+required link is presently unusable under a transient condition
+known to the domain, drop it and generate the Destination
+Unreachable error that ordinary ICMP rules call for. If the
+conditions of <a href="#ltu" class="auto internal xref">Section 5.2</a> are satisfied and the code is an eligible
+carrier (<a href="#carriers" class="auto internal xref">Section 5.2.1</a>), the gateway <span class="bcp14">MAY</span> attach Expected Time Until
+Link Usability, Generation Time, and Expected Link Delay objects
+(<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>).<a href="#section-6-3.4.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-6-3.5">
           <p id="section-6-3.5.1">If the traffic is admitted and the link is usable, forward it
-normally. A forwarded packet <span class="bcp14">MUST NOT</span> elicit either code.<a href="#section-6-3.5.1" class="pilcrow">¶</a></p>
+normally. A forwarded packet <span class="bcp14">MUST NOT</span> elicit a Destination
+Unreachable error.<a href="#section-6-3.5.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-6-4">A gateway <span class="bcp14">MUST NOT</span> generate either code if another path within the
-signaling domain can provide service inconsistent with the signal.
-The codes describe the domain's aggregate ability to serve the traffic
-toward the destination (<a href="#applicability" class="auto internal xref">Section 3</a>). A gateway that cannot
-determine this property for a destination <span class="bcp14">MUST NOT</span> generate these
-codes for it.<a href="#section-6-4" class="pilcrow">¶</a></p>
-<p id="section-6-5">A gateway <span class="bcp14">MUST NOT</span> generate Link Temporarily Unavailable on the basis
-of observed local interface or carrier state alone. The transient
-condition it reports <span class="bcp14">MUST</span> derive from the domain's knowledge of the
+<p id="section-6-4">A gateway <span class="bcp14">MUST NOT</span> attach Link Condition Objects or generate Denied by
+Link Policy if another path within the signaling domain can provide
+service inconsistent with the signal. These signals describe the
+domain's aggregate ability to serve the traffic toward the destination
+(<a href="#applicability" class="auto internal xref">Section 3</a>). A gateway that cannot determine this property for
+a destination <span class="bcp14">MUST NOT</span> attach Link Condition Objects or generate Denied
+by Link Policy for it; it generates ordinary errors under ordinary
+rules.<a href="#section-6-4" class="pilcrow">¶</a></p>
+<p id="section-6-5">A gateway <span class="bcp14">MUST NOT</span> attach Link Condition Objects on the basis of
+observed local interface or carrier state alone. The transient
+condition they describe <span class="bcp14">MUST</span> derive from the domain's knowledge of the
 constrained link's availability (<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-6-5" class="pilcrow">¶</a></p>
 <p id="section-6-6">A gateway <span class="bcp14">MUST NOT</span> send an ETU value not derived from its current
 knowledge of the link. A gateway that does not know when the link is
 expected to become usable omits the ETU object. A gateway <span class="bcp14">MAY</span> send ETU
 without Generation Time; it <span class="bcp14">SHOULD NOT</span> send Generation Time without
-ETU (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>).<a href="#section-6-6" class="pilcrow">¶</a></p>
-<p id="section-6-7">Generation of both codes <span class="bcp14">MUST</span> be configurable per policy. An operator
-<span class="bcp14">MUST</span> be able to configure, per source, prefix, or policy class,
-whether Denied by Link Policy is generated at all, the alternative
-being silent discard. An operator <span class="bcp14">SHOULD</span> be able to configure omission
-of the predictive metadata objects from Link Temporarily Unavailable
-(<a href="#security" class="auto internal xref">Section 11</a>).<a href="#section-6-7" class="pilcrow">¶</a></p>
-<p id="section-6-8">A gateway <span class="bcp14">MUST NOT</span> generate these codes toward the constrained link
-and <span class="bcp14">MUST NOT</span> generate them in response to traffic arriving from it
-(<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-6-8" class="pilcrow">¶</a></p>
-<p id="section-6-9">The absence of these codes promises nothing. ICMP delivery is
+ETU (<a href="#applicability-objects" class="auto internal xref">Section 5.5</a>). If metadata cannot be generated, is
+withheld by policy, or is out of range (<a href="#durations" class="auto internal xref">Section 5.4.1</a>), the gateway
+sends the ordinary error without the affected objects.<a href="#section-6-6" class="pilcrow">¶</a></p>
+<p id="section-6-7">Attachment of Link Condition Objects and generation of Denied by Link
+Policy <span class="bcp14">MUST</span> be configurable per policy. An operator <span class="bcp14">MUST</span> be able to
+configure, per source, prefix, or policy class, whether Denied by Link
+Policy is generated at all, the alternative being silent discard. An
+operator <span class="bcp14">SHOULD</span> be able to configure omission of the Link Condition
+Objects (<a href="#security" class="auto internal xref">Section 11</a>).<a href="#section-6-7" class="pilcrow">¶</a></p>
+<p id="section-6-8">A gateway <span class="bcp14">MUST NOT</span> attach Link Condition Objects to, or generate Denied
+by Link Policy in, messages sent toward the constrained link, and <span class="bcp14">MUST NOT</span> do so in response to traffic arriving from it (<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-6-8" class="pilcrow">¶</a></p>
+<p id="section-6-9">The absence of these signals promises nothing. ICMP delivery is
 unreliable and rate limited, and a gateway <span class="bcp14">MUST NOT</span> assume that a
 sender received any particular notification; it generates a fresh
 notification, subject to rate limiting, for each invoking packet that
@@ -2178,12 +2344,25 @@ meets the conditions above.<a href="#section-6-9" class="pilcrow">¶</a></p>
         <h3 id="name-validation">
 <a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-validation" class="section-name selfRef">Validation</a>
         </h3>
-<p id="section-7.1-1">A receiver <span class="bcp14">MUST</span> validate these messages as ICMP errors per
-<span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> and the mitigations of <span>[<a href="#RFC5927" class="cite xref">RFC5927</a>]</span>: the invoking packet
-excerpt is matched against existing connection or flow state, and a
-message matching nothing the receiver sent is discarded. A receiver
-<span class="bcp14">SHOULD</span> discard these messages when received on an interface facing
-outside its administered domain.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-1">Ordinary validation and handling of a Destination Unreachable error
+are governed by the receiver's existing ICMP and transport rules; this
+document does not change them and does not impose the checks below on
+bare errors.<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-2">Before acting on Link Condition Objects or on Denied by Link Policy, a
+receiver <span class="bcp14">MUST</span> validate the message as an ICMP error per <span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span>
+and the mitigations of <span>[<a href="#RFC5927" class="cite xref">RFC5927</a>]</span>: the invoking packet excerpt is
+matched against existing connection or flow state, and a message
+matching nothing the receiver sent is discarded. A receiver <span class="bcp14">SHOULD</span>
+disregard Link Condition Objects, and <span class="bcp14">SHOULD</span> discard Denied by Link
+Policy, when the message arrives on an interface facing outside its
+administered domain. Disregarding the objects for experimental use
+does not require rejecting the otherwise valid ordinary error.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<p id="section-7.1-3">The carrier code does not prove that a message originated inside the
+domain, and a filter that acts on code alone cannot selectively
+contain Link Condition Objects without also affecting ordinary errors
+of the same code. A deployment that requires selective containment of
+the metadata at a boundary needs extension-aware enforcement; this
+document does not specify one.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="consumers">
@@ -2193,16 +2372,18 @@ outside its administered domain.<a href="#section-7.1-1" class="pilcrow">¶</a><
         </h3>
 <p id="section-7.2-1">This section is informative. This document does not specify how a
 host, transport, application, or management system reacts to the
-codes, and no such reaction is required for interoperability. Receipt
-of Link Temporarily Unavailable informs the receiver that the domain
-models the path as transiently unavailable and, where ETU is present,
-roughly when usability is expected; receipt of Denied by Link Policy
-informs it that the link's admission policy did not admit the traffic.
-What follows are possibilities that the
-signals enable and that the experiment of <a href="#experiment" class="auto internal xref">Section 10</a> is intended
-to explore.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
-<p id="section-7.2-2">A host might record the information to avoid immediately repeating
-attempts known to have failed. Because the signal already reflects
+signals, and no such reaction is required for interoperability.
+Receipt of a Destination Unreachable error carrying Link Condition
+Objects informs the receiver that the domain models the path as
+transiently unavailable and, where ETU is present, roughly when
+usability is expected; receipt of the same error without the objects
+carries only the ordinary meaning of its code. Receipt of Denied by
+Link Policy informs the receiver that the link's admission policy did
+not admit the traffic. What follows are possibilities that the signals
+enable and that the experiment of <a href="#experiment" class="auto internal xref">Section 10</a> is intended to
+explore.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-2">A host might record the metadata to avoid immediately repeating
+attempts known to have failed. Because the metadata already reflects
 every path the domain could offer, immediate repetition is likely to
 elicit the same error. How such state would be keyed, how widely it
 would apply, how long it would live, how it would be invalidated when
@@ -2211,13 +2392,14 @@ are all open questions. Because ETU is an estimate and the gateway
 cannot revoke a notification, any such state is a hint about the
 domain's knowledge at generation time and not an assurance of service
 at any later time.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
-<p id="section-7.2-3">A transport might use the information as an input to its timeout and
+<p id="section-7.2-3">A transport might use the metadata as an input to its timeout and
 failure decisions: for example, comparing the expected wait against a
 connection's tolerance, or treating Denied by Link Policy as a
 condition that retrying unchanged will not resolve. The remote
 endpoint receives no corresponding notification and continues to run
 its own timers, which bounds the usefulness of waiting. No TCP or QUIC
-behavior is defined here.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
+behavior is defined here, and the presence of metadata does not change
+how a transport is required to treat the underlying error.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
 <p id="section-7.2-4">An application might be given the condition and its metadata so that
 it can defer, fail fast, select another communication mechanism such
 as a bundle service, or trigger provisioning. Whether such an
@@ -2234,36 +2416,39 @@ experiment question.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
       <h2 id="name-legacy-host-and-middlebox-b">
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-legacy-host-and-middlebox-b" class="section-name selfRef">Legacy Host and Middlebox Behavior</a>
       </h2>
-<p id="section-8-1">Both codes are new codes under existing Destination Unreachable types,
-so legacy behavior is whatever a stack does with an unrecognized
-Destination Unreachable code. <span><a href="https://rfc-editor.org/rfc/rfc1122#section-4.2.3.9" class="relref">Section 4.2.3.9</a> of [<a href="#RFC1122" class="cite xref">RFC1122</a>]</span>
-partitions the codes it enumerates into hard errors (codes 2 through
-4), which abort TCP connections, and soft errors, but prescribes
-nothing for other codes; <span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> is likewise silent, and
-<span>[<a href="#RFC5461" class="cite xref">RFC5461</a>]</span> documents how divergent soft-error handling already is
-among implementations. Deployed stacks variously treat an unrecognized
-code as a generic unreachable, as a soft error, as a hard error, or
-discard it on a range check. This document does not assume that all
-stacks behave alike; recording actual behavior across the stacks
-present in target environments is an experiment question
-(<a href="#exp-questions" class="auto internal xref">Section 10.3</a>).<a href="#section-8-1" class="pilcrow">¶</a></p>
-<p id="section-8-2">For Denied by Link Policy, each of these behaviors is acceptable: an
-abort is a reasonable outcome for unauthorized traffic, soft-error
-handling reaches the same outcome through timer expiry, and discard
-leaves the sender where a silently discarding gateway leaves it today.<a href="#section-8-2" class="pilcrow">¶</a></p>
-<p id="section-8-3">For Link Temporarily Unavailable, soft-error handling and discard
-reproduce the status quo. A stack that treats the unrecognized code
-as a hard error aborts a connection that might have survived a short
-unavailability; whether this occurs in practice, and whether it is
-worse than the timeout the connection would otherwise have suffered,
-is an experiment question.<a href="#section-8-3" class="pilcrow">¶</a></p>
+<p id="section-8-1">The two signals present different legacy questions.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">The carrier codes are long-established. <span><a href="https://rfc-editor.org/rfc/rfc9293#section-3.9.2.2" class="relref">Section 3.9.2.2</a> of [<a href="#RFC9293" class="cite xref">RFC9293</a>]</span>
+classifies ICMPv4 Destination Unreachable codes 0 and 1 and ICMPv6
+Destination Unreachable codes 0 and 3 as soft errors, which TCP <span class="bcp14">MUST NOT</span> abort a connection on, while also noting widespread implementation
+behavior that treats soft errors as hard errors during connection
+establishment; <span>[<a href="#RFC5461" class="cite xref">RFC5461</a>]</span> documents further divergence. A stack that
+does not process <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> extensions handles a metadata-bearing
+message exactly as it handles the same error today; the objects are
+invisible to it. This document does not promise identical behavior
+across stacks or that any connection survives, only that the metadata
+does not alter the ordinary error a legacy stack sees.<a href="#section-8-2" class="pilcrow">¶</a></p>
+<p id="section-8-3">Denied by Link Policy is a new code under an existing type, so legacy
+behavior is whatever a stack does with an unrecognized Destination
+Unreachable code. <span><a href="https://rfc-editor.org/rfc/rfc1122#section-4.2.3.9" class="relref">Section 4.2.3.9</a> of [<a href="#RFC1122" class="cite xref">RFC1122</a>]</span> and <span>[<a href="#RFC9293" class="cite xref">RFC9293</a>]</span>
+partition the codes they enumerate into hard and soft errors but
+prescribe nothing for other codes; <span>[<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> is likewise silent.
+Deployed stacks variously treat an unrecognized code as a generic
+unreachable, as a soft error, as a hard error, or discard it on a
+range check. This document does not assume that all stacks behave
+alike; recording actual behavior across the stacks present in target
+environments is an experiment question (<a href="#exp-signal" class="auto internal xref">Section 10.2</a>). Each of these
+behaviors is acceptable for this code: an abort is a reasonable outcome
+for unauthorized traffic, soft-error handling reaches the same outcome
+through timer expiry, and discard leaves the sender where a silently
+discarding gateway leaves it today.<a href="#section-8-3" class="pilcrow">¶</a></p>
 <p id="section-8-4">Firewalls and stateful middleboxes inside the deploying domain may
-discard unfamiliar Destination Unreachable codes under default-deny
-policy. This fails safe but silently defeats the mechanism, so
-deployment includes updating ICMP filtering policy on the paths
-between gateways and the hosts they serve; <span>[<a href="#RFC4890" class="cite xref">RFC4890</a>]</span> provides the
-ICMPv6 filtering framework. Legacy hosts generate nothing new and are
-unaffected as senders.<a href="#section-8-4" class="pilcrow">¶</a></p>
+discard an unfamiliar Destination Unreachable code such as Denied by
+Link Policy under default-deny policy, and may strip or discard
+messages carrying unfamiliar extension structures. This fails safe but
+silently defeats the mechanism, so deployment includes reviewing ICMP
+filtering policy on the paths between gateways and the hosts they
+serve; <span>[<a href="#RFC4890" class="cite xref">RFC4890</a>]</span> provides the ICMPv6 filtering framework. Legacy
+hosts generate nothing new and are unaffected as senders.<a href="#section-8-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="operational">
@@ -2271,31 +2456,35 @@ unaffected as senders.<a href="#section-8-4" class="pilcrow">¶</a></p>
       <h2 id="name-operational-considerations">
 <a href="#section-9" class="section-number selfRef">9. </a><a href="#name-operational-considerations" class="section-name selfRef">Operational Considerations</a>
       </h2>
-<p id="section-9-1">Gateways <span class="bcp14">SHOULD</span> count generation of each code and expose the counters
-through network management. A gateway generating Denied by Link
-Policy knows which policy dimension refused the traffic even though
-the code does not convey it; gateways <span class="bcp14">MAY</span> log or report that detail
-through local operational telemetry, which is where operators
-debugging a refused flow should look. This document does not
-prescribe a management or telemetry mechanism. In a correctly
-provisioned domain these codes are rare for authorized traffic, so
+<p id="section-9-1">Gateways <span class="bcp14">SHOULD</span> count generation of Denied by Link Policy and of
+metadata-bearing Destination Unreachable messages, including which
+Link Condition Objects were included, and expose the counters through
+network management. Counts of ordinary Destination Unreachable errors
+do not by themselves identify this experiment's activity, since the
+carrier codes are generated for other reasons as well. A gateway
+generating Denied by Link Policy knows which policy dimension refused
+the traffic even though the code does not convey it; gateways <span class="bcp14">MAY</span> log
+or report that detail through local operational telemetry, which is
+where operators debugging a refused flow should look. This document
+does not prescribe a management or telemetry mechanism. In a correctly
+provisioned domain these signals are rare for authorized traffic, so
 the counters serve as the divergence telemetry of <a href="#uc-divergence" class="auto internal xref">Section 4.3.4</a>.<a href="#section-9-1" class="pilcrow">¶</a></p>
 <p id="section-9-2">ICMP rate limiters deserve attention at contact boundaries. When a
-link becomes unusable, every active trans-boundary flow can elicit
-Link Temporarily Unavailable within a short interval, and a
-token-bucket limiter tuned for steady-state error rates may suppress
-most of the burst. Because ICMP is unreliable and a gateway cannot
-know which notifications were received, operators <span class="bcp14">SHOULD</span> size gateway
-ICMP rate limits for the expected flow fan-out at gap onset. Hosts
-that act on the signal to avoid repeated attempts reduce the offered
-load that would otherwise sustain the burst.<a href="#section-9-2" class="pilcrow">¶</a></p>
+link becomes unusable, every active trans-boundary flow can elicit an
+unreachable error within a short interval, and a token-bucket limiter
+tuned for steady-state error rates may suppress most of the burst.
+Because ICMP is unreliable and a gateway cannot know which
+notifications were received, operators <span class="bcp14">SHOULD</span> size gateway ICMP rate
+limits for the expected flow fan-out at gap onset. Hosts that act on
+the metadata to avoid repeated attempts reduce the offered load that
+would otherwise sustain the burst.<a href="#section-9-2" class="pilcrow">¶</a></p>
 <p id="section-9-3">ETU is only as meaningful as the gateway's knowledge of the link.
 Absolute interpretation of Generation Time additionally depends on the
 receiver being able to relate it to its local time reference;
 receivers that cannot may apply ETU from receipt (<a href="#etu" class="auto internal xref">Section 5.4.3</a>).<a href="#section-9-3" class="pilcrow">¶</a></p>
-<p id="section-9-4">Hosts that maintain state derived from these codes <span class="bcp14">SHOULD</span> expose it to
-local diagnostics, since such state changes transmission behavior in
-ways otherwise invisible to troubleshooting.<a href="#section-9-4" class="pilcrow">¶</a></p>
+<p id="section-9-4">Hosts that maintain state derived from these signals <span class="bcp14">SHOULD</span> expose it
+to local diagnostics, since such state changes transmission behavior
+in ways otherwise invisible to troubleshooting.<a href="#section-9-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="experiment">
@@ -2303,16 +2492,17 @@ ways otherwise invisible to troubleshooting.<a href="#section-9-4" class="pilcro
       <h2 id="name-experimental-status-and-goa">
 <a href="#section-10" class="section-number selfRef">10. </a><a href="#name-experimental-status-and-goa" class="section-name selfRef">Experimental Status and Goals</a>
       </h2>
-<p id="section-10-1">This document is published as Experimental. The codes and metadata
-are specified normatively so that independent implementations
-interoperate at the ICMP layer. The value of the
+<p id="section-10-1">This document is published as Experimental. The objects and the Denied
+by Link Policy code are specified normatively so that independent
+implementations interoperate at the ICMP layer. The value of the
 mechanism, however, rests on two kinds of questions that only
 deployment can answer: whether gateways can generate the signals
-correctly and usefully, and whether consumers of the signals can do
-anything worthwhile with them. Consumer behaviors are deliberately not
-standardized here and are not prerequisites for interoperability; the
-experiment is intended to produce the experience on which later
-specification of such behaviors might be based.<a href="#section-10-1" class="pilcrow">¶</a></p>
+correctly and usefully, and whether the metadata lets consumers make
+better decisions than the ordinary unreachable error alone would allow.
+Consumer behaviors are deliberately not standardized here and are not
+prerequisites for interoperability; the experiment is intended to
+produce the experience on which later specification of such behaviors
+might be based.<a href="#section-10-1" class="pilcrow">¶</a></p>
 <div id="exp-scope">
 <section id="section-10.1">
         <h3 id="name-scope-of-the-experiment">
@@ -2321,14 +2511,16 @@ specification of such behaviors might be based.<a href="#section-10-1" class="pi
 <p id="section-10.1-1">The experiment runs within administered limited domains meeting the
 criteria of <a href="#applicability" class="auto internal xref">Section 3</a>: space networking testbeds and missions,
 other networks with scheduled or intermittently available managed
-links, and laboratory emulations of the same topologies. The codes are
-not exchanged across uncontrolled networks, and no behavior in this
-document affects hosts whose traffic never requires a trans-boundary
-link.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
-<p id="section-10.1-2">Prior to IANA assignment, implementations use the experimental ICMP
-values reserved by <span>[<a href="#RFC4727" class="cite xref">RFC4727</a>]</span> and coordinate their interpretation
-bilaterally, per that document's rules. Interoperability reports from
-this phase are in scope for the experiment.<a href="#section-10.1-2" class="pilcrow">¶</a></p>
+links, and laboratory emulations of the same topologies. Link
+Condition Objects and Denied by Link Policy are not exchanged across
+uncontrolled networks, and no behavior in this document affects hosts
+whose traffic never requires a trans-boundary link.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+<p id="section-10.1-2">Prior to IANA assignment of the Denied by Link Policy codes and the
+Link Condition Object class, implementations use the experimental
+values reserved by <span>[<a href="#RFC4727" class="cite xref">RFC4727</a>]</span> for those and coordinate their
+interpretation bilaterally, per that document's rules. The carrier
+codes are already assigned and are used as is. Interoperability
+reports from this phase are in scope for the experiment.<a href="#section-10.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="exp-signal">
@@ -2339,16 +2531,18 @@ this phase are in scope for the experiment.<a href="#section-10.1-2" class="pilc
 <p id="section-10.2-1">The first layer of the experiment concerns the signals themselves:<a href="#section-10.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-10.2-2.1">
-            <p id="section-10.2-2.1.1">Generation correctness: whether gateways generate each code only
-under the conditions of <a href="#generation" class="auto internal xref">Section 6</a>, and in particular whether
-the aggregate-domain determination can be made reliably in deployed
-routing architectures.<a href="#section-10.2-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-10.2-2.1.1">Generation correctness: whether gateways attach Link Condition
+Objects and generate Denied by Link Policy only under the conditions
+of <a href="#generation" class="auto internal xref">Section 6</a>, whether the aggregate-domain determination can be
+made reliably in deployed routing architectures, and which carrier
+codes gateways actually produce for the constrained-link condition
+in each IP version (<a href="#carriers" class="auto internal xref">Section 5.2.1</a>).<a href="#section-10.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-10.2-2.2">
-            <p id="section-10.2-2.2.1">Distinction: whether the three-way distinction among no-route,
-transient constrained-link unavailability, and policy denial
-(<a href="#interaction" class="auto internal xref">Section 4.4</a>) is maintained in practice and is useful to
-operators and senders.<a href="#section-10.2-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-10.2-2.2.1">Distinction: whether the metadata usefully distinguishes transient
+constrained-link unavailability from ordinary unreachable errors of
+the same code, and whether policy denial remains distinguishable
+from both (<a href="#interaction" class="auto internal xref">Section 4.4</a>).<a href="#section-10.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-10.2-2.3">
             <p id="section-10.2-2.3.1">Prediction accuracy and usefulness: how closely ETU tracks actual
@@ -2361,18 +2555,18 @@ realistic fan-out, and the effect of rate limiting on which senders
 receive a notification.<a href="#section-10.2-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-10.2-2.5">
-            <p id="section-10.2-2.5.1">Legacy and middlebox behavior: how unmodified hosts respond to the
-new codes across the stacks present in target environments,
-including embedded and flight-heritage implementations, and whether
-any hard-error handling of Link Temporarily Unavailable is harmful
-(<a href="#legacy" class="auto internal xref">Section 8</a>); and what filtering changes deployments required.<a href="#section-10.2-2.5.1" class="pilcrow">¶</a></p>
+            <p id="section-10.2-2.5.1">Legacy and middlebox behavior: how unmodified hosts respond to
+metadata-bearing carrier errors and to the new Denied by Link Policy
+code across the stacks present in target environments, including
+embedded and flight-heritage implementations (<a href="#legacy" class="auto internal xref">Section 8</a>); and what
+filtering changes deployments required, including whether
+middleboxes strip or discard extension structures.<a href="#section-10.2-2.5.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-10.2-2.6">
             <p id="section-10.2-2.6.1">Security and disclosure: whether the information disclosed by the
-Denied by Link Policy code and by predictive metadata is
-operationally acceptable, whether the disclosure controls of
-<a href="#generation" class="auto internal xref">Section 6</a> are sufficient, and whether forged or stale
-notifications caused harm.<a href="#section-10.2-2.6.1" class="pilcrow">¶</a></p>
+Denied by Link Policy code and by the metadata is operationally
+acceptable, whether the disclosure controls of <a href="#generation" class="auto internal xref">Section 6</a> are
+sufficient, and whether forged or stale notifications caused harm.<a href="#section-10.2-2.6.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-10.2-2.7">
             <p id="section-10.2-2.7.1">Whether the coarse Denied by Link Policy signal is operationally
@@ -2394,10 +2588,11 @@ these behaviors is specified here; the experiment is intended to
 discover which are worthwhile:<a href="#section-10.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-10.3-2.1">
-            <p id="section-10.3-2.1.1">Whether hosts that record the information to avoid repeated
-attempts reduce futile retransmission and offered load during
-link-unavailable periods, and what keying, scope, lifetime, and
-invalidation rules work.<a href="#section-10.3-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-10.3-2.1.1">Whether hosts that record the metadata to avoid repeated attempts
+reduce futile retransmission and offered load during
+link-unavailable periods, relative to hosts receiving the same
+ordinary errors without metadata, and what keying, scope, lifetime,
+and invalidation rules work.<a href="#section-10.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-10.3-2.2">
             <p id="section-10.3-2.2.1">What transport reactions are appropriate, including whether
@@ -2405,7 +2600,7 @@ comparing expected wait against connection tolerance is useful and
 whether connections that wait survive the peer's own timers.<a href="#section-10.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-10.3-2.3">
-            <p id="section-10.3-2.3.1">What application decisions the information enables, including
+            <p id="section-10.3-2.3.1">What application decisions the metadata enables, including
 selection among communication mechanisms such as IP transports and
 bundle services, and whether an application interface should be
 standardized.<a href="#section-10.3-2.3.1" class="pilcrow">¶</a></p>
@@ -2425,16 +2620,17 @@ faults ahead of existing monitoring.<a href="#section-10.3-2.4.1" class="pilcrow
         </h3>
 <p id="section-10.4-1">Later consideration of the mechanism for the standards track could be
 informed by evidence of: at least two independent interoperable
-implementations of both codes, including extension object processing;
-generation accuracy in at least one operational, non-laboratory
-domain; usefulness of the metadata objects, with unused objects
-removed rather than carried forward; manageable legacy and middlebox
-behavior; acceptable security and disclosure properties; consumer
-behaviors independently demonstrated to benefit from the signals,
-without presupposing any one receiver strategy; and evidence that the
-semantics apply across more than one class of constrained network
-without special-case changes to the wire format. Reports of failed or
-inconclusive experiments are requested to the same degree as
+implementations of the Link Condition Objects and of Denied by Link
+Policy, including extension object processing; generation accuracy in
+at least one operational, non-laboratory domain; usefulness of the
+metadata objects beyond the ordinary unreachable error, with unused
+objects removed rather than carried forward; manageable legacy and
+middlebox behavior; acceptable security and disclosure properties;
+consumer behaviors independently demonstrated to benefit from the
+metadata, without presupposing any one receiver strategy; and evidence
+that the semantics apply across more than one class of constrained
+network without special-case changes to the wire format. Reports of
+failed or inconclusive experiments are requested to the same degree as
 successful ones.<a href="#section-10.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2445,29 +2641,41 @@ successful ones.<a href="#section-10.4-1" class="pilcrow">¶</a></p>
       <h2 id="name-security-considerations">
 <a href="#section-11" class="section-number selfRef">11. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-11-1">ICMP carries no authentication, and both codes are actionable by
-implementations that choose to act on them, so the principal threats
-are forgery by off-path attackers and information disclosure to the
-senders these messages answer. The containment for both is the
-limited-domain scoping of <a href="#applicability" class="auto internal xref">Section 3</a>: validation against sender
-state (<a href="#validation" class="auto internal xref">Section 7.1</a>), boundary filtering (<a href="#generation" class="auto internal xref">Section 6</a>), rate
-limiting, and a single administrative authority. None of these
-defenses is dependable across the open internet.<a href="#section-11-1" class="pilcrow">¶</a></p>
-<p id="section-11-2">A forged Link Temporarily Unavailable message could induce an
-implementation that acts on it to withhold trans-boundary traffic for
-the advertised interval. This document does not require receivers to
-withhold traffic, and stronger reactions to unauthenticated ICMP
-information carry correspondingly greater risk; an implementation that
-does act on the signal should bound the effect of any single
-notification, treat ETU as an estimate that may be stale or wrong, and
-consider that the gateway cannot revoke a notification whose basis has
-changed. The invoking-packet validation of <span>[<a href="#RFC5927" class="cite xref">RFC5927</a>]</span> forces an
-attacker to guess connection state, and boundary filtering confines
-injection to on-path or in-domain attackers.<a href="#section-11-2" class="pilcrow">¶</a></p>
-<p id="section-11-3">A forged Denied by Link Policy message is in the class of attacks
-<span>[<a href="#RFC5927" class="cite xref">RFC5927</a>]</span> analyzes for existing hard-error codes; it adds no
-capability beyond forging the existing administratively prohibited
-codes, and the same mitigations apply.<a href="#section-11-3" class="pilcrow">¶</a></p>
+<p id="section-11-1">ICMP carries no authentication, and both the metadata and Denied by
+Link Policy are actionable by implementations that choose to act on
+them, so the principal threats are forgery by off-path attackers and
+information disclosure to the senders these messages answer. The
+containment for both is the limited-domain scoping of
+<a href="#applicability" class="auto internal xref">Section 3</a>: validation against sender state (<a href="#validation" class="auto internal xref">Section 7.1</a>),
+boundary filtering of Denied by Link Policy, rate limiting, and a
+single administrative authority. None of these defenses is dependable
+across the open internet, and none authenticates the carrier code or
+the metadata.<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-2">Three forgery cases arise. A forged ordinary Destination Unreachable
+error is an existing threat with existing mitigations (<span>[<a href="#RFC5927" class="cite xref">RFC5927</a>]</span>);
+this document does not change it. Forged Link Condition Objects on an
+otherwise plausible error could induce an implementation that acts on
+them to withhold trans-boundary traffic for the advertised interval.
+This document does not require receivers to withhold traffic, and
+stronger reactions to unauthenticated ICMP information carry
+correspondingly greater risk; an implementation that does act on the
+metadata should bound the effect of any single notification, treat ETU
+as an estimate that may be stale or wrong, and consider that the
+gateway cannot revoke a notification whose basis has changed. The
+invoking-packet validation of <span>[<a href="#RFC5927" class="cite xref">RFC5927</a>]</span> forces an attacker to guess
+connection state, and in-domain filtering confines injection to
+on-path or in-domain attackers. A forged Denied by Link Policy message
+is in the class of attacks <span>[<a href="#RFC5927" class="cite xref">RFC5927</a>]</span> analyzes for existing hard-error
+codes; it adds no capability beyond forging the existing
+administratively prohibited codes, and the same mitigations apply.<a href="#section-11-2" class="pilcrow">¶</a></p>
+<p id="section-11-3">Because the metadata rides on ordinary codes, a boundary filter on
+code values alone cannot contain it without also blocking ordinary
+errors (<a href="#validation" class="auto internal xref">Section 7.1</a>). Deployments that require such containment
+need extension-aware enforcement, which this document does not
+specify. The absence of Link Condition Objects from a message is not a
+trustworthy indication that no constrained-link condition exists,
+since objects may be omitted by policy, by rate limiting, by
+middleboxes, or by an attacker.<a href="#section-11-3" class="pilcrow">¶</a></p>
 <p id="section-11-4">Denied by Link Policy reveals to the sender that constrained-link
 admission policy refused its traffic, and a responsive gateway is a
 probing oracle: an attacker varying markings, sources, and
@@ -2477,16 +2685,20 @@ therefore requires per-policy control over whether the code is
 generated at all; toward any sender the operator does not trust,
 silent discard is the expected posture, consistent with existing
 firewall practice.<a href="#section-11-4" class="pilcrow">¶</a></p>
-<p id="section-11-5">The predictive metadata of Link Temporarily Unavailable discloses link
-schedule information, which in some deployments is sensitive
-operational information. <a href="#generation" class="auto internal xref">Section 6</a> permits omitting it per
-policy; operators of such deployments should protect the metadata as
-they protect the underlying schedule. Evaluating admission before link
-state (<a href="#generation" class="auto internal xref">Section 6</a>) prevents disclosure of schedule information to
-traffic that would not be admitted regardless.<a href="#section-11-5" class="pilcrow">¶</a></p>
-<p id="section-11-6">Neither code creates an amplification vector: each is generated only
-toward the domain interior, is rate limited, and is no larger than
-ordinary extended ICMP errors.<a href="#section-11-6" class="pilcrow">¶</a></p>
+<p id="section-11-5">The Link Condition Objects disclose link schedule information, which
+in some deployments is sensitive operational information.
+<a href="#generation" class="auto internal xref">Section 6</a> permits omitting them per policy; operators of such
+deployments should protect the metadata as they protect the underlying
+schedule. Evaluating admission before link state (<a href="#generation" class="auto internal xref">Section 6</a>)
+prevents disclosure of schedule information to traffic that would not
+be admitted regardless.<a href="#section-11-5" class="pilcrow">¶</a></p>
+<p id="section-11-6">Ordinary ICMP generation restrictions and rate limiting
+(<span><a href="https://rfc-editor.org/rfc/rfc4443#section-2.4" class="relref">Section 2.4</a> of [<a href="#RFC4443" class="cite xref">RFC4443</a>]</span>, <span>[<a href="#RFC1812" class="cite xref">RFC1812</a>]</span>) apply to all of these
+messages. Quoting and padding of the invoking packet and the optional
+objects affect response size; a message carrying all three objects is
+larger than a minimal Destination Unreachable error. This document
+makes no claim about the absence of amplification beyond what those
+restrictions provide.<a href="#section-11-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana">
@@ -2497,24 +2709,26 @@ ordinary extended ICMP errors.<a href="#section-11-6" class="pilcrow">¶</a></p>
 <p id="section-12-1">This document requests the following assignments, shown as TBD values
 throughout. No numeric values are proposed.<a href="#section-12-1" class="pilcrow">¶</a></p>
 <p id="section-12-2">From the "Type 1 - Destination Unreachable" code registry of the
-"ICMPv6 Parameters" registry: code TBD1, Link Temporarily Unavailable,
-and code TBD3, Denied by Link Policy. The registration procedure for
-this registry is Standards Action or IESG Approval; this document
-requests IESG Approval.<a href="#section-12-2" class="pilcrow">¶</a></p>
+"ICMPv6 Parameters" registry: code TBD3, Denied by Link Policy. The
+registration procedure for this registry is Standards Action or IESG
+Approval; this document requests IESG Approval.<a href="#section-12-2" class="pilcrow">¶</a></p>
 <p id="section-12-3">From the "Type 3 - Destination Unreachable" code registry of the
-"ICMP Parameters" registry: code TBD2, Link Temporarily Unavailable,
-and code TBD4, Denied by Link Policy. The registration procedure for
-this registry is IESG Approval or Standards Action; this document
-requests IESG Approval.<a href="#section-12-3" class="pilcrow">¶</a></p>
+"ICMP Parameters" registry: code TBD4, Denied by Link Policy. The
+registration procedure for this registry is IESG Approval or Standards
+Action; this document requests IESG Approval.<a href="#section-12-3" class="pilcrow">¶</a></p>
 <p id="section-12-4">From the "ICMP Extension Object Classes and Class Sub-types" registry
 <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span>: a new class TBD5, Link Condition Object, with C-Type 1,
 Generation Time; C-Type 2, Expected Time Until Link Usability; and
 C-Type 3, Expected Link Delay, assigned by this document. Further
 C-Types are Specification Required.<a href="#section-12-4" class="pilcrow">¶</a></p>
-<p id="section-12-5">Publication as Experimental does not by itself satisfy the
+<p id="section-12-5">This document requests no change to the already-assigned Destination
+Unreachable codes on which Link Condition Objects may be carried:
+ICMPv6 Type 1 codes 0 and 3, and ICMPv4 Type 3 codes 0 and 1
+(<a href="#carriers" class="auto internal xref">Section 5.2.1</a>). Their existing meanings are unchanged.<a href="#section-12-5" class="pilcrow">¶</a></p>
+<p id="section-12-6">Publication as Experimental does not by itself satisfy the
 registration procedures for the Destination Unreachable code
 registries. Should the requested code assignments not be approved,
-the allocation strategy is a matter for further review.<a href="#section-12-5" class="pilcrow">¶</a></p>
+the allocation strategy is a matter for further review.<a href="#section-12-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
@@ -2531,6 +2745,10 @@ the allocation strategy is a matter for further review.<a href="#section-12-5" c
 <dt id="RFC0792">[RFC0792]</dt>
         <dd>
 <span class="refAuthor">Postel, J.</span>, <span class="refTitle">"Internet Control Message Protocol"</span>, <span class="seriesInfo">STD 5</span>, <span class="seriesInfo">RFC 792</span>, <span class="seriesInfo">DOI 10.17487/RFC792</span>, <time datetime="1981-09" class="refDate">September 1981</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc792">https://www.rfc-editor.org/rfc/rfc792</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC1812">[RFC1812]</dt>
+        <dd>
+<span class="refAuthor">Baker, F., Ed.</span>, <span class="refTitle">"Requirements for IP Version 4 Routers"</span>, <span class="seriesInfo">RFC 1812</span>, <span class="seriesInfo">DOI 10.17487/RFC1812</span>, <time datetime="1995-06" class="refDate">June 1995</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1812">https://www.rfc-editor.org/rfc/rfc1812</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
@@ -2569,10 +2787,6 @@ the allocation strategy is a matter for further review.<a href="#section-12-5" c
         <dd>
 <span class="refAuthor">Braden, R., Ed.</span>, <span class="refTitle">"Requirements for Internet Hosts - Communication Layers"</span>, <span class="seriesInfo">STD 3</span>, <span class="seriesInfo">RFC 1122</span>, <span class="seriesInfo">DOI 10.17487/RFC1122</span>, <time datetime="1989-10" class="refDate">October 1989</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1122">https://www.rfc-editor.org/rfc/rfc1122</a>&gt;</span>. </dd>
 <dd class="break"></dd>
-<dt id="RFC1812">[RFC1812]</dt>
-        <dd>
-<span class="refAuthor">Baker, F., Ed.</span>, <span class="refTitle">"Requirements for IP Version 4 Routers"</span>, <span class="seriesInfo">RFC 1812</span>, <span class="seriesInfo">DOI 10.17487/RFC1812</span>, <time datetime="1995-06" class="refDate">June 1995</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1812">https://www.rfc-editor.org/rfc/rfc1812</a>&gt;</span>. </dd>
-<dd class="break"></dd>
 <dt id="RFC4890">[RFC4890]</dt>
         <dd>
 <span class="refAuthor">Davies, E.</span> and <span class="refAuthor">J. Mohacsi</span>, <span class="refTitle">"Recommendations for Filtering ICMPv6 Messages in Firewalls"</span>, <span class="seriesInfo">RFC 4890</span>, <span class="seriesInfo">DOI 10.17487/RFC4890</span>, <time datetime="2007-05" class="refDate">May 2007</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4890">https://www.rfc-editor.org/rfc/rfc4890</a>&gt;</span>. </dd>
@@ -2593,6 +2807,10 @@ the allocation strategy is a matter for further review.<a href="#section-12-5" c
         <dd>
 <span class="refAuthor">Gont, F.</span>, <span class="refTitle">"ICMP Attacks against TCP"</span>, <span class="seriesInfo">RFC 5927</span>, <span class="seriesInfo">DOI 10.17487/RFC5927</span>, <time datetime="2010-07" class="refDate">July 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5927">https://www.rfc-editor.org/rfc/rfc5927</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC6069">[RFC6069]</dt>
+        <dd>
+<span class="refAuthor">Zimmermann, A.</span> and <span class="refAuthor">A. Hannemann</span>, <span class="refTitle">"Making TCP More Robust to Long Connectivity Disruptions (TCP-LCD)"</span>, <span class="seriesInfo">RFC 6069</span>, <span class="seriesInfo">DOI 10.17487/RFC6069</span>, <time datetime="2010-12" class="refDate">December 2010</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6069">https://www.rfc-editor.org/rfc/rfc6069</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC8799">[RFC8799]</dt>
         <dd>
 <span class="refAuthor">Carpenter, B.</span> and <span class="refAuthor">B. Liu</span>, <span class="refTitle">"Limited Domains and Internet Protocols"</span>, <span class="seriesInfo">RFC 8799</span>, <span class="seriesInfo">DOI 10.17487/RFC8799</span>, <time datetime="2020-07" class="refDate">July 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8799">https://www.rfc-editor.org/rfc/rfc8799</a>&gt;</span>. </dd>
@@ -2606,8 +2824,12 @@ the allocation strategy is a matter for further review.<a href="#section-12-5" c
 <span class="refAuthor">Herbert, T.</span>, <span class="refTitle">"ICMPv6 Errors for Discarding Packets Due to Processing Limits"</span>, <span class="seriesInfo">RFC 8883</span>, <span class="seriesInfo">DOI 10.17487/RFC8883</span>, <time datetime="2020-09" class="refDate">September 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8883">https://www.rfc-editor.org/rfc/rfc8883</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC9171">[RFC9171]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Burleigh, S.</span>, <span class="refAuthor">Fall, K.</span>, and <span class="refAuthor">E. Birrane, III</span>, <span class="refTitle">"Bundle Protocol Version 7"</span>, <span class="seriesInfo">RFC 9171</span>, <span class="seriesInfo">DOI 10.17487/RFC9171</span>, <time datetime="2022-01" class="refDate">January 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9171">https://www.rfc-editor.org/rfc/rfc9171</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9293">[RFC9293]</dt>
+      <dd>
+<span class="refAuthor">Eddy, W., Ed.</span>, <span class="refTitle">"Transmission Control Protocol (TCP)"</span>, <span class="seriesInfo">STD 7</span>, <span class="seriesInfo">RFC 9293</span>, <span class="seriesInfo">DOI 10.17487/RFC9293</span>, <time datetime="2022-08" class="refDate">August 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9293">https://www.rfc-editor.org/rfc/rfc9293</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -2619,19 +2841,22 @@ the allocation strategy is a matter for further review.<a href="#section-12-5" c
       <h2 id="name-worked-example">
 <a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-worked-example" class="section-name selfRef">Worked Example</a>
       </h2>
-<p id="appendix-A-1">A gateway whose deep-space link is presently unusable receives a
-packet for a trans-boundary destination at 18:00:00 UTC on 16
+<p id="appendix-A-1">A gateway whose deep-space link is presently unusable receives an
+IPv6 packet for a trans-boundary destination at 18:00:00 UTC on 16
 September 2026. No other path in the signaling domain can serve the
-traffic. The packet is admissible under the link's policy, but the
-domain's contact plan shows the link becoming usable 42 minutes later,
-and the gateway's one-way delay estimate for the link is 20 minutes.
-The gateway drops the packet and returns Destination Unreachable, code
-Link Temporarily Unavailable, with three extension objects. The
+traffic. The packet is admissible under the link's policy. The gateway
+retains a route toward the destination, but the next hop over the
+deep-space link is unusable; under <span><a href="https://rfc-editor.org/rfc/rfc4443#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> this is
+a link-specific problem not covered by another code, so the gateway
+generates ICMPv6 Destination Unreachable, Code 3 (Address
+unreachable). The domain's contact plan shows the link becoming usable
+42 minutes later, and the gateway's one-way delay estimate for the
+link is 20 minutes, so it attaches three Link Condition Objects. The
 Class-Num octet of each is TBD5 and is omitted from the listing.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <span id="name-worked-example-extension-ob"></span><div id="tab-example">
-<table class="center" id="table-2">
+<table class="center" id="table-4">
         <caption>
-<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#table-4" class="selfRef">Table 4</a>:
 <a href="#name-worked-example-extension-ob" class="selfRef">Worked Example Extension Objects</a>
         </caption>
 <thead>
@@ -2666,20 +2891,27 @@ Class-Num octet of each is TBD5 and is omitted from the listing.<a href="#append
 </div>
 <p id="appendix-A-3">The Generation Time seconds word is the Unix time of the instant plus
 2208988800; the fraction word is zero.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
-<p id="appendix-A-4">A receiver that cannot relate Generation Time to its own clock, or
-that did not receive it, needs no timestamp arithmetic: it knows that,
-as of generation, the link was expected to become usable in 42
-minutes, and it may apply that interval from the moment of receipt. If
-the notification spent time in delivery, the receiver waits slightly
-longer than necessary, which errs on the safe side.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
-<p id="appendix-A-5">A receiver that can relate Generation Time to its local clock may
+<p id="appendix-A-4">Had the gateway attached no objects -- because it had no estimate,
+withheld it by policy, or lacked the domain knowledge required by
+<a href="#ltu" class="auto internal xref">Section 5.2</a> -- the receiver would have an ordinary Address Unreachable
+error, meaning only that the packet was not delivered. A receiver that
+does not process <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> extensions sees exactly that in either
+case.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<p id="appendix-A-5">A receiver that processes the objects but cannot relate Generation
+Time to its own clock, or that did not receive it, needs no timestamp
+arithmetic: it knows that, as of generation, the link was expected to
+become usable in 42 minutes, and it may apply that interval from the
+moment of receipt. If the notification spent time in delivery, the
+receiver waits slightly longer than necessary, which errs on the safe
+side.<a href="#appendix-A-5" class="pilcrow">¶</a></p>
+<p id="appendix-A-6">A receiver that can relate Generation Time to its local clock may
 compute Generation Time + ETU = 18:42:00Z and, on receiving the
 message at, say, 18:00:03Z, understand that about 41 minutes 57
-seconds remain.<a href="#appendix-A-5" class="pilcrow">¶</a></p>
-<p id="appendix-A-6">Either receiver might, as a matter of local policy, use the 20-minute
+seconds remain.<a href="#appendix-A-6" class="pilcrow">¶</a></p>
+<p id="appendix-A-7">Either receiver might, as a matter of local policy, use the 20-minute
 link delay estimate in deciding whether the destination suits its
 traffic once the link is usable. Whether either receiver does anything
-at all with the information is not specified by this document.<a href="#appendix-A-6" class="pilcrow">¶</a></p>
+at all with the information is not specified by this document.<a href="#appendix-A-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="acknowledgments">
