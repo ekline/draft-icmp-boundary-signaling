@@ -4,11 +4,11 @@
 
 Internet Area Working Group                                     E. Kline
 Internet-Draft                                Aalyria Technologies, Inc.
-Intended status: Experimental                          21 September 2026
-Expires: 25 March 2027
+Intended status: Experimental                             5 October 2026
+Expires: 8 April 2027
 
 
-                    ICMP Enclave Boundary Signaling
+                     IP Enclave Boundary Signaling
                 draft-ek-icmp-boundary-signaling-latest
 
 Abstract
@@ -63,7 +63,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 25 March 2027.
+   This Internet-Draft will expire on 8 April 2027.
 
 Copyright Notice
 
