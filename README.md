@@ -1,8 +1,8 @@
 <!-- regenerate: on (set to off if you edit this file) -->
 
-# ICMP Enclave Boundary Signaling
+# IP Enclave Boundary Signaling
 
-This is the working area for the individual Internet-Draft, "ICMP Enclave Boundary Signaling".
+This is the working area for the individual Internet-Draft, "IP Enclave Boundary Signaling".
 
 * [Editor's Copy](https://ekline.github.io/draft-icmp-boundary-signaling/#go.draft-ek-icmp-boundary-signaling.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-ek-icmp-boundary-signaling)

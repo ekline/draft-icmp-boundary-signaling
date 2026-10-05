@@ -1,6 +1,6 @@
 ---
-title: "ICMP Enclave Boundary Signaling"
-abbrev: "ICMP Enclave Boundary Signaling"
+title: "IP Enclave Boundary Signaling"
+abbrev: "IP Enclave Boundary Signaling"
 category: exp
 
 docname: draft-ek-icmp-boundary-signaling-latest
