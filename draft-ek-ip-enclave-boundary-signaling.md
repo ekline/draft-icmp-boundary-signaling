@@ -3,14 +3,14 @@ title: "IP Enclave Boundary Signaling"
 abbrev: "IP Enclave Boundary Signaling"
 category: exp
 
-docname: draft-ek-icmp-boundary-signaling-latest
+docname: draft-ek-ip-enclave-boundary-signaling-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
-consensus: true
+
 v: 3
 area: INT
-workgroup: Internet Area Working Group
+
 keyword:
  - IP enclave
  - delay/disruption links
@@ -23,7 +23,7 @@ venue:
   mail: int-area@ietf.org
   arch: https://mailarchive.ietf.org/arch/browse/int-area/
   github: "ekline/draft-icmp-boundary-signaling"
-  latest: "https://ekline.github.io/draft-icmp-boundary-signaling/draft-ek-icmp-boundary-signaling.html"
+  latest: "https://ekline.github.io/draft-icmp-boundary-signaling/draft-ek-ip-enclave-boundary-signaling.html"
 
 author:
  -
@@ -87,11 +87,10 @@ from a contact plan or equivalent scheduling knowledge when each link is
 expected to carry traffic, it enforces an admission policy describing
 whose traffic each link will carry, and it can distribute routing
 updates to migrate long-haul traffic onto the best current or next link
-according to its policy. An IP sender inside such an enclave has none of
-this knowledge. Today it learns of a link's unavailability or of a
-policy refusal only through its own timers, retransmitting until they
-expire and then receiving a failure indistinguishable from a routing
-fault or a crashed peer.
+according to its policy. An IP sender inside such an enclave may lack
+this knowledge. Ordinary errors do not communicate the managed service's
+recovery estimate or identify boundary-link admission as the source of
+a policy refusal.
 
 Existing Destination Unreachable messages already report the
 forwarding failures that result. This document defines optional ICMP
@@ -118,9 +117,10 @@ publishing the objects is to enable experimentation with them
 because the boundary is close and the condition is long-lived: gateway
 feedback reaches senders in local round-trip times, while the
 unavailability it reports lasts minutes to hours ({{applicability}}).
-The policy indication is useful for a different reason: it tells an
-application that changing what it sends, rather than waiting, is what
-would help.
+The policy indication is useful for a different reason: it identifies
+the source of the refusal and may prompt an application to reconsider
+its configured communication options. It does not establish that a
+change will succeed or that policy cannot change over time.
 
 Where an application can learn in advance which communication
 mechanisms suit a destination -- through configuration, provisioning,
@@ -309,10 +309,12 @@ minutes. And they are policy-managed: contact capacity is allocated to
 specific senders or traffic classes, and traffic outside those
 allocations is not authorized to use the link.
 
-The gateways run a Bundle Protocol version 7 {{RFC9171}} agent.
-Trans-boundary data normally crosses as bundles, either because the
-originating host is BP-capable or because the gateway encapsulates IP
-traffic on its behalf.
+A gateway may also offer a Bundle Protocol version 7 {{RFC9171}} or
+application-layer gateway service that accepts traffic under its own
+policy. The ICMP cases here concern packets refused or not forwarded
+by the IP forwarding service; they do not describe traffic accepted
+for delivery by a separate service. BP is not required for this ICMP
+mechanism.
 
 The same structure exists on the Earth side. A terrestrial sender's
 traffic crosses an Earth-side gateway that holds the same contact plan
@@ -500,14 +502,16 @@ admitted.
 
 ### Plan/Reality Divergence {#uc-divergence}
 
-In nominal operation, provisioned traffic should never elicit these
-objects. Availability metadata generated during a planned contact, or
-a Denied by Link Policy object generated for a flow the orchestrator
-believes it admitted, indicate that the control plane's model and the
-data plane's state have diverged: an unplanned outage, a policy or
-routing distribution failure, or traffic outside the provisioning
-workflow. Gateways count and report generation of these objects so
-that operators can use them as a diagnostic feed ({{operational}}).
+Notifications that conflict with the currently applicable service
+expectation can be evidence of divergence between the control plane's
+model and the data plane's state. Examples include ETU or ELD
+reporting unavailability after expected data-plane readiness,
+or a Denied by Link Policy object for traffic that installed policy
+should admit. A planned contact alone does not establish readiness:
+preparation may continue after contact start ({{orchestration}}).
+Authorized traffic between contacts can legitimately elicit availability
+metadata. Gateway counters provide diagnostic evidence, not proof of
+failure ({{operational}}).
 
 ## Interaction of the Two Signals {#interaction}
 
@@ -516,9 +520,10 @@ different questions and may both be relevant to one flow over time: a
 link can be simultaneously restricted and unavailable. Admission is
 evaluated first ({{generation}}). Traffic that would be refused
 regardless of link state receives the administrative prohibition
-error, optionally with the Denied by Link Policy object, and never
-receives availability metadata, which would disclose link schedule
-information to traffic that could not use the link anyway. Traffic
+error, optionally with the Denied by Link Policy object, but the error
+MUST NOT carry ETU or ELD, which could disclose link characteristics to traffic
+that could not use the link anyway. Generation Time without ETU remains
+discouraged, not prohibited ({{applicability-objects}}). Traffic
 that is admitted but whose link is not presently usable receives the
 ordinary unreachable error, optionally with availability metadata. A
 sender whose denial is resolved through provisioning may then receive
@@ -531,11 +536,11 @@ notes that they can result from routing transients, and {{RFC6069}}
 has previously used them experimentally as indications of
 connectivity disruption. Nor does an ordinary administrative
 prohibition error identify which administrative control refused the
-packet. Availability metadata adds to an unreachable error the
-domain's assertion that the failure reflects a managed transient
-condition of a constrained long-haul link to which the traffic was
-admitted, and, where supplied, an estimate of its duration. The Denied
-by Link Policy object adds to an administrative prohibition error the
+packet. ETU or ELD adds to an unreachable error the domain's assertion
+that the failure reflects a managed transient condition of a constrained
+long-haul link to which the traffic was admitted; ETU also estimates
+its duration. Generation Time alone does not assert a failure cause.
+The Denied by Link Policy object adds to an administrative prohibition error the
 assertion that boundary-link admission policy was the source of the
 refusal.
 
@@ -703,7 +708,7 @@ require a particular routing implementation, and a gateway that would
 have sent a given code before implementing this specification does not
 change that code because of it.
 
-Editor's note (IPv4 applicability, to be resolved before publication):
+Editor's note (IPv4 applicability, to be resolved before RFC publication):
 {{RFC1812}}'s code-specific text ties Host Unreachable to a
 destination on a directly connected network, while its general
 Destination Unreachable text covers an unreachable next hop.
@@ -1014,8 +1019,8 @@ the invoking traffic was not admitted, and admission is evaluated
 before any link state is disclosed ({{generation}}). An availability
 carrier MUST NOT carry Denied by Link Policy, since an admitted packet
 was by definition not refused by admission policy. Under these rules
-Denied by Link Policy and the availability metadata are never emitted
-in the same message.
+Denied by Link Policy is never emitted with ETU or ELD. Generation Time
+may accompany it, subject to the guidance below.
 
 Generation Time SHOULD NOT be sent without Expected Time Until Link
 Usability on either carrier group, since this document defines no
@@ -1055,7 +1060,7 @@ On receiving trans-boundary traffic, a gateway proceeds as follows:
    local response policy call for one, generate the appropriate
    administrative prohibition error ({{carriers-policy}}); where
    disclosure policy permits, attach the Denied by Link Policy object
-   and nothing else ({{applicability-objects}}). Denial of admission
+   ({{applicability-objects}}). Denial of admission
    to one long-haul service does not by itself mean no policy-permitted
    managed alternative exists; step 1 addresses that.
 
@@ -1142,11 +1147,12 @@ filtering of the carrier codes.
 This section is informative. This document does not specify how a
 host, transport, application, or management system reacts to the
 objects, and no such reaction is required for interoperability.
-Receipt of an unreachable error carrying availability metadata informs
-the receiver that the domain models the path as transiently
-unavailable and, where ETU is present, roughly when usability is
-expected; receipt of an administrative prohibition error carrying
-Denied by Link Policy informs it that boundary-link admission policy
+Receipt of an unreachable error carrying ETU or ELD informs the
+receiver that the domain models the path as transiently unavailable;
+ETU also indicates roughly when usability is expected. Generation Time
+alone does not indicate a failure cause. Receipt of an administrative
+prohibition error carrying Denied by Link Policy informs it that
+boundary-link admission policy
 refused the traffic. What follows are possibilities that the objects
 enable and that the experiment of {{experiment}} is intended to
 explore.
@@ -1196,14 +1202,13 @@ survives.
 
 For context, {{Section 3.9.2.2 of RFC9293}} classifies the
 availability carriers (ICMPv4 Type 3 codes 0 and 1, ICMPv6 Type 1
-codes 0 and 3) as soft errors for TCP and the administrative
-prohibition codes among the hard errors, while noting widespread
+codes 0 and 3) as soft errors for TCP, while noting widespread
 implementation behavior that treats soft errors as hard errors during
 connection establishment; {{RFC5461}} documents further divergence.
-These classifications describe existing TCP processing; they are not
-the basis on which this document selects carriers, do not define
-permanent versus temporary failure, and this document neither relies
-on nor promises any particular transport reaction.
+This classification describes existing TCP processing; it is not the
+basis on which this document selects carriers and does not define
+permanent versus temporary failure. This document neither prescribes
+nor relies on a particular TCP reaction to either policy carrier.
 
 Firewalls and stateful middleboxes inside the deploying domain may
 strip or discard messages carrying unfamiliar extension structures, or
@@ -1225,9 +1230,9 @@ attaching Denied by Link Policy knows which policy dimension refused
 the traffic even though the object does not convey it, and MAY log or
 report that detail through local operational telemetry, which is where
 operators debugging a refused flow should look. This document does not
-prescribe a management or telemetry mechanism. In a correctly
-provisioned domain these objects are rare for authorized traffic, so
-the counters serve as the divergence telemetry of {{uc-divergence}}.
+prescribe a management or telemetry mechanism. Operators can use the
+counters as diagnostic evidence of possible divergence from applicable
+service expectations, not as proof of failure ({{uc-divergence}}).
 
 The orchestration model of {{orchestration}} yields several
 operational lessons. Gateways need their managed-service records to
@@ -1514,7 +1519,7 @@ is omitted from the listing.
 | Object | C-Type | Length | Wire value | Decoded |
 |:-------|-------:|-------:|:-----------|:--------|
 | Generation Time | 1 | 12 | 0x00002710 0x00000000 | 10,000 s in the enclave reference |
-| Expected Time Until Link Usability | 2 | 8 | 0x00267360 | 2,520,000 ms (42 min) |
+| Expected Time Until Link Usability | 2 | 8 | 0x002673C0 | 2,520,000 ms (42 min) |
 | Expected Link Delay | 3 | 8 | 0x00124F80 | 1,200,000 ms (20 min) |
 {: #tab-example title="Availability Metadata Example"}
 

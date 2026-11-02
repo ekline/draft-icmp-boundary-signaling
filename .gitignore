@@ -18,7 +18,7 @@
 /versioned/
 Gemfile.lock
 archive.json
-draft-ek-icmp-boundary-signaling.xml
+draft-ek-ip-enclave-boundary-signaling.xml
 package-lock.json
 report.xml
 !requirements.txt

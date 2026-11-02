@@ -4,10 +4,10 @@
 
 This is the working area for the individual Internet-Draft, "IP Enclave Boundary Signaling".
 
-* [Editor's Copy](https://ekline.github.io/draft-icmp-boundary-signaling/#go.draft-ek-icmp-boundary-signaling.html)
-* [Datatracker Page](https://datatracker.ietf.org/doc/draft-ek-icmp-boundary-signaling)
-* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-ek-icmp-boundary-signaling)
-* [Compare Editor's Copy to Individual Draft](https://ekline.github.io/draft-icmp-boundary-signaling/#go.draft-ek-icmp-boundary-signaling.diff)
+* [Editor's Copy](https://ekline.github.io/draft-icmp-boundary-signaling/#go.draft-ek-ip-enclave-boundary-signaling.html)
+* [Datatracker Page](https://datatracker.ietf.org/doc/draft-ek-ip-enclave-boundary-signaling)
+* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-ek-ip-enclave-boundary-signaling)
+* [Compare Editor's Copy to Individual Draft](https://ekline.github.io/draft-icmp-boundary-signaling/#go.draft-ek-ip-enclave-boundary-signaling.diff)
 
 
 ## Contributing

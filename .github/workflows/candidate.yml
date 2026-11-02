@@ -1,0 +1,58 @@
+name: "Build Submission Candidate"
+
+on: workflow_dispatch
+
+permissions:
+  contents: read
+
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+        persist-credentials: false
+
+    - name: "Check candidate source"
+      run: |
+        test -f draft-ek-ip-enclave-boundary-signaling.md || {
+          echo 'Rename the draft and update its docname before building the candidate.' >&2
+          exit 1
+        }
+        test "$(git ls-files 'draft-*.md' 'draft-*.xml' 'draft-*.org' | wc -l)" -eq 1 || {
+          echo 'Expected exactly one tracked draft source.' >&2
+          exit 1
+        }
+
+    - name: "Build and lint editor's copy"
+      uses: martinthomson/i-d-template@v1
+
+    - name: "Build next version"
+      uses: martinthomson/i-d-template@v1
+      with:
+        make: next
+
+    - name: "Check candidate revision"
+      id: build
+      run: |
+        test -s versioned/draft-ek-ip-enclave-boundary-signaling-00.xml
+        test -s versioned/draft-ek-ip-enclave-boundary-signaling-00.txt
+
+    - name: "Validate candidate in submission mode"
+      uses: martinthomson/i-d-template@v1
+      env:
+        idnits_mode: submission
+      with:
+        make: idnits
+
+    - name: "Archive candidate for review"
+      if: always() && steps.build.outcome == 'success'
+      uses: actions/upload-artifact@v6
+      with:
+        name: submission-candidate
+        if-no-files-found: error
+        path: |
+          versioned/draft-ek-ip-enclave-boundary-signaling-00.xml
+          versioned/draft-ek-ip-enclave-boundary-signaling-00.txt
