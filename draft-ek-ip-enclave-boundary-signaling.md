@@ -520,10 +520,9 @@ different questions and may both be relevant to one flow over time: a
 link can be simultaneously restricted and unavailable. Admission is
 evaluated first ({{generation}}). Traffic that would be refused
 regardless of link state receives the administrative prohibition
-error, optionally with the Denied by Link Policy object, but the error
-MUST NOT carry ETU or ELD, which could disclose link characteristics to traffic
-that could not use the link anyway. Generation Time without ETU remains
-discouraged, not prohibited ({{applicability-objects}}). Traffic
+error, optionally with the Denied by Link Policy object. ETU and ELD
+are excluded as specified in {{applicability-objects}}. Generation Time
+without ETU remains discouraged, not prohibited. Traffic
 that is admitted but whose link is not presently usable receives the
 ordinary unreachable error, optionally with availability metadata. A
 sender whose denial is resolved through provisioning may then receive
@@ -1017,8 +1016,7 @@ A policy carrier MUST NOT carry Expected Time Until Link Usability or
 Expected Link Delay: they reveal characteristics of a link to which
 the invoking traffic was not admitted, and admission is evaluated
 before any link state is disclosed ({{generation}}). An availability
-carrier MUST NOT carry Denied by Link Policy, since an admitted packet
-was by definition not refused by admission policy. Under these rules
+carrier MUST NOT carry Denied by Link Policy. Under these rules
 Denied by Link Policy is never emitted with ETU or ELD. Generation Time
 may accompany it, subject to the guidance below.
 
