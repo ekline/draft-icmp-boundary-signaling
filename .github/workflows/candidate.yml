@@ -17,7 +17,7 @@ jobs:
 
     - name: "Check candidate source"
       run: |
-        test -f draft-ek-ip-enclave-boundary-signaling.md || {
+        test -f draft-ek-intarea-ip-enclave-signaling.md || {
           echo 'Rename the draft and update its docname before building the candidate.' >&2
           exit 1
         }
@@ -37,8 +37,8 @@ jobs:
     - name: "Check candidate revision"
       id: build
       run: |
-        test -s versioned/draft-ek-ip-enclave-boundary-signaling-00.xml
-        test -s versioned/draft-ek-ip-enclave-boundary-signaling-00.txt
+        test -s versioned/draft-ek-intarea-ip-enclave-signaling-00.xml
+        test -s versioned/draft-ek-intarea-ip-enclave-signaling-00.txt
 
     - name: "Validate candidate in submission mode"
       uses: martinthomson/i-d-template@v1
@@ -54,5 +54,5 @@ jobs:
         name: submission-candidate
         if-no-files-found: error
         path: |
-          versioned/draft-ek-ip-enclave-boundary-signaling-00.xml
-          versioned/draft-ek-ip-enclave-boundary-signaling-00.txt
+          versioned/draft-ek-intarea-ip-enclave-signaling-00.xml
+          versioned/draft-ek-intarea-ip-enclave-signaling-00.txt

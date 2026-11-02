@@ -3,7 +3,7 @@ title: "IP Enclave Boundary Signaling"
 abbrev: "IP Enclave Boundary Signaling"
 category: exp
 
-docname: draft-ek-ip-enclave-boundary-signaling-latest
+docname: draft-ek-intarea-ip-enclave-signaling-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
@@ -23,7 +23,7 @@ venue:
   mail: int-area@ietf.org
   arch: https://mailarchive.ietf.org/arch/browse/int-area/
   github: "ekline/draft-icmp-boundary-signaling"
-  latest: "https://ekline.github.io/draft-icmp-boundary-signaling/draft-ek-ip-enclave-boundary-signaling.html"
+  latest: "https://ekline.github.io/draft-icmp-boundary-signaling/draft-ek-intarea-ip-enclave-signaling.html"
 
 author:
  -
