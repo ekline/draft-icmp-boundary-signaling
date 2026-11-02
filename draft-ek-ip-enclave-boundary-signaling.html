@@ -1852,10 +1852,9 @@ different questions and may both be relevant to one flow over time: a
 link can be simultaneously restricted and unavailable. Admission is
 evaluated first (<a href="#generation" class="auto internal xref">Section 6</a>). Traffic that would be refused
 regardless of link state receives the administrative prohibition
-error, optionally with the Denied by Link Policy object, but the error
-<span class="bcp14">MUST NOT</span> carry ETU or ELD, which could disclose link characteristics to traffic
-that could not use the link anyway. Generation Time without ETU remains
-discouraged, not prohibited (<a href="#applicability-objects" class="auto internal xref">Section 5.4</a>). Traffic
+error, optionally with the Denied by Link Policy object. ETU and ELD
+are excluded as specified in <a href="#applicability-objects" class="auto internal xref">Section 5.4</a>. Generation Time
+without ETU remains discouraged, not prohibited. Traffic
 that is admitted but whose link is not presently usable receives the
 ordinary unreachable error, optionally with availability metadata. A
 sender whose denial is resolved through provisioning may then receive
@@ -2535,8 +2534,7 @@ ICMPv6 Type 1 code 1 (<a href="#carriers-policy" class="auto internal xref">Sect
 Expected Link Delay: they reveal characteristics of a link to which
 the invoking traffic was not admitted, and admission is evaluated
 before any link state is disclosed (<a href="#generation" class="auto internal xref">Section 6</a>). An availability
-carrier <span class="bcp14">MUST NOT</span> carry Denied by Link Policy, since an admitted packet
-was by definition not refused by admission policy. Under these rules
+carrier <span class="bcp14">MUST NOT</span> carry Denied by Link Policy. Under these rules
 Denied by Link Policy is never emitted with ETU or ELD. Generation Time
 may accompany it, subject to the guidance below.<a href="#section-5.4-3" class="pilcrow">¶</a></p>
 <p id="section-5.4-4">Generation Time <span class="bcp14">SHOULD NOT</span> be sent without Expected Time Until Link
