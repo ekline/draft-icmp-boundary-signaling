@@ -9,7 +9,7 @@ Expires: 6 May 2027
 
 
                      IP Enclave Boundary Signaling
-             draft-ek-ip-enclave-boundary-signaling-latest
+              draft-ek-intarea-ip-enclave-signaling-latest
 
 Abstract
 
@@ -35,10 +35,10 @@ About This Document
    This note is to be removed before publishing as an RFC.
 
    The latest revision of this draft can be found at
-   https://ekline.github.io/draft-icmp-boundary-signaling/draft-ek-ip-
-   enclave-boundary-signaling.html.  Status information for this
+   https://ekline.github.io/draft-icmp-boundary-signaling/draft-ek-
+   intarea-ip-enclave-signaling.html.  Status information for this
    document may be found at https://datatracker.ietf.org/doc/draft-ek-
-   ip-enclave-boundary-signaling/.
+   intarea-ip-enclave-signaling/.
 
    Discussion of this document takes place on the INTAREA Working Group
    mailing list (mailto:int-area@ietf.org), which is archived at
