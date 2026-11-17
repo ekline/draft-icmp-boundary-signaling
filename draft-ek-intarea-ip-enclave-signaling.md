@@ -28,7 +28,7 @@ venue:
 author:
  -
     fullname: "Erik Kline"
-    organization: Aalyria Technologies, Inc.
+    organization: Aalyria Technologies Inc.
     email: "ek.ietf@gmail.com"
 
 normative:
@@ -493,12 +493,21 @@ consults the gateway's own logs and counters ({{operational}});
 obtaining admission is a provisioning action. The application may
 reconsider its communication mechanism ({{uc-handoff}}).
 
-A flow that policy admitted at contact start and later displaces in
-favor of higher-precedence traffic falls under the same object.
-Whether an implementation regards this internally as preemption,
-resource allocation, or precedence enforcement is a matter of local
-policy; the sender learns only that the traffic is not presently
-admitted.
+Admission policy can change during a contact. For example, policy can
+admit a flow at contact start and later give contact capacity to
+higher-precedence traffic. The applicable admission policy can then
+withdraw permission for that flow to use the managed service. In that
+case, the flow is not admitted, and the same object can apply. The
+sender learns only that the traffic is not presently admitted.
+
+Loss of traffic that stays admitted is different. Scheduling
+preference, queue overflow, or congestion can cause this loss, but
+this loss alone is not a refusal by admission policy. The internal
+name that an implementation uses, such as "preemption" or "resource
+allocation", does not decide whether the object applies. In all cases,
+the gateway generates the administrative prohibition error only when
+ordinary ICMP rules and local response policy call for it
+({{generation}}).
 
 ### Plan/Reality Divergence {#uc-divergence}
 
@@ -991,6 +1000,10 @@ of the object does not establish that the refusal came from some
 other control, that no boundary-link policy exists, or that the
 application has no alternatives.
 
+Congestion, queue overflow, or scheduling competition that affects
+traffic that stays admitted is not a basis for this object
+({{uc-denied}}).
+
 Generating the object is optional and subject to disclosure policy
 ({{generation}}). Its presence does not promise permanent denial,
 prove that waiting could never help, require the receiver to change
@@ -1043,6 +1056,12 @@ in the other cases those documents prohibit. Nothing in this document
 suppresses a Destination Unreachable error that those documents
 otherwise require, and uncertainty about whether an optional object
 can be supported never suppresses the underlying error.
+
+This specification does not define congestion signaling. A gateway
+MUST NOT generate a Destination Unreachable error only to report
+congestion or to carry a Link Condition Object. In particular,
+{{Section 3.1 of RFC4443}} prohibits generating an ICMPv6 message when
+the invoking packet is dropped because of congestion.
 
 On receiving trans-boundary traffic, a gateway proceeds as follows:
 
