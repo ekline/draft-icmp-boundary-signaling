@@ -24,7 +24,7 @@ how transports, applications, or hosts react to them; making the
 boundary's knowledge available to senders is intended to enable
 experimentation with such reactions. 
     " name="description">
-<meta content="xml2rfc 3.34.1" name="generator">
+<meta content="xml2rfc 3.35.0" name="generator">
 <meta content="IP enclave" name="keyword">
 <meta content="delay/disruption links" name="keyword">
 <meta content="ICMP" name="keyword">
@@ -32,19 +32,19 @@ experimentation with such reactions.
 <meta content="ICMPv6" name="keyword">
 <meta content="draft-ek-intarea-ip-enclave-signaling-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.1
-    Python 3.14.8
-    ConfigArgParse 1.8.0
+  xml2rfc 3.35.0
+    Python 3.14.10
+    ConfigArgParse 1.9.0
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.13.4
+    platformdirs 4.14.3
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.9.2
+    wcwidth 0.9.4
 -->
 <link href="draft-ek-intarea-ip-enclave-signaling.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1045,7 +1045,7 @@ svg {
   & :is([stroke="white"], [stroke^="#fff"]) {
     stroke: var(--background-color);
   }
-  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+  & :is([fill="black"], [fill^="#000"], :not([fill], [fill] *)) {
     fill: var(--text-color);
   }
   & :is([fill="white"], [fill^="#fff"]) {
@@ -1064,7 +1064,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Kline</td>
-<td class="center">Expires 6 May 2027</td>
+<td class="center">Expires 21 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1077,17 +1077,17 @@ svg {
 <dd class="internet-draft">draft-ek-intarea-ip-enclave-signaling-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-11-02" class="published">2 November 2026</time>
+<time datetime="2026-11-17" class="published">17 November 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-05-06">6 May 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-21">21 May 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
       <div class="author-name">E. Kline</div>
-<div class="org">Aalyria Technologies, Inc.</div>
+<div class="org">Aalyria Technologies Inc.</div>
 </div>
 </dd>
 </dl>
@@ -1147,7 +1147,7 @@ experimentation with such reactions.<a href="#section-abstract-1" class="pilcrow
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 6 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 21 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1815,12 +1815,20 @@ is granted through the control plane. The operator debugging the flow
 consults the gateway's own logs and counters (<a href="#operational" class="auto internal xref">Section 9</a>);
 obtaining admission is a provisioning action. The application may
 reconsider its communication mechanism (<a href="#uc-handoff" class="auto internal xref">Section 4.4.2</a>).<a href="#section-4.4.3-1" class="pilcrow">¶</a></p>
-<p id="section-4.4.3-2">A flow that policy admitted at contact start and later displaces in
-favor of higher-precedence traffic falls under the same object.
-Whether an implementation regards this internally as preemption,
-resource allocation, or precedence enforcement is a matter of local
-policy; the sender learns only that the traffic is not presently
-admitted.<a href="#section-4.4.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.4.3-2">Admission policy can change during a contact. For example, policy can
+admit a flow at contact start and later give contact capacity to
+higher-precedence traffic. The applicable admission policy can then
+withdraw permission for that flow to use the managed service. In that
+case, the flow is not admitted, and the same object can apply. The
+sender learns only that the traffic is not presently admitted.<a href="#section-4.4.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.4.3-3">Loss of traffic that stays admitted is different. Scheduling
+preference, queue overflow, or congestion can cause this loss, but
+this loss alone is not a refusal by admission policy. The internal
+name that an implementation uses, such as "preemption" or "resource
+allocation", does not decide whether the object applies. In all cases,
+the gateway generates the administrative prohibition error only when
+ordinary ICMP rules and local response policy call for it
+(<a href="#generation" class="auto internal xref">Section 6</a>).<a href="#section-4.4.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="uc-divergence">
@@ -2461,10 +2469,13 @@ of any other length does not establish it (<a href="#common" class="auto interna
 of the object does not establish that the refusal came from some
 other control, that no boundary-link policy exists, or that the
 application has no alternatives.<a href="#section-5.3.5-3" class="pilcrow">¶</a></p>
-<p id="section-5.3.5-4">Generating the object is optional and subject to disclosure policy
+<p id="section-5.3.5-4">Congestion, queue overflow, or scheduling competition that affects
+traffic that stays admitted is not a basis for this object
+(<a href="#uc-denied" class="auto internal xref">Section 4.4.3</a>).<a href="#section-5.3.5-4" class="pilcrow">¶</a></p>
+<p id="section-5.3.5-5">Generating the object is optional and subject to disclosure policy
 (<a href="#generation" class="auto internal xref">Section 6</a>). Its presence does not promise permanent denial,
 prove that waiting could never help, require the receiver to change
-mechanisms, or authorize evading policy.<a href="#section-5.3.5-4" class="pilcrow">¶</a></p>
+mechanisms, or authorize evading policy.<a href="#section-5.3.5-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2564,43 +2575,48 @@ in the other cases those documents prohibit. Nothing in this document
 suppresses a Destination Unreachable error that those documents
 otherwise require, and uncertainty about whether an optional object
 can be supported never suppresses the underlying error.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<p id="section-6-2">On receiving trans-boundary traffic, a gateway proceeds as follows:<a href="#section-6-2" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-6-3">
-<li id="section-6-3.1">
-          <p id="section-6-3.1.1">Assess the current coordinated forwarding and service state for
+<p id="section-6-2">This specification does not define congestion signaling. A gateway
+<span class="bcp14">MUST NOT</span> generate a Destination Unreachable error only to report
+congestion or to carry a Link Condition Object. In particular,
+<span><a href="https://rfc-editor.org/rfc/rfc4443#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> prohibits generating an ICMPv6 message when
+the invoking packet is dropped because of congestion.<a href="#section-6-2" class="pilcrow">¶</a></p>
+<p id="section-6-3">On receiving trans-boundary traffic, a gateway proceeds as follows:<a href="#section-6-3" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6-4">
+<li id="section-6-4.1">
+          <p id="section-6-4.1.1">Assess the current coordinated forwarding and service state for
 the traffic, including whether a policy-permitted path within the
 coordination scope is presently available to serve it. If so, use
-that path and attach nothing.<a href="#section-6-3.1.1" class="pilcrow">¶</a></p>
+that path and attach nothing.<a href="#section-6-4.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li id="section-6-3.2">
-          <p id="section-6-3.2.1">Apply the long-haul service's admission policy before disclosing
-any link state or prediction.<a href="#section-6-3.2.1" class="pilcrow">¶</a></p>
+        <li id="section-6-4.2">
+          <p id="section-6-4.2.1">Apply the long-haul service's admission policy before disclosing
+any link state or prediction.<a href="#section-6-4.2.1" class="pilcrow">¶</a></p>
 </li>
-        <li id="section-6-3.3">
-          <p id="section-6-3.3.1">If the traffic is not admitted, drop it. Where ordinary rules and
+        <li id="section-6-4.3">
+          <p id="section-6-4.3.1">If the traffic is not admitted, drop it. Where ordinary rules and
 local response policy call for one, generate the appropriate
 administrative prohibition error (<a href="#carriers-policy" class="auto internal xref">Section 5.2.1.2</a>); where
 disclosure policy permits, attach the Denied by Link Policy object
 (<a href="#applicability-objects" class="auto internal xref">Section 5.4</a>). Denial of admission
 to one long-haul service does not by itself mean no policy-permitted
-managed alternative exists; step 1 addresses that.<a href="#section-6-3.3.1" class="pilcrow">¶</a></p>
+managed alternative exists; step 1 addresses that.<a href="#section-6-4.3.1" class="pilcrow">¶</a></p>
 </li>
-        <li id="section-6-3.4">
-          <p id="section-6-3.4.1">If the traffic is admitted but cannot be forwarded because the
+        <li id="section-6-4.4">
+          <p id="section-6-4.4.1">If the traffic is admitted but cannot be forwarded because the
 selected link is presently unusable, drop it and generate the
 Destination Unreachable error that ordinary ICMP rules call for. If
 the conditions of <a href="#ltu" class="auto internal xref">Section 5.2</a> are satisfied and the code is an eligible
 availability carrier (<a href="#carriers-avail" class="auto internal xref">Section 5.2.1.1</a>), the gateway <span class="bcp14">MAY</span> attach
 Expected Time Until Link Usability, Generation Time, and Expected
-Link Delay objects.<a href="#section-6-3.4.1" class="pilcrow">¶</a></p>
+Link Delay objects.<a href="#section-6-4.4.1" class="pilcrow">¶</a></p>
 </li>
-        <li id="section-6-3.5">
-          <p id="section-6-3.5.1">If the traffic is admitted and the link is usable, forward it
+        <li id="section-6-4.5">
+          <p id="section-6-4.5.1">If the traffic is admitted and the link is usable, forward it
 normally. A forwarded packet <span class="bcp14">MUST NOT</span> elicit a Destination
-Unreachable error.<a href="#section-6-3.5.1" class="pilcrow">¶</a></p>
+Unreachable error.<a href="#section-6-4.5.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-6-4">The restrictions in this section govern attaching Link Condition
+<p id="section-6-5">The restrictions in this section govern attaching Link Condition
 Objects; they do not alter when ordinary Destination Unreachable
 errors are generated. A gateway <span class="bcp14">MUST NOT</span> attach any Link Condition
 Object whose assertion it cannot establish from a sufficiently current
@@ -2613,27 +2629,27 @@ the coordination scope is presently available for the traffic, and
 state alone (<a href="#applicability" class="auto internal xref">Section 3</a>). Whenever an object's basis is
 missing, the object is withheld by policy, or an estimate is out of
 range (<a href="#durations" class="auto internal xref">Section 5.3.1</a>), the gateway omits that object and sends the
-ordinary error.<a href="#section-6-4" class="pilcrow">¶</a></p>
-<p id="section-6-5">A gateway <span class="bcp14">MUST NOT</span> send an ETU value not derived from its current
+ordinary error.<a href="#section-6-5" class="pilcrow">¶</a></p>
+<p id="section-6-6">A gateway <span class="bcp14">MUST NOT</span> send an ETU value not derived from its current
 managed-service knowledge, and <span class="bcp14">MUST NOT</span> report an expired estimate
 clamped to zero. A gateway <span class="bcp14">MAY</span> send ETU without Generation Time; it
 <span class="bcp14">SHOULD NOT</span> send Generation Time without ETU
-(<a href="#applicability-objects" class="auto internal xref">Section 5.4</a>).<a href="#section-6-5" class="pilcrow">¶</a></p>
-<p id="section-6-6">Attachment of every Link Condition Object <span class="bcp14">MUST</span> be configurable per
+(<a href="#applicability-objects" class="auto internal xref">Section 5.4</a>).<a href="#section-6-6" class="pilcrow">¶</a></p>
+<p id="section-6-7">Attachment of every Link Condition Object <span class="bcp14">MUST</span> be configurable per
 policy. An operator <span class="bcp14">MUST</span> be able to configure, per source, prefix, or
 policy class, whether an administrative prohibition error is generated
 at all for refused traffic, the alternative being silent discard, and
 independently whether the Denied by Link Policy object is attached to
 it. An operator <span class="bcp14">SHOULD</span> be able to configure omission of the
-availability metadata objects (<a href="#security" class="auto internal xref">Section 11</a>).<a href="#section-6-6" class="pilcrow">¶</a></p>
-<p id="section-6-7">A gateway <span class="bcp14">MUST NOT</span> attach Link Condition Objects to messages sent
+availability metadata objects (<a href="#security" class="auto internal xref">Section 11</a>).<a href="#section-6-7" class="pilcrow">¶</a></p>
+<p id="section-6-8">A gateway <span class="bcp14">MUST NOT</span> attach Link Condition Objects to messages sent
 toward the constrained long-haul link, and <span class="bcp14">MUST NOT</span> attach them in
-response to traffic arriving from it (<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-6-7" class="pilcrow">¶</a></p>
-<p id="section-6-8">ICMP delivery is unreliable and rate limited. A gateway <span class="bcp14">MUST NOT</span>
+response to traffic arriving from it (<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-6-8" class="pilcrow">¶</a></p>
+<p id="section-6-9">ICMP delivery is unreliable and rate limited. A gateway <span class="bcp14">MUST NOT</span>
 assume that a sender received any particular notification; it
 generates a fresh notification, subject to rate limiting, for each
 invoking packet that meets the conditions above, using its current
-applicable knowledge.<a href="#section-6-8" class="pilcrow">¶</a></p>
+applicable knowledge.<a href="#section-6-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="receiver">
@@ -3319,7 +3335,7 @@ and the final text are the responsibility of the author.<a href="#appendix-B-1" 
       </h2>
 <address class="vcard">
         <div dir="auto" class="left"><span class="fn nameRole">Erik Kline</span></div>
-<div dir="auto" class="left"><span class="org">Aalyria Technologies, Inc.</span></div>
+<div dir="auto" class="left"><span class="org">Aalyria Technologies Inc.</span></div>
 <div class="email">
 <span>Email:</span>
 <a href="mailto:ek.ietf@gmail.com" class="email">ek.ietf@gmail.com</a>
