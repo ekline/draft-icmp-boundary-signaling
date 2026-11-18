@@ -34,13 +34,13 @@ experimentation with such reactions.
 <!-- Generator version information:
   xml2rfc 3.35.0
     Python 3.14.10
-    ConfigArgParse 1.9.0
+    ConfigArgParse 1.10.1
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.14.3
+    platformdirs 4.14.7
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
@@ -1064,7 +1064,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Kline</td>
-<td class="center">Expires 21 May 2027</td>
+<td class="center">Expires 22 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1077,12 +1077,12 @@ svg {
 <dd class="internet-draft">draft-ek-intarea-ip-enclave-signaling-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-11-17" class="published">17 November 2026</time>
+<time datetime="2026-11-18" class="published">18 November 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-05-21">21 May 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-22">22 May 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1147,7 +1147,7 @@ experimentation with such reactions.<a href="#section-abstract-1" class="pilcrow
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 21 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 22 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1815,20 +1815,15 @@ is granted through the control plane. The operator debugging the flow
 consults the gateway's own logs and counters (<a href="#operational" class="auto internal xref">Section 9</a>);
 obtaining admission is a provisioning action. The application may
 reconsider its communication mechanism (<a href="#uc-handoff" class="auto internal xref">Section 4.4.2</a>).<a href="#section-4.4.3-1" class="pilcrow">¶</a></p>
-<p id="section-4.4.3-2">Admission policy can change during a contact. For example, policy can
-admit a flow at contact start and later give contact capacity to
-higher-precedence traffic. The applicable admission policy can then
-withdraw permission for that flow to use the managed service. In that
-case, the flow is not admitted, and the same object can apply. The
-sender learns only that the traffic is not presently admitted.<a href="#section-4.4.3-2" class="pilcrow">¶</a></p>
-<p id="section-4.4.3-3">Loss of traffic that stays admitted is different. Scheduling
-preference, queue overflow, or congestion can cause this loss, but
-this loss alone is not a refusal by admission policy. The internal
-name that an implementation uses, such as "preemption" or "resource
-allocation", does not decide whether the object applies. In all cases,
-the gateway generates the administrative prohibition error only when
-ordinary ICMP rules and local response policy call for it
-(<a href="#generation" class="auto internal xref">Section 6</a>).<a href="#section-4.4.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.4.3-2">A contact can start with a flow admitted. To serve higher-precedence
+traffic, the admission policy can later withdraw that flow's permission
+to use the managed service. The gateway can attach the object if
+ordinary ICMP rules and local response policy call for an
+administrative prohibition error (<a href="#generation" class="auto internal xref">Section 6</a>).<a href="#section-4.4.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.4.3-3">If the flow remains admitted, scheduling preference, queue overflow,
+or congestion does not constitute refusal. An internal label such as
+"preemption" or "resource allocation" does not determine whether the
+object applies.<a href="#section-4.4.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="uc-divergence">
@@ -1857,14 +1852,14 @@ failure (<a href="#operational" class="auto internal xref">Section 9</a>).<a hre
         </h3>
 <p id="section-4.5-1">The availability metadata and the Denied by Link Policy object answer
 different questions and may both be relevant to one flow over time: a
-link can be simultaneously restricted and unavailable. Admission is
-evaluated first (<a href="#generation" class="auto internal xref">Section 6</a>). Traffic that would be refused
-regardless of link state receives the administrative prohibition
-error, optionally with the Denied by Link Policy object. ETU and ELD
+link can be both restricted and unavailable. The gateway checks
+admission before it discloses link state (<a href="#generation" class="auto internal xref">Section 6</a>). If policy
+refuses the traffic, the gateway can attach the Denied by Link Policy
+object to an otherwise justified administrative prohibition error. ETU and ELD
 are excluded as specified in <a href="#applicability-objects" class="auto internal xref">Section 5.4</a>. Generation Time
 without ETU remains discouraged, not prohibited. Traffic
-that is admitted but whose link is not presently usable receives the
-ordinary unreachable error, optionally with availability metadata. A
+that is admitted but cannot be forwarded because its link is unusable
+can elicit an ordinary unreachable error with availability metadata. A
 sender whose denial is resolved through provisioning may then receive
 a metadata-bearing unreachable error for the same flow: first become
 admissible, then wait for the link.<a href="#section-4.5-1" class="pilcrow">¶</a></p>
@@ -2469,8 +2464,8 @@ of any other length does not establish it (<a href="#common" class="auto interna
 of the object does not establish that the refusal came from some
 other control, that no boundary-link policy exists, or that the
 application has no alternatives.<a href="#section-5.3.5-3" class="pilcrow">¶</a></p>
-<p id="section-5.3.5-4">Congestion, queue overflow, or scheduling competition that affects
-traffic that stays admitted is not a basis for this object
+<p id="section-5.3.5-4">For traffic that remains admitted, congestion, queue overflow, or
+scheduling competition does not justify attaching this object
 (<a href="#uc-denied" class="auto internal xref">Section 4.4.3</a>).<a href="#section-5.3.5-4" class="pilcrow">¶</a></p>
 <p id="section-5.3.5-5">Generating the object is optional and subject to disclosure policy
 (<a href="#generation" class="auto internal xref">Section 6</a>). Its presence does not promise permanent denial,
