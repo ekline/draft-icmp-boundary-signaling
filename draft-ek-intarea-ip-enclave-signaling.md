@@ -493,21 +493,16 @@ consults the gateway's own logs and counters ({{operational}});
 obtaining admission is a provisioning action. The application may
 reconsider its communication mechanism ({{uc-handoff}}).
 
-Admission policy can change during a contact. For example, policy can
-admit a flow at contact start and later give contact capacity to
-higher-precedence traffic. The applicable admission policy can then
-withdraw permission for that flow to use the managed service. In that
-case, the flow is not admitted, and the same object can apply. The
-sender learns only that the traffic is not presently admitted.
+A contact can start with a flow admitted. To serve higher-precedence
+traffic, the admission policy can later withdraw that flow's permission
+to use the managed service. The gateway can attach the object if
+ordinary ICMP rules and local response policy call for an
+administrative prohibition error ({{generation}}).
 
-Loss of traffic that stays admitted is different. Scheduling
-preference, queue overflow, or congestion can cause this loss, but
-this loss alone is not a refusal by admission policy. The internal
-name that an implementation uses, such as "preemption" or "resource
-allocation", does not decide whether the object applies. In all cases,
-the gateway generates the administrative prohibition error only when
-ordinary ICMP rules and local response policy call for it
-({{generation}}).
+If the flow remains admitted, scheduling preference, queue overflow,
+or congestion does not constitute refusal. An internal label such as
+"preemption" or "resource allocation" does not determine whether the
+object applies.
 
 ### Plan/Reality Divergence {#uc-divergence}
 
@@ -526,14 +521,14 @@ failure ({{operational}}).
 
 The availability metadata and the Denied by Link Policy object answer
 different questions and may both be relevant to one flow over time: a
-link can be simultaneously restricted and unavailable. Admission is
-evaluated first ({{generation}}). Traffic that would be refused
-regardless of link state receives the administrative prohibition
-error, optionally with the Denied by Link Policy object. ETU and ELD
+link can be both restricted and unavailable. The gateway checks
+admission before it discloses link state ({{generation}}). If policy
+refuses the traffic, the gateway can attach the Denied by Link Policy
+object to an otherwise justified administrative prohibition error. ETU and ELD
 are excluded as specified in {{applicability-objects}}. Generation Time
 without ETU remains discouraged, not prohibited. Traffic
-that is admitted but whose link is not presently usable receives the
-ordinary unreachable error, optionally with availability metadata. A
+that is admitted but cannot be forwarded because its link is unusable
+can elicit an ordinary unreachable error with availability metadata. A
 sender whose denial is resolved through provisioning may then receive
 a metadata-bearing unreachable error for the same flow: first become
 admissible, then wait for the link.
@@ -1000,8 +995,8 @@ of the object does not establish that the refusal came from some
 other control, that no boundary-link policy exists, or that the
 application has no alternatives.
 
-Congestion, queue overflow, or scheduling competition that affects
-traffic that stays admitted is not a basis for this object
+For traffic that remains admitted, congestion, queue overflow, or
+scheduling competition does not justify attaching this object
 ({{uc-denied}}).
 
 Generating the object is optional and subject to disclosure policy
