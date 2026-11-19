@@ -698,36 +698,30 @@ For ICMPv4, per {{Section 4.3.3.1 of RFC1812}} and
 | Type 3 Code | Name | Eligibility |
 |------------:|:-----|:------------|
 | 0 | Network unreachable | Eligible when ordinary forwarding failure warrants Network Unreachable, such as absence of any route to the destination network. |
-| 1 | Host unreachable | Eligible when ordinary forwarding failure warrants Host Unreachable; see the note below. |
+| 1 | Host unreachable | Eligible when ordinary forwarding failure warrants Host Unreachable; see the IPv4 scope clarification below. |
 {: #tab-carriers-v4 title="Eligible ICMPv4 Availability Carrier Codes"}
 
-The existence of a managed service and the presence of a currently
-usable forwarding-table entry are distinct. A domain may withdraw the
-route to a destination between contacts while retaining knowledge of
-the future service, yielding No Route or Network Unreachable; or it
-may retain a route toward a presently unusable link, yielding Address
-Unreachable. Both are legitimate carriers. This document does not
-require a particular routing implementation, and a gateway that would
-have sent a given code before implementing this specification does not
-change that code because of it.
+A domain can withdraw a route between contacts and still retain
+knowledge of the future service. In IPv6, if the gateway instead
+retains the route but the required link is unusable, Address
+Unreachable can apply when no more specific code applies.
 
-Editor's note (IPv4 applicability, to be resolved before RFC publication):
-{{RFC1812}}'s code-specific text ties Host Unreachable to a
-destination on a directly connected network, while its general
-Destination Unreachable text covers an unreachable next hop.
-Implementations are known to send Host Unreachable on transit-link
-failure, but that is precedent rather than mandate, and ICMPv4 has no
-residual code equivalent to ICMPv6 Address Unreachable. The
-retained-route, unusable-transit-link case therefore requires an
-explicit IPv4 applicability clarification that this document does not
-yet supply. The worked examples in {{example}} use ICMPv6 so that
-their interpretation does not depend on resolving this point.
+For IPv4, this specification defines no new code-selection rule for a
+retained route whose required transit link is unusable. An otherwise
+valid ICMPv4 Type 3 Code 0 or Code 1 error can carry availability
+metadata when all conditions in {{ltu}} are met. Carrier eligibility
+does not change when the gateway generates the underlying error. If
+ordinary ICMP processing produces no eligible error, this specification
+provides no availability-metadata notification for that case. A gateway
+need not change the selected code or withdraw a route to obtain an
+eligible carrier.
 
 #### Policy Carriers {#carriers-policy}
 
-The Denied by Link Policy object may be carried on the following
-codes, whose existing definitions already cover administrative refusal
-of a packet:
+A gateway can attach the Denied by Link Policy object only if the
+error it generates under ordinary ICMP rules uses a code listed below.
+If ordinary processing selects another code, the gateway retains that
+code and omits the object.
 
 | IP version | Type | Code | Existing meaning |
 |:-----------|-----:|-----:|:-----------------|
@@ -1068,11 +1062,12 @@ On receiving trans-boundary traffic, a gateway proceeds as follows:
 2. Apply the long-haul service's admission policy before disclosing
    any link state or prediction.
 
-3. If the traffic is not admitted, drop it. Where ordinary rules and
-   local response policy call for one, generate the appropriate
-   administrative prohibition error ({{carriers-policy}}); where
-   disclosure policy permits, attach the Denied by Link Policy object
-   ({{applicability-objects}}). Denial of admission
+3. If the traffic is not admitted, drop it. Generate an error only as
+   called for by ordinary ICMP rules and local response policy. If the
+   error uses an eligible policy carrier ({{carriers-policy}}) and
+   disclosure policy permits, the gateway may attach the Denied by Link
+   Policy object ({{applicability-objects}}). If ordinary processing
+   selects another code, retain it and omit the object. Denial of admission
    to one long-haul service does not by itself mean no policy-permitted
    managed alternative exists; step 1 addresses that.
 
