@@ -1338,54 +1338,25 @@ experimentation with such reactions.<a href="#section-abstract-1" class="pilcrow
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">Some IP enclaves are connected to the rest of a network only by
-constrained long-haul links that are high-delay, periodically disrupted,
-or both: deep-space links, satellite links available only during
-scheduled passes, periodic store-and-forward contacts. An administrative
-domain, or a set of cooperating domains, manages those links: it knows
-from a contact plan or equivalent scheduling knowledge when each link is
-expected to carry traffic, it enforces an admission policy describing
-whose traffic each link will carry, and it can distribute routing
-updates to migrate long-haul traffic onto the best current or next link
-according to its policy. An IP sender inside such an enclave may lack
-this knowledge. Ordinary errors do not communicate the managed service's
-recovery estimate or identify boundary-link admission as the source of
-a policy refusal.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">Existing Destination Unreachable messages already report the
-forwarding failures that result. This document defines optional ICMP
-extension objects <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> that let a gateway in such a domain
-supply additional information on those messages. On the unreachable
-errors generated when an admitted packet cannot be forwarded because
-the required link is presently unusable, the gateway may attach the
-time at which it generated the message, its estimate of the time until
-the link becomes usable, and the approximate one-way delay of the
-link. On the administrative prohibition errors generated when the
-link's admission policy refuses a packet, it may attach a
-presence-only object indicating that boundary-link admission policy,
-rather than some other administrative control, was the source of the
-refusal. The underlying code retains its existing meaning in every
-case (<a href="#common" class="auto internal xref">Section 5.1</a>).<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">This document specifies the network-layer signals: when a gateway may
-attach each object, what each asserts, and its encoding. It does not
-specify how a transport, application, host cache, provisioning system,
-or orchestrator reacts to them. Such reactions are not required for
-interoperability, and they are not merely out of scope: a purpose of
-publishing the objects is to enable experimentation with them
-(<a href="#consumers" class="auto internal xref">Section 7.2</a>, <a href="#experiment" class="auto internal xref">Section 10</a>). The availability metadata is useful
-because the boundary is close and the condition is long-lived: gateway
-feedback reaches senders in local round-trip times, while the
-unavailability it reports lasts minutes to hours (<a href="#applicability" class="auto internal xref">Section 3</a>).
-The policy indication is useful for a different reason: it identifies
-the source of the refusal and may prompt an application to reconsider
-its configured communication options. It does not establish that a
-change will succeed or that policy cannot change over time.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">Where an application can learn in advance which communication
-mechanisms suit a destination -- through configuration, provisioning,
-DNS, or orchestration -- selecting an appropriate mechanism before
-initiating unsuitable IP communication is preferable to discovering
-the condition reactively. Such discovery and selection mechanisms are
-out of scope for this document, which addresses only what a gateway
-reports once a packet has been sent.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-1">Some IP enclaves reach other networks only over managed long-haul
+links, such as a satellite link available during scheduled passes.
+A boundary gateway can report a forwarding failure in a local
+round-trip time even when the interruption lasts hours. An ordinary
+Destination Unreachable error does not tell the sender when the
+link is expected to become usable. An administrative prohibition
+error alone does not identify which policy refused the packet.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">This document defines optional ICMP extension objects <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> for
+existing Destination Unreachable errors. If an admitted packet cannot
+be forwarded because its required link is unusable, the gateway can
+report the message generation time, the expected time until the link
+is usable, and the expected one-way link delay. If the managed
+service's admission policy refuses the packet, a presence-only object
+can identify that policy as the source of the refusal. The gateway
+follows its usual rules to decide whether to send an error and which
+code to use (<a href="#carriers" class="auto internal xref">Section 5.2.1</a>). The objects describe why a packet could
+not be forwarded. They do not advertise services in advance. This
+document does not specify how a sender reacts to the error
+(<a href="#consumers" class="auto internal xref">Section 7.2</a>, <a href="#experiment" class="auto internal xref">Section 10</a>).<a href="#section-1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1611,34 +1582,22 @@ policy. The ICMP cases here concern packets refused or not forwarded
 by the IP forwarding service; they do not describe traffic accepted
 for delivery by a separate service. BP is not required for this ICMP
 mechanism.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
-<p id="section-4.1-4">An enclave could use the Provisioning Domain (PvD) mechanism in
-<span>[<a href="#RFC8801" class="cite xref">RFC8801</a>]</span> to make information about local communication services
-available to hosts. The existing PvD option in IPv6 Router
-Advertisements identifies a PvD and indicates whether PvD Additional
-Information is available. Hosts can retrieve this additional
-information as a JSON object over HTTPS.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
-<p id="section-4.1-5">Future work could define information describing an enclave-local SMTP
-submission or relay service, a Bundle Protocol agent, or other
-communication services. Such work is expected to extend the JSON
-information supplied through the HTTPS interface, including the
-meaning and applicability of new information keys. It would reuse the
-existing RA discovery mechanism; no new RA options are envisaged for
-these service descriptions.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
-<p id="section-4.1-6">Hosts could obtain this information independently of the ICMP
-indications specified here. Applications could consult it when
-initially selecting a communication mechanism or when reconsidering
-that choice after receiving an indication. Making the information and
-its retrieval dependencies available within the enclave would allow
-it to remain useful during external-link outages. Use of an advertised
-service remains subject to application capabilities, local policy,
-and the service's authorization requirements. This document defines
-no such service-information keys or application behavior and does not
-require PvD support.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
-<p id="section-4.1-7">The same structure exists on the Earth side. A terrestrial sender's
+<p id="section-4.1-4">The Provisioning Domain (PvD) option in IPv6 Router Advertisements
+identifies a PvD and indicates whether PvD Additional Information is
+available (<span>[<a href="#RFC8801" class="cite xref">RFC8801</a>]</span>). Hosts can retrieve that information as a
+JSON object over HTTPS, independently of ICMP.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1-5">Future work could define JSON keys for local services, such as an
+SMTP submission or relay service or a Bundle Protocol agent. This
+would reuse PvD discovery without a new Router Advertisement option.
+If the information and everything needed to retrieve it are available
+within the enclave, hosts can consult it even during an external-link
+outage. This document defines no service keys or application behavior
+and does not require PvD support.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.1-6">The same structure exists on the Earth side. A terrestrial sender's
 traffic crosses an Earth-side gateway that holds the same contact plan
 and enforces its own admission policy, and that gateway generates the
 same signals toward terrestrial senders. This section describes the
-Mars side for concreteness.<a href="#section-4.1-7" class="pilcrow">¶</a></p>
+Mars side for concreteness.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="roles">
@@ -2701,18 +2660,9 @@ filtering of the carrier codes.<a href="#section-7.1-3" class="pilcrow">¶</a></
         <h3 id="name-consumer-behavior">
 <a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-consumer-behavior" class="section-name selfRef">Consumer Behavior</a>
         </h3>
-<p id="section-7.2-1">This section is informative. This document does not specify how a
-host, transport, application, or management system reacts to the
-objects, and no such reaction is required for interoperability.
-Receipt of an unreachable error carrying ETU or ELD informs the
-receiver that the domain models the path as transiently unavailable;
-ETU also indicates roughly when usability is expected. Generation Time
-alone does not indicate a failure cause. Receipt of an administrative
-prohibition error carrying Denied by Link Policy informs it that
-boundary-link admission policy
-refused the traffic. What follows are possibilities that the objects
-enable and that the experiment of <a href="#experiment" class="auto internal xref">Section 10</a> is intended to
-explore.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2-1">This section is informative. The examples below describe possible
+uses of the objects. None of these responses is required for
+interoperability.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.2-2">A host might record availability metadata to avoid immediately
 repeating attempts likely to elicit the same error. How such state
 would be keyed, how widely it would apply, how long it would live, how
@@ -2727,18 +2677,14 @@ a connection's tolerance. The remote endpoint receives no
 corresponding notification and continues to run its own timers, which
 bounds the usefulness of waiting. No TCP or QUIC behavior is defined
 here.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
-<p id="section-7.2-4">An application might be given the condition and its objects so that it
-can defer, fail fast, or reconsider its communication mechanism
-(<a href="#uc-handoff" class="auto internal xref">Section 4.4.2</a>). On learning that its present traffic was refused by
-boundary-link policy, an application with separately provisioned
-knowledge of an authorized application-layer gateway or bundle
-service might choose that mechanism instead; the object is the trigger
-to reconsider, and provisioning supplies the alternative and its
-authorization. Whether an application can receive and correlate this
-context at all, and whether the extra classification improves its
-decisions relative to an ordinary administrative prohibition error,
-are experiment questions. Whether an application interface should be
-standardized is not addressed here.<a href="#section-7.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.2-4">An application that can match an indication to its traffic might
+wait, report failure, or reconsider its communication mechanism
+(<a href="#uc-handoff" class="auto internal xref">Section 4.4.2</a>). To compare its options, it could consult service
+information obtained separately. For example, <a href="#scenario" class="auto internal xref">Section 4.1</a> describes
+how future service descriptions could use PvD Additional Information
+(<span>[<a href="#RFC8801" class="cite xref">RFC8801</a>]</span>). The ICMP indication neither identifies an alternative
+service nor grants access to one. This document does not define an
+application interface.<a href="#section-7.2-4" class="pilcrow">¶</a></p>
 <p id="section-7.2-5">Stronger reactions to unauthenticated ICMP information carry greater
 risk (<a href="#security" class="auto internal xref">Section 11</a>); which reactions are worth their risk is itself an
 experiment question.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
@@ -2751,12 +2697,9 @@ experiment question.<a href="#section-7.2-5" class="pilcrow">¶</a></p>
       <h2 id="name-legacy-host-and-middlebox-b">
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-legacy-host-and-middlebox-b" class="section-name selfRef">Legacy Host and Middlebox Behavior</a>
       </h2>
-<p id="section-8-1">Every message defined by this document is an existing Destination
-Unreachable error, optionally carrying additional information, so a
-stack that does not process <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> extensions handles it exactly
-as it handles the same error today (<a href="#common" class="auto internal xref">Section 5.1</a>). This document does
-not promise identical behavior across stacks or that any connection
-survives.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-1">A receiver that ignores the <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> extension objects can still
+process the underlying Destination Unreachable error (<a href="#common" class="auto internal xref">Section 5.1</a>).
+How it responds to that error depends on the implementation.<a href="#section-8-1" class="pilcrow">¶</a></p>
 <p id="section-8-2">For context, <span><a href="https://rfc-editor.org/rfc/rfc9293#section-3.9.2.2" class="relref">Section 3.9.2.2</a> of [<a href="#RFC9293" class="cite xref">RFC9293</a>]</span> classifies the
 availability carriers (ICMPv4 Type 3 codes 0 and 1, ICMPv6 Type 1
 codes 0 and 3) as soft errors for TCP, while noting widespread
@@ -2784,29 +2727,17 @@ Legacy hosts generate nothing new and are unaffected as senders.<a href="#sectio
 Unreachable messages, including which Link Condition Objects were
 included, and expose the counters through network management; counts
 of the carrier codes alone do not identify this experiment's activity,
-since those codes are generated for other reasons as well. A gateway
-attaching Denied by Link Policy knows which policy dimension refused
-the traffic even though the object does not convey it, and <span class="bcp14">MAY</span> log or
-report that detail through local operational telemetry, which is where
-operators debugging a refused flow should look. This document does not
+since those codes are generated for other reasons as well. If the
+gateway knows why admission policy refused the packet, it <span class="bcp14">MAY</span> report
+that reason in local telemetry. The Denied by Link Policy object does
+not carry the reason. This document does not
 prescribe a management or telemetry mechanism. Operators can use the
 counters as diagnostic evidence of possible divergence from applicable
 service expectations, not as proof of failure (<a href="#uc-divergence" class="auto internal xref">Section 4.4.4</a>).<a href="#section-9-1" class="pilcrow">¶</a></p>
-<p id="section-9-2">The orchestration model of <a href="#orchestration" class="auto internal xref">Section 4.3</a> yields several
-operational lessons. Gateways need their managed-service records to
-carry revision and validity information so that stale records are
-recognized rather than acted on. When a readiness estimate passes
-without the link becoming usable, gateways should have a supported new
-estimate or omit ETU; a countdown clamped to zero is not an estimate.
-Loss of controller connectivity is expected, and a gateway should
-continue to use a still-valid record until it expires or local
-evidence contradicts it, while ordinary error generation continues
-regardless. During routing migrations, the record consulted for a
-notification must be the one applicable to the traffic's current
-selected exit; describing a different opportunity is worse than
-attaching nothing. Operators should expect notifications to be less
-informative during transitions and after plan revisions, and should
-treat that as normal rather than as a fault.<a href="#section-9-2" class="pilcrow">¶</a></p>
+<p id="section-9-2">After a plan or route change, a gateway may have no current estimate
+for the selected link (<a href="#orchestration" class="auto internal xref">Section 4.3</a>). It can still send the
+ordinary ICMP error. The absence of an estimate does not by itself
+indicate a fault in the gateway or its controller.<a href="#section-9-2" class="pilcrow">¶</a></p>
 <p id="section-9-3">ICMP rate limiters deserve attention at contact boundaries. When a
 link becomes unusable, every active trans-boundary flow can elicit an
 unreachable error within a short interval, and a token-bucket limiter
@@ -2838,18 +2769,12 @@ in ways otherwise invisible to troubleshooting.<a href="#section-9-5" class="pil
       <h2 id="name-experimental-status-and-goa">
 <a href="#section-10" class="section-number selfRef">10. </a><a href="#name-experimental-status-and-goa" class="section-name selfRef">Experimental Status and Goals</a>
       </h2>
-<p id="section-10-1">This document is published as Experimental. The objects are specified
-normatively so that independent implementations interoperate at the
-ICMP layer. The value of the mechanism, however, rests on two kinds of
-questions that only deployment can answer: whether gateways can
-generate the objects correctly and usefully, and whether the objects
-let consumers make better decisions than the ordinary unreachable or
-administrative prohibition error alone would allow. Consumer behaviors
-are deliberately not standardized here (<a href="#consumers" class="auto internal xref">Section 7.2</a>); the experiment
-is intended to produce the experience on which later specification of
-such behaviors might be based. An extension object, like a new code,
-requires implementation support to expose a new meaning to
-applications; neither inherently solves application delivery.<a href="#section-10-1" class="pilcrow">¶</a></p>
+<p id="section-10-1">This experiment asks two questions. Can gateways generate the objects
+under the conditions specified in <a href="#generation" class="auto internal xref">Section 6</a>? Do consumers make
+better decisions when they receive the objects than when they receive
+the same ICMP errors without them? This document specifies the objects
+for interoperability. It does not prescribe a consumer response
+(<a href="#consumers" class="auto internal xref">Section 7.2</a>).<a href="#section-10-1" class="pilcrow">¶</a></p>
 <div id="exp-scope">
 <section id="section-10.1">
         <h3 id="name-scope-of-the-experiment">
@@ -2890,11 +2815,10 @@ codes gateways actually produce for the long-haul conditions in each
 IP version (<a href="#carriers" class="auto internal xref">Section 5.2.1</a>).<a href="#section-10.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-10.2-2.2">
-            <p id="section-10.2-2.2.1">Distinction: whether availability metadata usefully distinguishes
-managed transient unavailability from ordinary unreachable errors of
-the same code, and whether the Denied by Link Policy object usefully
-distinguishes boundary-link admission refusal from other
-administrative prohibition (<a href="#interaction" class="auto internal xref">Section 4.5</a>).<a href="#section-10.2-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-10.2-2.2.1">Information beyond the carrier code: does it help to know that an
+outage is transient, or that boundary-link admission policy refused
+the packet (<a href="#interaction" class="auto internal xref">Section 4.5</a>)? For policy refusals, does experience
+show a need for more detail than the object provides?<a href="#section-10.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-10.2-2.3">
             <p id="section-10.2-2.3.1">Prediction accuracy and usefulness: how closely ETU tracks actual
@@ -2926,12 +2850,6 @@ structures.<a href="#section-10.2-2.6.1" class="pilcrow">¶</a></p>
 objects is operationally acceptable, whether the disclosure controls
 of <a href="#generation" class="auto internal xref">Section 6</a> are sufficient, and whether forged or stale
 objects caused harm.<a href="#section-10.2-2.7.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-10.2-2.8">
-            <p id="section-10.2-2.8.1">Whether a coarse boundary-policy object is useful beyond the
-ordinary administrative refusal, and whether experience establishes
-a need for richer policy-denial metadata. This document does not
-speculate about the format of any such metadata.<a href="#section-10.2-2.8.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -2978,20 +2896,36 @@ faults ahead of existing monitoring.<a href="#section-10.3-2.4.1" class="pilcrow
         <h3 id="name-evidence-for-advancement">
 <a href="#section-10.4" class="section-number selfRef">10.4. </a><a href="#name-evidence-for-advancement" class="section-name selfRef">Evidence for Advancement</a>
         </h3>
-<p id="section-10.4-1">Later consideration of the mechanism for the standards track could be
-informed by evidence of: at least two independent interoperable
-implementations of the Link Condition Objects, including extension
-object processing on both carrier groups; generation accuracy in at
-least one operational, non-laboratory domain; usefulness of the
-objects beyond the ordinary errors they ride on, with unused objects
-removed rather than carried forward; manageable legacy and middlebox
-behavior; acceptable security and disclosure properties; consumer
-behaviors independently demonstrated to benefit from the objects,
-without presupposing any one receiver strategy; and evidence that the
-semantics apply across more than one class of long-haul network
-without special-case changes to the wire format. Reports of failed or
-inconclusive experiments are requested to the same degree as
-successful ones.<a href="#section-10.4-1" class="pilcrow">¶</a></p>
+<p id="section-10.4-1">The following evidence could inform later consideration for the
+standards track:<a href="#section-10.4-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-10.4-2.1">
+            <p id="section-10.4-2.1.1">At least two independent implementations interoperate on both
+carrier groups.<a href="#section-10.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-10.4-2.2">
+            <p id="section-10.4-2.2.1">Gateways generate the objects accurately in at least one
+operational domain outside the laboratory.<a href="#section-10.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-10.4-2.3">
+            <p id="section-10.4-2.3.1">Each object retained for the standards track provides information
+that is useful beyond the ordinary error alone.<a href="#section-10.4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-10.4-2.4">
+            <p id="section-10.4-2.4.1">Tests with legacy hosts and middleboxes show manageable effects.
+Security and disclosure risks are acceptable.<a href="#section-10.4-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-10.4-2.5">
+            <p id="section-10.4-2.5.1">Independent tests show a benefit to consumers without assuming a
+particular receiver strategy.<a href="#section-10.4-2.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-10.4-2.6">
+            <p id="section-10.4-2.6.1">The same semantics and wire format serve more than one class of
+long-haul network.<a href="#section-10.4-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-10.4-3">Reports of failed or inconclusive experiments are as useful as
+reports of successful ones.<a href="#section-10.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3339,10 +3273,11 @@ ordinary administrative prohibition error and nothing more
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-B-1">The author used AI-assisted tooling in preparing this document,
+<p id="appendix-B-1">The author thanks Mark Andrews for helpful discussions.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2">The author used AI-assisted tooling in preparing this document,
 including drafting and editing text and converting it to the
 kramdown-rfc source format. All technical content, design decisions,
-and the final text are the responsibility of the author.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+and the final text are the responsibility of the author.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
