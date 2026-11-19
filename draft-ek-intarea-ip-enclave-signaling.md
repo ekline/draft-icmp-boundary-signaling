@@ -357,8 +357,8 @@ acquisition, and modem configuration, it expects the link to be ready
 to forward traffic at reference time 12,520 s, and it estimates the
 one-way delay over the link at that time as 20 minutes. It installs
 or schedules the routing and admission policy needed for that link,
-and it supplies the gateway with an associated record containing at
-least:
+and supplies an associated record. In this example, the gateway uses
+the following information:
 
 - the traffic-to-service binding: the destination prefix and the
   routing or policy context to which the record applies, associated
@@ -1087,23 +1087,20 @@ clamped to zero. A gateway MAY send ETU without Generation Time; it
 SHOULD NOT send Generation Time without ETU
 ({{applicability-objects}}).
 
-Attachment of every Link Condition Object MUST be configurable per
-policy. An operator MUST be able to configure, per source, prefix, or
-policy class, whether an administrative prohibition error is generated
-at all for refused traffic, the alternative being silent discard, and
-independently whether the Denied by Link Policy object is attached to
-it. An operator SHOULD be able to configure omission of the
-availability metadata objects ({{security}}).
+An operator MUST be able to control disclosure of each Link Condition
+Object independently of whether the gateway sends the underlying error
+({{security}}). For refused traffic, the operator MUST be able to select
+silent discard or an administrative prohibition error where ordinary
+ICMP rules permit that choice. Policy can use criteria such as source,
+prefix, or traffic class.
 
 A gateway MUST NOT attach Link Condition Objects to messages sent
 toward the constrained long-haul link, and MUST NOT attach them in
 response to traffic arriving from it ({{applicability}}).
 
-ICMP delivery is unreliable and rate limited. A gateway MUST NOT
-assume that a sender received any particular notification; it
-generates a fresh notification, subject to rate limiting, for each
-invoking packet that meets the conditions above, using its current
-applicable knowledge.
+A gateway MUST NOT assume that a sender received an earlier
+notification. If it attaches objects to a later error, it uses its
+current applicable knowledge.
 
 
 # Receiver Processing {#receiver}
@@ -1212,15 +1209,8 @@ for the selected link ({{orchestration}}). It can still send the
 ordinary ICMP error. The absence of an estimate does not by itself
 indicate a fault in the gateway or its controller.
 
-ICMP rate limiters deserve attention at contact boundaries. When a
-link becomes unusable, every active trans-boundary flow can elicit an
-unreachable error within a short interval, and a token-bucket limiter
-tuned for steady-state error rates may suppress most of the burst.
-Because ICMP is unreliable and a gateway cannot know which
-notifications were received, operators SHOULD size gateway ICMP rate
-limits for the expected flow fan-out at gap onset. Hosts that act on
-the metadata to avoid repeated attempts reduce the offered load that
-would otherwise sustain the burst.
+When a contact ends, many flows can fail at once. ICMP rate limiting
+may prevent some senders from receiving a notification.
 
 ETU is only as meaningful as the gateway's knowledge of the link.
 Using Generation Time additionally depends on the receiver knowing the
@@ -1235,9 +1225,8 @@ Time. Cooperating administrative domains need a shared reference or a
 known conversion before their receivers compare timestamps; sharing an
 orchestration function does not by itself provide either.
 
-Hosts that maintain state derived from these objects SHOULD expose it
-to local diagnostics, since such state changes transmission behavior
-in ways otherwise invisible to troubleshooting.
+If a host uses stored metadata to delay another attempt, exposing
+that state to local diagnostics can help an operator explain the delay.
 
 
 # Experimental Status and Goals {#experiment}
