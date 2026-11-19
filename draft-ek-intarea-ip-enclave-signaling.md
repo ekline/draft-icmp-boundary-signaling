@@ -48,6 +48,7 @@ informative:
   RFC5927:
   RFC6069:
   RFC8799:
+  RFC8801:
   RFC8883:
   RFC9171:
   RFC9293:
@@ -315,6 +316,32 @@ policy. The ICMP cases here concern packets refused or not forwarded
 by the IP forwarding service; they do not describe traffic accepted
 for delivery by a separate service. BP is not required for this ICMP
 mechanism.
+
+An enclave could use the Provisioning Domain (PvD) mechanism in
+{{RFC8801}} to make information about local communication services
+available to hosts. The existing PvD option in IPv6 Router
+Advertisements identifies a PvD and indicates whether PvD Additional
+Information is available. Hosts can retrieve this additional
+information as a JSON object over HTTPS.
+
+Future work could define information describing an enclave-local SMTP
+submission or relay service, a Bundle Protocol agent, or other
+communication services. Such work is expected to extend the JSON
+information supplied through the HTTPS interface, including the
+meaning and applicability of new information keys. It would reuse the
+existing RA discovery mechanism; no new RA options are envisaged for
+these service descriptions.
+
+Hosts could obtain this information independently of the ICMP
+indications specified here. Applications could consult it when
+initially selecting a communication mechanism or when reconsidering
+that choice after receiving an indication. Making the information and
+its retrieval dependencies available within the enclave would allow
+it to remain useful during external-link outages. Use of an advertised
+service remains subject to application capabilities, local policy,
+and the service's authorization requirements. This document defines
+no such service-information keys or application behavior and does not
+require PvD support.
 
 The same structure exists on the Earth side. A terrestrial sender's
 traffic crosses an Earth-side gateway that holds the same contact plan
