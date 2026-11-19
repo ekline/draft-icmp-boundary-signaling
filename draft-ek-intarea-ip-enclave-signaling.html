@@ -1832,32 +1832,17 @@ failure (<a href="#operational" class="auto internal xref">Section 9</a>).<a hre
         <h3 id="name-interaction-of-the-two-sign">
 <a href="#section-4.5" class="section-number selfRef">4.5. </a><a href="#name-interaction-of-the-two-sign" class="section-name selfRef">Interaction of the Two Signals</a>
         </h3>
-<p id="section-4.5-1">The availability metadata and the Denied by Link Policy object answer
-different questions and may both be relevant to one flow over time: a
-link can be both restricted and unavailable. The gateway checks
-admission before it discloses link state (<a href="#generation" class="auto internal xref">Section 6</a>). If policy
-refuses the traffic, the gateway can attach the Denied by Link Policy
-object to an otherwise justified administrative prohibition error. ETU and ELD
-are excluded as specified in <a href="#applicability-objects" class="auto internal xref">Section 5.4</a>. Generation Time
-without ETU remains discouraged, not prohibited. Traffic
-that is admitted but cannot be forwarded because its link is unusable
-can elicit an ordinary unreachable error with availability metadata. A
-sender whose denial is resolved through provisioning may then receive
-a metadata-bearing unreachable error for the same flow: first become
-admissible, then wait for the link.<a href="#section-4.5-1" class="pilcrow">¶</a></p>
-<p id="section-4.5-2">Ordinary Destination Unreachable errors do not by themselves establish
-that service is permanently absent; <span><a href="https://rfc-editor.org/rfc/rfc1122#section-3.2.2.1" class="relref">Section 3.2.2.1</a> of [<a href="#RFC1122" class="cite xref">RFC1122</a>]</span>
-notes that they can result from routing transients, and <span>[<a href="#RFC6069" class="cite xref">RFC6069</a>]</span>
-has previously used them experimentally as indications of
-connectivity disruption. Nor does an ordinary administrative
-prohibition error identify which administrative control refused the
-packet. ETU or ELD adds to an unreachable error the domain's assertion
-that the failure reflects a managed transient condition of a constrained
-long-haul link to which the traffic was admitted; ETU also estimates
-its duration. Generation Time alone does not assert a failure cause.
-The Denied by Link Policy object adds to an administrative prohibition error the
-assertion that boundary-link admission policy was the source of the
-refusal.<a href="#section-4.5-2" class="pilcrow">¶</a></p>
+<p id="section-4.5-1">A sender can receive both signals for the same flow at different
+times. If admission policy refuses a packet, the sender may receive an
+administrative prohibition error with the Denied by Link Policy object.
+If policy later admits the flow but the required link is still unusable,
+its next packet may elicit an unreachable error with availability
+metadata. The gateway checks admission before it discloses link state
+(<a href="#generation" class="auto internal xref">Section 6</a>); <a href="#applicability-objects" class="auto internal xref">Section 5.4</a> lists the objects permitted
+on each carrier group.<a href="#section-4.5-1" class="pilcrow">¶</a></p>
+<p id="section-4.5-2">An unreachable error alone does not establish permanent failure:
+routing transients can cause it (<span><a href="https://rfc-editor.org/rfc/rfc1122#section-3.2.2.1" class="relref">Section 3.2.2.1</a> of [<a href="#RFC1122" class="cite xref">RFC1122</a>]</span>), and
+<span>[<a href="#RFC6069" class="cite xref">RFC6069</a>]</span> used such errors experimentally to indicate disruption.<a href="#section-4.5-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3119,22 +3104,15 @@ ICMPv6 Type 1 codes 0, 1, and 3, and ICMPv4 Type 3 codes 0, 1, and 13
         <h3 id="name-availability-metadata">
 <a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-availability-metadata" class="section-name selfRef">Availability Metadata</a>
         </h3>
-<p id="appendix-A.1-1">Times in this example are expressed in the enclave time reference
-(<a href="#gen-time" class="auto internal xref">Section 5.3.2</a>) as seconds from its epoch. A gateway whose deep-space
-link is presently unusable receives an IPv6 packet for a
-trans-boundary destination at reference time 10,000 s. According to
-its current coordinated forwarding state, no other policy-permitted
-path within the coordination scope is available for the traffic. The
-packet is admitted under the service's policy. The gateway retains a
-route toward the destination, but the next hop over the deep-space
-link is unusable; under <span><a href="https://rfc-editor.org/rfc/rfc4443#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC4443" class="cite xref">RFC4443</a>]</span> this is a
-link-specific problem not covered by another code, so the gateway
-generates ICMPv6 Destination Unreachable, Code 3 (Address
-unreachable). Its managed-service record (<a href="#orchestration" class="auto internal xref">Section 4.3</a>) shows the
-link expected to be ready to forward at reference time 12,520 s, and
-its one-way delay estimate for the link is 20 minutes, so it attaches
-three Link Condition Objects. The Class-Num octet of each is TBD5 and
-is omitted from the listing.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-1">Unlike the gateway in <a href="#orchestration" class="auto internal xref">Section 4.3</a>, this gateway retains an IPv6
+route. The required link is unusable, and no other policy-permitted
+path within the coordination scope can serve the admitted packet. No
+more specific code applies, so the gateway sends ICMPv6 Destination
+Unreachable, Code 3 (Address unreachable; <span><a href="https://rfc-editor.org/rfc/rfc4443#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC4443" class="cite xref">RFC4443</a>]</span>).<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-2">The timing is the same: the gateway generates the error at 10,000 s
+in the enclave time reference and expects the link to be usable at
+12,520 s. Its one-way link delay estimate is 20 minutes. The table
+omits the Class-Num octet (TBD5) for each object.<a href="#appendix-A.1-2" class="pilcrow">¶</a></p>
 <span id="name-availability-metadata-examp"></span><div id="tab-example">
 <table class="center" id="table-5">
           <caption>
@@ -3175,16 +3153,16 @@ is omitted from the listing.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
           </tbody>
         </table>
 </div>
-<p id="appendix-A.1-3">The Generation Time seconds word is 10,000 and the fraction word is
+<p id="appendix-A.1-4">The Generation Time seconds word is 10,000 and the fraction word is
 zero. ETU is the interval from reference time 10,000 s to 12,520 s.
 If this deployment had chosen UTC as its enclave time reference, the
 seconds word would instead be the corresponding count of seconds from
 the epoch the deployment specified; that is the deployment's choice
-and is not required by this document.<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-4">Had the gateway attached no objects, or had the receiver not
+and is not required by this document.<a href="#appendix-A.1-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-5">Had the gateway attached no objects, or had the receiver not
 processed them, the message would be an ordinary Address Unreachable
-error (<a href="#common" class="auto internal xref">Section 5.1</a>).<a href="#appendix-A.1-4" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-5">A receiver that processes the objects but does not know the enclave
+error (<a href="#common" class="auto internal xref">Section 5.1</a>).<a href="#appendix-A.1-5" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-6">A receiver that processes the objects but does not know the enclave
 time reference, cannot relate it to its own clock, or did not receive
 Generation Time needs no timestamp arithmetic: it knows that, as of
 generation, the link was expected to become usable in 42 minutes, and
@@ -3192,8 +3170,8 @@ it may apply that interval from the moment of receipt. If the
 notification spent time in delivery, this interpretation expires later
 than the original forecast; it remains a conservative reading of the
 same forecast, not a guarantee, and the link may in fact become usable
-later than either.<a href="#appendix-A.1-5" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-6">A receiver that knows the enclave time reference and can relate it to
+later than either.<a href="#appendix-A.1-6" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-7">A receiver that knows the enclave time reference and can relate it to
 its own clock may compute Generation Time + ETU = 12,520 s and, on
 receiving the message at reference time 10,003 s, understand that
 about 2,517 s remain, subject to its own clock uncertainty and to the
@@ -3201,10 +3179,10 @@ accuracy of the forecast. Had the gateway instead generated a
 notification at 10,003 s against the same forecast, that notification
 would carry Generation Time 10,003 s and ETU 2,517,000 ms: ETU is
 recomputed for each notification from the current reference time, not
-copied from the plan.<a href="#appendix-A.1-6" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-7">Either receiver might, as a matter of local policy, use the 20-minute
+copied from the plan.<a href="#appendix-A.1-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-8">Either receiver might, as a matter of local policy, use the 20-minute
 link delay estimate in deciding whether the destination suits its
-traffic once the link is usable (<a href="#consumers" class="auto internal xref">Section 7.2</a>).<a href="#appendix-A.1-7" class="pilcrow">¶</a></p>
+traffic once the link is usable (<a href="#consumers" class="auto internal xref">Section 7.2</a>).<a href="#appendix-A.1-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="example-dlp">
