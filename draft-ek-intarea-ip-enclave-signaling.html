@@ -1064,7 +1064,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Kline</td>
-<td class="center">Expires 22 May 2027</td>
+<td class="center">Expires 23 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1077,12 +1077,12 @@ svg {
 <dd class="internet-draft">draft-ek-intarea-ip-enclave-signaling-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-11-18" class="published">18 November 2026</time>
+<time datetime="2026-11-19" class="published">19 November 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Experimental</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-05-22">22 May 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-23">23 May 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1147,7 +1147,7 @@ experimentation with such reactions.<a href="#section-abstract-1" class="pilcrow
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 22 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 23 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2089,31 +2089,24 @@ following codes.<a href="#section-5.2.1.1-1" class="pilcrow">¶</a></p>
                 <tr>
                   <td class="text-right" rowspan="1" colspan="1">1</td>
                   <td class="text-left" rowspan="1" colspan="1">Host unreachable</td>
-                  <td class="text-left" rowspan="1" colspan="1">Eligible when ordinary forwarding failure warrants Host Unreachable; see the note below.</td>
+                  <td class="text-left" rowspan="1" colspan="1">Eligible when ordinary forwarding failure warrants Host Unreachable; see the IPv4 scope clarification below.</td>
                 </tr>
               </tbody>
             </table>
 </div>
-<p id="section-5.2.1.1-6">The existence of a managed service and the presence of a currently
-usable forwarding-table entry are distinct. A domain may withdraw the
-route to a destination between contacts while retaining knowledge of
-the future service, yielding No Route or Network Unreachable; or it
-may retain a route toward a presently unusable link, yielding Address
-Unreachable. Both are legitimate carriers. This document does not
-require a particular routing implementation, and a gateway that would
-have sent a given code before implementing this specification does not
-change that code because of it.<a href="#section-5.2.1.1-6" class="pilcrow">¶</a></p>
-<p id="section-5.2.1.1-7">Editor's note (IPv4 applicability, to be resolved before RFC publication):
-<span>[<a href="#RFC1812" class="cite xref">RFC1812</a>]</span>'s code-specific text ties Host Unreachable to a
-destination on a directly connected network, while its general
-Destination Unreachable text covers an unreachable next hop.
-Implementations are known to send Host Unreachable on transit-link
-failure, but that is precedent rather than mandate, and ICMPv4 has no
-residual code equivalent to ICMPv6 Address Unreachable. The
-retained-route, unusable-transit-link case therefore requires an
-explicit IPv4 applicability clarification that this document does not
-yet supply. The worked examples in <a href="#example" class="auto internal xref">Appendix A</a> use ICMPv6 so that
-their interpretation does not depend on resolving this point.<a href="#section-5.2.1.1-7" class="pilcrow">¶</a></p>
+<p id="section-5.2.1.1-6">A domain can withdraw a route between contacts and still retain
+knowledge of the future service. In IPv6, if the gateway instead
+retains the route but the required link is unusable, Address
+Unreachable can apply when no more specific code applies.<a href="#section-5.2.1.1-6" class="pilcrow">¶</a></p>
+<p id="section-5.2.1.1-7">For IPv4, this specification defines no new code-selection rule for a
+retained route whose required transit link is unusable. An otherwise
+valid ICMPv4 Type 3 Code 0 or Code 1 error can carry availability
+metadata when all conditions in <a href="#ltu" class="auto internal xref">Section 5.2</a> are met. Carrier eligibility
+does not change when the gateway generates the underlying error. If
+ordinary ICMP processing produces no eligible error, this specification
+provides no availability-metadata notification for that case. A gateway
+need not change the selected code or withdraw a route to obtain an
+eligible carrier.<a href="#section-5.2.1.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="carriers-policy">
@@ -2121,9 +2114,10 @@ their interpretation does not depend on resolving this point.<a href="#section-5
             <h5 id="name-policy-carriers">
 <a href="#section-5.2.1.2" class="section-number selfRef">5.2.1.2. </a><a href="#name-policy-carriers" class="section-name selfRef">Policy Carriers</a>
             </h5>
-<p id="section-5.2.1.2-1">The Denied by Link Policy object may be carried on the following
-codes, whose existing definitions already cover administrative refusal
-of a packet:<a href="#section-5.2.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2.1.2-1">A gateway can attach the Denied by Link Policy object only if the
+error it generates under ordinary ICMP rules uses a code listed below.
+If ordinary processing selects another code, the gateway retains that
+code and omits the object.<a href="#section-5.2.1.2-1" class="pilcrow">¶</a></p>
 <span id="name-eligible-policy-carrier-cod"></span><div id="tab-carriers-policy">
 <table class="center" id="table-3">
               <caption>
@@ -2588,11 +2582,12 @@ that path and attach nothing.<a href="#section-6-4.1.1" class="pilcrow">¶</a></
 any link state or prediction.<a href="#section-6-4.2.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-6-4.3">
-          <p id="section-6-4.3.1">If the traffic is not admitted, drop it. Where ordinary rules and
-local response policy call for one, generate the appropriate
-administrative prohibition error (<a href="#carriers-policy" class="auto internal xref">Section 5.2.1.2</a>); where
-disclosure policy permits, attach the Denied by Link Policy object
-(<a href="#applicability-objects" class="auto internal xref">Section 5.4</a>). Denial of admission
+          <p id="section-6-4.3.1">If the traffic is not admitted, drop it. Generate an error only as
+called for by ordinary ICMP rules and local response policy. If the
+error uses an eligible policy carrier (<a href="#carriers-policy" class="auto internal xref">Section 5.2.1.2</a>) and
+disclosure policy permits, the gateway may attach the Denied by Link
+Policy object (<a href="#applicability-objects" class="auto internal xref">Section 5.4</a>). If ordinary processing
+selects another code, retain it and omit the object. Denial of admission
 to one long-haul service does not by itself mean no policy-permitted
 managed alternative exists; step 1 addresses that.<a href="#section-6-4.3.1" class="pilcrow">¶</a></p>
 </li>
