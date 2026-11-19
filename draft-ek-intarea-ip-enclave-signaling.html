@@ -1313,21 +1313,10 @@ experimentation with such reactions.<a href="#section-abstract-1" class="pilcrow
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
-            <p id="section-toc.1-1.14.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-worked-examples" class="internal xref">Worked Examples</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.1">
-                <p id="section-toc.1-1.14.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-availability-metadata" class="internal xref">Availability Metadata</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.2">
-                <p id="section-toc.1-1.14.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-denied-by-link-policy-2" class="internal xref">Denied by Link Policy</a></p>
-</li>
-            </ul>
+            <p id="section-toc.1-1.14.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
-            <p id="section-toc.1-1.15.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
-</li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16">
-            <p id="section-toc.1-1.16.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
+            <p id="section-toc.1-1.15.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-address" class="internal xref">Author's Address</a></p>
 </li>
         </ul>
 </nav>
@@ -1498,55 +1487,17 @@ The objects are specified for use under a single administrative
 authority or cooperating authorities sharing the coordination and
 disclosure scopes defined below. <span>[<a href="#RFC8799" class="cite xref">RFC8799</a>]</span> provides broader context
 on limited-domain deployments.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">Three relationships need to be kept distinct.<a href="#section-3-2" class="pilcrow">¶</a></p>
-<p id="section-3-3">The first is the timing relationship between a notifying gateway and
-the senders it notifies. Let R be the round-trip time between a sender
-and the gateway, D the duration of a link unavailability being
-reported, and T the timescale on which the sender's transport would
-otherwise detect failure. Availability metadata is useful when R is
-small relative to T, so the notification arrives while the sender
-still has options, and small relative to D, so the reported condition
-is still in effect on arrival. In the Mars enclave of <a href="#conops" class="auto internal xref">Section 4</a>, R is
-milliseconds to seconds, T is seconds to minutes, and D is minutes to
-hours. When R approaches D, a notification describes a link state that
-may no longer exist on arrival; gateways therefore attach objects only
-into their local enclave and never across the constrained long-haul
-link. This timing argument is specific to availability metadata; a
-policy refusal applies regardless of current link usability and needs
-no predicted outage to be worth reporting.<a href="#section-3-3" class="pilcrow">¶</a></p>
-<p id="section-3-4">The second is the coordination scope: the set of links, routes, and
-policies whose current state the gateway's assertions describe. A
-gateway's assertions are about the applicable, current managed
-service and forwarding state for the affected traffic within this
-scope, not about every path that could ever exist, unprovisioned
-routes, unrelated domains, or application-layer alternatives.
-Equally, the failure of one local link is not a basis for an assertion
-when the current managed forwarding state provides a usable,
-policy-permitted alternative for that traffic.<a href="#section-3-4" class="pilcrow">¶</a></p>
-<p id="section-3-5">The third is the disclosure scope: the administrative boundary within
-which the objects are generated and considered appropriate to reveal.
-Cooperating domains must agree on both scopes; their agreement does
-not authenticate ICMP (<a href="#security" class="auto internal xref">Section 11</a>), and a short local round-trip
-time does not by itself make a network part of either scope. For
-comparison of timescales only, the public Internet has sub-second
-internal round-trip times relative to a link whose unavailability is
-measured in minutes, but it is not thereby a cooperating or trusted
-signaling domain.<a href="#section-3-5" class="pilcrow">¶</a></p>
-<p id="section-3-6">The objects apply only to links whose availability and admission the
-domain deliberately manages as a long-haul service. A gateway attaches
-availability metadata on the basis of managed-service knowledge about
-the link, never on the basis of observed local carrier or interface
-state alone; a router that merely notices its outgoing interface is
-down generates whatever error ordinary ICMP rules call for and has no
-basis to attach Link Condition Objects to it. How the domain acquires
-and distributes its knowledge is not specified; the objects encode
-what the gateway is entitled to assert, not how it learned it. The
-same criteria identify deployments beyond the interplanetary case,
-wherever a domain manages scheduled or intermittently available links
-between enclaves on the basis of advance knowledge. Conversely, the
-mechanism offers nothing on paths that are merely lossy or congested,
-and high delay alone is not a reason to generate a Destination
-Unreachable error when forwarding is possible.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-2">The coordination scope is the set of links, routes, and policies the
+participating domains manage together for the affected traffic. A
+failed interface alone does not establish that the managed service is
+unavailable. If a usable, policy-permitted path within that scope can
+serve the traffic, the gateway uses it (<a href="#generation" class="auto internal xref">Section 6</a>).<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-3">The disclosure scope is the administrative boundary within which the
+domains agree to share the objects. Gateways send them only toward
+senders in their local enclave, not across the constrained long-haul
+link. This lets a sender learn of an outage while the information is
+still useful. A policy refusal does not depend on an outage. Agreement
+on disclosure does not authenticate ICMP messages (<a href="#security" class="auto internal xref">Section 11</a>).<a href="#section-3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conops">
@@ -3094,161 +3045,20 @@ ICMPv6 Type 1 codes 0, 1, and 3, and ICMPv4 Type 3 codes 0, 1, and 13
 </div>
 </section>
 </div>
-<div id="example">
-<section id="appendix-A">
-      <h2 id="name-worked-examples">
-<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-worked-examples" class="section-name selfRef">Worked Examples</a>
-      </h2>
-<div id="example-avail">
-<section id="appendix-A.1">
-        <h3 id="name-availability-metadata">
-<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-availability-metadata" class="section-name selfRef">Availability Metadata</a>
-        </h3>
-<p id="appendix-A.1-1">Unlike the gateway in <a href="#orchestration" class="auto internal xref">Section 4.3</a>, this gateway retains an IPv6
-route. The required link is unusable, and no other policy-permitted
-path within the coordination scope can serve the admitted packet. No
-more specific code applies, so the gateway sends ICMPv6 Destination
-Unreachable, Code 3 (Address unreachable; <span><a href="https://rfc-editor.org/rfc/rfc4443#section-3.1" class="relref">Section 3.1</a> of [<a href="#RFC4443" class="cite xref">RFC4443</a>]</span>).<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-2">The timing is the same: the gateway generates the error at 10,000 s
-in the enclave time reference and expects the link to be usable at
-12,520 s. Its one-way link delay estimate is 20 minutes. The table
-omits the Class-Num octet (TBD5) for each object.<a href="#appendix-A.1-2" class="pilcrow">¶</a></p>
-<span id="name-availability-metadata-examp"></span><div id="tab-example">
-<table class="center" id="table-5">
-          <caption>
-<a href="#table-5" class="selfRef">Table 5</a>:
-<a href="#name-availability-metadata-examp" class="selfRef">Availability Metadata Example</a>
-          </caption>
-<thead>
-            <tr>
-              <th class="text-left" rowspan="1" colspan="1">Object</th>
-              <th class="text-right" rowspan="1" colspan="1">C-Type</th>
-              <th class="text-right" rowspan="1" colspan="1">Length</th>
-              <th class="text-left" rowspan="1" colspan="1">Wire value</th>
-              <th class="text-left" rowspan="1" colspan="1">Decoded</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">Generation Time</td>
-              <td class="text-right" rowspan="1" colspan="1">1</td>
-              <td class="text-right" rowspan="1" colspan="1">12</td>
-              <td class="text-left" rowspan="1" colspan="1">0x00002710 0x00000000</td>
-              <td class="text-left" rowspan="1" colspan="1">10,000 s in the enclave reference</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">Expected Time Until Link Usability</td>
-              <td class="text-right" rowspan="1" colspan="1">2</td>
-              <td class="text-right" rowspan="1" colspan="1">8</td>
-              <td class="text-left" rowspan="1" colspan="1">0x002673C0</td>
-              <td class="text-left" rowspan="1" colspan="1">2,520,000 ms (42 min)</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">Expected Link Delay</td>
-              <td class="text-right" rowspan="1" colspan="1">3</td>
-              <td class="text-right" rowspan="1" colspan="1">8</td>
-              <td class="text-left" rowspan="1" colspan="1">0x00124F80</td>
-              <td class="text-left" rowspan="1" colspan="1">1,200,000 ms (20 min)</td>
-            </tr>
-          </tbody>
-        </table>
-</div>
-<p id="appendix-A.1-4">The Generation Time seconds word is 10,000 and the fraction word is
-zero. ETU is the interval from reference time 10,000 s to 12,520 s.
-If this deployment had chosen UTC as its enclave time reference, the
-seconds word would instead be the corresponding count of seconds from
-the epoch the deployment specified; that is the deployment's choice
-and is not required by this document.<a href="#appendix-A.1-4" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-5">Had the gateway attached no objects, or had the receiver not
-processed them, the message would be an ordinary Address Unreachable
-error (<a href="#common" class="auto internal xref">Section 5.1</a>).<a href="#appendix-A.1-5" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-6">A receiver that processes the objects but does not know the enclave
-time reference, cannot relate it to its own clock, or did not receive
-Generation Time needs no timestamp arithmetic: it knows that, as of
-generation, the link was expected to become usable in 42 minutes, and
-it may apply that interval from the moment of receipt. If the
-notification spent time in delivery, this interpretation expires later
-than the original forecast; it remains a conservative reading of the
-same forecast, not a guarantee, and the link may in fact become usable
-later than either.<a href="#appendix-A.1-6" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-7">A receiver that knows the enclave time reference and can relate it to
-its own clock may compute Generation Time + ETU = 12,520 s and, on
-receiving the message at reference time 10,003 s, understand that
-about 2,517 s remain, subject to its own clock uncertainty and to the
-accuracy of the forecast. Had the gateway instead generated a
-notification at 10,003 s against the same forecast, that notification
-would carry Generation Time 10,003 s and ETU 2,517,000 ms: ETU is
-recomputed for each notification from the current reference time, not
-copied from the plan.<a href="#appendix-A.1-7" class="pilcrow">¶</a></p>
-<p id="appendix-A.1-8">Either receiver might, as a matter of local policy, use the 20-minute
-link delay estimate in deciding whether the destination suits its
-traffic once the link is usable (<a href="#consumers" class="auto internal xref">Section 7.2</a>).<a href="#appendix-A.1-8" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="example-dlp">
-<section id="appendix-A.2">
-        <h3 id="name-denied-by-link-policy-2">
-<a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-denied-by-link-policy-2" class="section-name selfRef">Denied by Link Policy</a>
-        </h3>
-<p id="appendix-A.2-1">The same gateway, during an active contact, receives an IPv6 packet
-whose traffic class is not admitted by the service's policy. It drops
-the packet. Local response policy calls for an error, so it generates
-ICMPv6 Destination Unreachable, Code 1 (Communication with destination
-administratively prohibited), and, disclosure policy permitting,
-attaches a single Link Condition Object:<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
-<span id="name-denied-by-link-policy-examp"></span><div id="tab-example-dlp">
-<table class="center" id="table-6">
-          <caption>
-<a href="#table-6" class="selfRef">Table 6</a>:
-<a href="#name-denied-by-link-policy-examp" class="selfRef">Denied by Link Policy Example</a>
-          </caption>
-<thead>
-            <tr>
-              <th class="text-left" rowspan="1" colspan="1">Object</th>
-              <th class="text-right" rowspan="1" colspan="1">C-Type</th>
-              <th class="text-right" rowspan="1" colspan="1">Length</th>
-              <th class="text-left" rowspan="1" colspan="1">Payload</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">Denied by Link Policy</td>
-              <td class="text-right" rowspan="1" colspan="1">4</td>
-              <td class="text-right" rowspan="1" colspan="1">4</td>
-              <td class="text-left" rowspan="1" colspan="1">none</td>
-            </tr>
-          </tbody>
-        </table>
-</div>
-<p id="appendix-A.2-3">The object occupies one 32-bit word: Length 0x0004, Class-Num TBD5,
-C-Type 0x04. It is preceded by the <span>[<a href="#RFC4884" class="cite xref">RFC4884</a>]</span> extension header and
-by the invoking packet, padded to at least 128 octets. No Expected
-Time Until Link Usability or Expected Link Delay is attached, and
-Generation Time is omitted because no ETU accompanies it.<a href="#appendix-A.2-3" class="pilcrow">¶</a></p>
-<p id="appendix-A.2-4">A receiver that processes the object learns that boundary-link
-admission policy refused the traffic and may, for instance,
-reconsider its communication mechanism (<a href="#uc-handoff" class="auto internal xref">Section 4.4.2</a>). A receiver
-that ignores extensions, or that disregards the object, has an
-ordinary administrative prohibition error and nothing more
-(<a href="#common" class="auto internal xref">Section 5.1</a>).<a href="#appendix-A.2-4" class="pilcrow">¶</a></p>
-</section>
-</div>
-</section>
-</div>
 <div id="acknowledgments">
-<section id="appendix-B">
+<section id="appendix-A">
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-B-1">The author thanks Mark Andrews for helpful discussions.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
-<p id="appendix-B-2">The author used AI-assisted tooling in preparing this document,
+<p id="appendix-A-1">The author thanks Mark Andrews for helpful discussions.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">The author used AI-assisted tooling in preparing this document,
 including drafting and editing text and converting it to the
 kramdown-rfc source format. All technical content, design decisions,
-and the final text are the responsibility of the author.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
+and the final text are the responsibility of the author.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-C">
+<section id="appendix-B">
       <h2 id="name-authors-address">
 <a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
       </h2>
