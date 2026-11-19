@@ -502,33 +502,18 @@ failure ({{operational}}).
 
 ## Interaction of the Two Signals {#interaction}
 
-The availability metadata and the Denied by Link Policy object answer
-different questions and may both be relevant to one flow over time: a
-link can be both restricted and unavailable. The gateway checks
-admission before it discloses link state ({{generation}}). If policy
-refuses the traffic, the gateway can attach the Denied by Link Policy
-object to an otherwise justified administrative prohibition error. ETU and ELD
-are excluded as specified in {{applicability-objects}}. Generation Time
-without ETU remains discouraged, not prohibited. Traffic
-that is admitted but cannot be forwarded because its link is unusable
-can elicit an ordinary unreachable error with availability metadata. A
-sender whose denial is resolved through provisioning may then receive
-a metadata-bearing unreachable error for the same flow: first become
-admissible, then wait for the link.
+A sender can receive both signals for the same flow at different
+times. If admission policy refuses a packet, the sender may receive an
+administrative prohibition error with the Denied by Link Policy object.
+If policy later admits the flow but the required link is still unusable,
+its next packet may elicit an unreachable error with availability
+metadata. The gateway checks admission before it discloses link state
+({{generation}}); {{applicability-objects}} lists the objects permitted
+on each carrier group.
 
-Ordinary Destination Unreachable errors do not by themselves establish
-that service is permanently absent; {{Section 3.2.2.1 of RFC1122}}
-notes that they can result from routing transients, and {{RFC6069}}
-has previously used them experimentally as indications of
-connectivity disruption. Nor does an ordinary administrative
-prohibition error identify which administrative control refused the
-packet. ETU or ELD adds to an unreachable error the domain's assertion
-that the failure reflects a managed transient condition of a constrained
-long-haul link to which the traffic was admitted; ETU also estimates
-its duration. Generation Time alone does not assert a failure cause.
-The Denied by Link Policy object adds to an administrative prohibition error the
-assertion that boundary-link admission policy was the source of the
-refusal.
+An unreachable error alone does not establish permanent failure:
+routing transients can cause it ({{Section 3.2.2.1 of RFC1122}}), and
+{{RFC6069}} used such errors experimentally to indicate disruption.
 
 
 # Message Formats and Extension Objects {#formats}
@@ -1443,22 +1428,16 @@ ICMPv6 Type 1 codes 0, 1, and 3, and ICMPv4 Type 3 codes 0, 1, and 13
 
 ## Availability Metadata {#example-avail}
 
-Times in this example are expressed in the enclave time reference
-({{gen-time}}) as seconds from its epoch. A gateway whose deep-space
-link is presently unusable receives an IPv6 packet for a
-trans-boundary destination at reference time 10,000 s. According to
-its current coordinated forwarding state, no other policy-permitted
-path within the coordination scope is available for the traffic. The
-packet is admitted under the service's policy. The gateway retains a
-route toward the destination, but the next hop over the deep-space
-link is unusable; under {{Section 3.1 of RFC4443}} this is a
-link-specific problem not covered by another code, so the gateway
-generates ICMPv6 Destination Unreachable, Code 3 (Address
-unreachable). Its managed-service record ({{orchestration}}) shows the
-link expected to be ready to forward at reference time 12,520 s, and
-its one-way delay estimate for the link is 20 minutes, so it attaches
-three Link Condition Objects. The Class-Num octet of each is TBD5 and
-is omitted from the listing.
+Unlike the gateway in {{orchestration}}, this gateway retains an IPv6
+route. The required link is unusable, and no other policy-permitted
+path within the coordination scope can serve the admitted packet. No
+more specific code applies, so the gateway sends ICMPv6 Destination
+Unreachable, Code 3 (Address unreachable; {{Section 3.1 of RFC4443}}).
+
+The timing is the same: the gateway generates the error at 10,000 s
+in the enclave time reference and expects the link to be usable at
+12,520 s. Its one-way link delay estimate is 20 minutes. The table
+omits the Class-Num octet (TBD5) for each object.
 
 | Object | C-Type | Length | Wire value | Decoded |
 |:-------|-------:|-------:|:-----------|:--------|
