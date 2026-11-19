@@ -200,59 +200,18 @@ authority or cooperating authorities sharing the coordination and
 disclosure scopes defined below. {{RFC8799}} provides broader context
 on limited-domain deployments.
 
-Three relationships need to be kept distinct.
+The coordination scope is the set of links, routes, and policies the
+participating domains manage together for the affected traffic. A
+failed interface alone does not establish that the managed service is
+unavailable. If a usable, policy-permitted path within that scope can
+serve the traffic, the gateway uses it ({{generation}}).
 
-The first is the timing relationship between a notifying gateway and
-the senders it notifies. Let R be the round-trip time between a sender
-and the gateway, D the duration of a link unavailability being
-reported, and T the timescale on which the sender's transport would
-otherwise detect failure. Availability metadata is useful when R is
-small relative to T, so the notification arrives while the sender
-still has options, and small relative to D, so the reported condition
-is still in effect on arrival. In the Mars enclave of {{conops}}, R is
-milliseconds to seconds, T is seconds to minutes, and D is minutes to
-hours. When R approaches D, a notification describes a link state that
-may no longer exist on arrival; gateways therefore attach objects only
-into their local enclave and never across the constrained long-haul
-link. This timing argument is specific to availability metadata; a
-policy refusal applies regardless of current link usability and needs
-no predicted outage to be worth reporting.
-
-The second is the coordination scope: the set of links, routes, and
-policies whose current state the gateway's assertions describe. A
-gateway's assertions are about the applicable, current managed
-service and forwarding state for the affected traffic within this
-scope, not about every path that could ever exist, unprovisioned
-routes, unrelated domains, or application-layer alternatives.
-Equally, the failure of one local link is not a basis for an assertion
-when the current managed forwarding state provides a usable,
-policy-permitted alternative for that traffic.
-
-The third is the disclosure scope: the administrative boundary within
-which the objects are generated and considered appropriate to reveal.
-Cooperating domains must agree on both scopes; their agreement does
-not authenticate ICMP ({{security}}), and a short local round-trip
-time does not by itself make a network part of either scope. For
-comparison of timescales only, the public Internet has sub-second
-internal round-trip times relative to a link whose unavailability is
-measured in minutes, but it is not thereby a cooperating or trusted
-signaling domain.
-
-The objects apply only to links whose availability and admission the
-domain deliberately manages as a long-haul service. A gateway attaches
-availability metadata on the basis of managed-service knowledge about
-the link, never on the basis of observed local carrier or interface
-state alone; a router that merely notices its outgoing interface is
-down generates whatever error ordinary ICMP rules call for and has no
-basis to attach Link Condition Objects to it. How the domain acquires
-and distributes its knowledge is not specified; the objects encode
-what the gateway is entitled to assert, not how it learned it. The
-same criteria identify deployments beyond the interplanetary case,
-wherever a domain manages scheduled or intermittently available links
-between enclaves on the basis of advance knowledge. Conversely, the
-mechanism offers nothing on paths that are merely lossy or congested,
-and high delay alone is not a reason to generate a Destination
-Unreachable error when forwarding is possible.
+The disclosure scope is the administrative boundary within which the
+domains agree to share the objects. Gateways send them only toward
+senders in their local enclave, not across the constrained long-haul
+link. This lets a sender learn of an outage while the information is
+still useful. A policy refusal does not depend on an outage. Agreement
+on disclosure does not authenticate ICMP messages ({{security}}).
 
 
 # Concept of Operations {#conops}
@@ -1423,91 +1382,6 @@ ICMPv6 Type 1 codes 0, 1, and 3, and ICMPv4 Type 3 codes 0, 1, and 13
 
 
 --- back
-
-# Worked Examples {#example}
-
-## Availability Metadata {#example-avail}
-
-Unlike the gateway in {{orchestration}}, this gateway retains an IPv6
-route. The required link is unusable, and no other policy-permitted
-path within the coordination scope can serve the admitted packet. No
-more specific code applies, so the gateway sends ICMPv6 Destination
-Unreachable, Code 3 (Address unreachable; {{Section 3.1 of RFC4443}}).
-
-The timing is the same: the gateway generates the error at 10,000 s
-in the enclave time reference and expects the link to be usable at
-12,520 s. Its one-way link delay estimate is 20 minutes. The table
-omits the Class-Num octet (TBD5) for each object.
-
-| Object | C-Type | Length | Wire value | Decoded |
-|:-------|-------:|-------:|:-----------|:--------|
-| Generation Time | 1 | 12 | 0x00002710 0x00000000 | 10,000 s in the enclave reference |
-| Expected Time Until Link Usability | 2 | 8 | 0x002673C0 | 2,520,000 ms (42 min) |
-| Expected Link Delay | 3 | 8 | 0x00124F80 | 1,200,000 ms (20 min) |
-{: #tab-example title="Availability Metadata Example"}
-
-The Generation Time seconds word is 10,000 and the fraction word is
-zero. ETU is the interval from reference time 10,000 s to 12,520 s.
-If this deployment had chosen UTC as its enclave time reference, the
-seconds word would instead be the corresponding count of seconds from
-the epoch the deployment specified; that is the deployment's choice
-and is not required by this document.
-
-Had the gateway attached no objects, or had the receiver not
-processed them, the message would be an ordinary Address Unreachable
-error ({{common}}).
-
-A receiver that processes the objects but does not know the enclave
-time reference, cannot relate it to its own clock, or did not receive
-Generation Time needs no timestamp arithmetic: it knows that, as of
-generation, the link was expected to become usable in 42 minutes, and
-it may apply that interval from the moment of receipt. If the
-notification spent time in delivery, this interpretation expires later
-than the original forecast; it remains a conservative reading of the
-same forecast, not a guarantee, and the link may in fact become usable
-later than either.
-
-A receiver that knows the enclave time reference and can relate it to
-its own clock may compute Generation Time + ETU = 12,520 s and, on
-receiving the message at reference time 10,003 s, understand that
-about 2,517 s remain, subject to its own clock uncertainty and to the
-accuracy of the forecast. Had the gateway instead generated a
-notification at 10,003 s against the same forecast, that notification
-would carry Generation Time 10,003 s and ETU 2,517,000 ms: ETU is
-recomputed for each notification from the current reference time, not
-copied from the plan.
-
-Either receiver might, as a matter of local policy, use the 20-minute
-link delay estimate in deciding whether the destination suits its
-traffic once the link is usable ({{consumers}}).
-
-## Denied by Link Policy {#example-dlp}
-
-The same gateway, during an active contact, receives an IPv6 packet
-whose traffic class is not admitted by the service's policy. It drops
-the packet. Local response policy calls for an error, so it generates
-ICMPv6 Destination Unreachable, Code 1 (Communication with destination
-administratively prohibited), and, disclosure policy permitting,
-attaches a single Link Condition Object:
-
-| Object | C-Type | Length | Payload |
-|:-------|-------:|-------:|:--------|
-| Denied by Link Policy | 4 | 4 | none |
-{: #tab-example-dlp title="Denied by Link Policy Example"}
-
-The object occupies one 32-bit word: Length 0x0004, Class-Num TBD5,
-C-Type 0x04. It is preceded by the {{RFC4884}} extension header and
-by the invoking packet, padded to at least 128 octets. No Expected
-Time Until Link Usability or Expected Link Delay is attached, and
-Generation Time is omitted because no ETU accompanies it.
-
-A receiver that processes the object learns that boundary-link
-admission policy refused the traffic and may, for instance,
-reconsider its communication mechanism ({{uc-handoff}}). A receiver
-that ignores extensions, or that disregards the object, has an
-ordinary administrative prohibition error and nothing more
-({{common}}).
-
 
 # Acknowledgments
 {:numbered="false"}
