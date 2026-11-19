@@ -361,6 +361,32 @@ Table of Contents
    for delivery by a separate service.  BP is not required for this ICMP
    mechanism.
 
+   An enclave could use the Provisioning Domain (PvD) mechanism in
+   [RFC8801] to make information about local communication services
+   available to hosts.  The existing PvD option in IPv6 Router
+   Advertisements identifies a PvD and indicates whether PvD Additional
+   Information is available.  Hosts can retrieve this additional
+   information as a JSON object over HTTPS.
+
+   Future work could define information describing an enclave-local SMTP
+   submission or relay service, a Bundle Protocol agent, or other
+   communication services.  Such work is expected to extend the JSON
+   information supplied through the HTTPS interface, including the
+   meaning and applicability of new information keys.  It would reuse
+   the existing RA discovery mechanism; no new RA options are envisaged
+   for these service descriptions.
+
+   Hosts could obtain this information independently of the ICMP
+   indications specified here.  Applications could consult it when
+   initially selecting a communication mechanism or when reconsidering
+   that choice after receiving an indication.  Making the information
+   and its retrieval dependencies available within the enclave would
+   allow it to remain useful during external-link outages.  Use of an
+   advertised service remains subject to application capabilities, local
+   policy, and the service's authorization requirements.  This document
+   defines no such service-information keys or application behavior and
+   does not require PvD support.
+
    The same structure exists on the Earth side.  A terrestrial sender's
    traffic crosses an Earth-side gateway that holds the same contact
    plan and enforces its own admission policy, and that gateway
@@ -1666,6 +1692,11 @@ Table of Contents
    [RFC8799]  Carpenter, B. and B. Liu, "Limited Domains and Internet
               Protocols", RFC 8799, DOI 10.17487/RFC8799, July 2020,
               <https://www.rfc-editor.org/rfc/rfc8799>.
+
+   [RFC8801]  Pfister, P., Vyncke, É., Pauly, T., Schinazi, D., and W.
+              Shao, "Discovering Provisioning Domain Names and Data",
+              RFC 8801, DOI 10.17487/RFC8801, July 2020,
+              <https://www.rfc-editor.org/rfc/rfc8801>.
 
    [RFC8883]  Herbert, T., "ICMPv6 Errors for Discarding Packets Due to
               Processing Limits", RFC 8883, DOI 10.17487/RFC8883,
