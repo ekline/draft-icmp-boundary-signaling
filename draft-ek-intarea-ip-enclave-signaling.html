@@ -1655,8 +1655,8 @@ acquisition, and modem configuration, it expects the link to be ready
 to forward traffic at reference time 12,520 s, and it estimates the
 one-way delay over the link at that time as 20 minutes. It installs
 or schedules the routing and admission policy needed for that link,
-and it supplies the gateway with an associated record containing at
-least:<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+and supplies an associated record. In this example, the gateway uses
+the following information:<a href="#section-4.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3-3.1">
             <p id="section-4.3-3.1.1">the traffic-to-service binding: the destination prefix and the
@@ -2607,21 +2607,18 @@ managed-service knowledge, and <span class="bcp14">MUST NOT</span> report an exp
 clamped to zero. A gateway <span class="bcp14">MAY</span> send ETU without Generation Time; it
 <span class="bcp14">SHOULD NOT</span> send Generation Time without ETU
 (<a href="#applicability-objects" class="auto internal xref">Section 5.4</a>).<a href="#section-6-6" class="pilcrow">¶</a></p>
-<p id="section-6-7">Attachment of every Link Condition Object <span class="bcp14">MUST</span> be configurable per
-policy. An operator <span class="bcp14">MUST</span> be able to configure, per source, prefix, or
-policy class, whether an administrative prohibition error is generated
-at all for refused traffic, the alternative being silent discard, and
-independently whether the Denied by Link Policy object is attached to
-it. An operator <span class="bcp14">SHOULD</span> be able to configure omission of the
-availability metadata objects (<a href="#security" class="auto internal xref">Section 11</a>).<a href="#section-6-7" class="pilcrow">¶</a></p>
+<p id="section-6-7">An operator <span class="bcp14">MUST</span> be able to control disclosure of each Link Condition
+Object independently of whether the gateway sends the underlying error
+(<a href="#security" class="auto internal xref">Section 11</a>). For refused traffic, the operator <span class="bcp14">MUST</span> be able to select
+silent discard or an administrative prohibition error where ordinary
+ICMP rules permit that choice. Policy can use criteria such as source,
+prefix, or traffic class.<a href="#section-6-7" class="pilcrow">¶</a></p>
 <p id="section-6-8">A gateway <span class="bcp14">MUST NOT</span> attach Link Condition Objects to messages sent
 toward the constrained long-haul link, and <span class="bcp14">MUST NOT</span> attach them in
 response to traffic arriving from it (<a href="#applicability" class="auto internal xref">Section 3</a>).<a href="#section-6-8" class="pilcrow">¶</a></p>
-<p id="section-6-9">ICMP delivery is unreliable and rate limited. A gateway <span class="bcp14">MUST NOT</span>
-assume that a sender received any particular notification; it
-generates a fresh notification, subject to rate limiting, for each
-invoking packet that meets the conditions above, using its current
-applicable knowledge.<a href="#section-6-9" class="pilcrow">¶</a></p>
+<p id="section-6-9">A gateway <span class="bcp14">MUST NOT</span> assume that a sender received an earlier
+notification. If it attaches objects to a later error, it uses its
+current applicable knowledge.<a href="#section-6-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="receiver">
@@ -2738,15 +2735,8 @@ service expectations, not as proof of failure (<a href="#uc-divergence" class="a
 for the selected link (<a href="#orchestration" class="auto internal xref">Section 4.3</a>). It can still send the
 ordinary ICMP error. The absence of an estimate does not by itself
 indicate a fault in the gateway or its controller.<a href="#section-9-2" class="pilcrow">¶</a></p>
-<p id="section-9-3">ICMP rate limiters deserve attention at contact boundaries. When a
-link becomes unusable, every active trans-boundary flow can elicit an
-unreachable error within a short interval, and a token-bucket limiter
-tuned for steady-state error rates may suppress most of the burst.
-Because ICMP is unreliable and a gateway cannot know which
-notifications were received, operators <span class="bcp14">SHOULD</span> size gateway ICMP rate
-limits for the expected flow fan-out at gap onset. Hosts that act on
-the metadata to avoid repeated attempts reduce the offered load that
-would otherwise sustain the burst.<a href="#section-9-3" class="pilcrow">¶</a></p>
+<p id="section-9-3">When a contact ends, many flows can fail at once. ICMP rate limiting
+may prevent some senders from receiving a notification.<a href="#section-9-3" class="pilcrow">¶</a></p>
 <p id="section-9-4">ETU is only as meaningful as the gateway's knowledge of the link.
 Using Generation Time additionally depends on the receiver knowing the
 enclave time reference and being able to relate it to its own clock
@@ -2759,9 +2749,8 @@ one; until that is assured, receivers fall back to ignoring Generation
 Time. Cooperating administrative domains need a shared reference or a
 known conversion before their receivers compare timestamps; sharing an
 orchestration function does not by itself provide either.<a href="#section-9-4" class="pilcrow">¶</a></p>
-<p id="section-9-5">Hosts that maintain state derived from these objects <span class="bcp14">SHOULD</span> expose it
-to local diagnostics, since such state changes transmission behavior
-in ways otherwise invisible to troubleshooting.<a href="#section-9-5" class="pilcrow">¶</a></p>
+<p id="section-9-5">If a host uses stored metadata to delay another attempt, exposing
+that state to local diagnostics can help an operator explain the delay.<a href="#section-9-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="experiment">
